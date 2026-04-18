@@ -27,6 +27,7 @@ const globalSlot =
 	import.meta.env.PUBLIC_ADSENSE_SLOT_HOME_MID ??
 	import.meta.env.PUBLIC_ADSENSE_SLOT_DEFAULT ??
 	"";
+const hasGlobalAdSlot = Boolean(adsenseClient && globalSlot);
 const siteBase = Astro.site?.toString().replace(/\/$/, "") ?? "";
 const pagePath = Astro.url?.pathname ?? "/";
 const canonicalUrl = canonical ?? (siteBase ? `${siteBase}${pagePath}` : undefined);
@@ -79,7 +80,7 @@ const jsonLdScripts = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
 	<body>
 		<slot />
 		{
-			showGlobalAd && (
+			showGlobalAd && hasGlobalAdSlot && (
 				<section class="layout-global-ad section">
 					<div class="container">
 						<AdBlock slotId={globalSlot} minHeight="150px" />
@@ -88,7 +89,7 @@ const jsonLdScripts = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
 			)
 		}
 		{
-			showGlobalAd && (
+			showGlobalAd && hasGlobalAdSlot && (
 				<script is:inline>
 					document.addEventListener("DOMContentLoaded", () => {
 						const ad = document.querySelector(".layout-global-ad");
