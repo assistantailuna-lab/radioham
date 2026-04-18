@@ -1,0 +1,421 @@
+﻿---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import "../styles/site.css";
+import { calculatorCategories, calculators } from "../data/calculators";
+
+const trList = (value: unknown): string => String(value ?? "");
+
+const CATEGORY_FALLBACK: Record<string, { title: string; description: string }> = {
+	"rf-anten": {
+		title: "RF / Anten Tarafı",
+		description: "Anten, besleme hattı, kazanç ve kapsama odaklı temel RF hesapları.",
+	},
+	"power-electric": {
+		title: "Güç ve Elektrik Tarafı",
+		description: "Akım, gerilim, kablo, sigorta, akü ve enerji dengesi hesapları.",
+	},
+	operations: {
+		title: "İşletme ve Kullanım Tarafı",
+		description: "Gerçek kullanım senaryosu ve sahadaki pratik etki tahminleri.",
+	},
+	digital: {
+		title: "Dijital / Frekans Planlama Tarafı",
+		description: "Kanal planı, offset, beacon, doppler ve lokasyon tabanlı araçlar.",
+	},
+	satellite: {
+		title: "Uydu ve Yayınım Tarafı",
+		description: "Uydu geçişi, gri hat, MUF/LUF ve HF uygunluk rehberleri.",
+	},
+};
+
+const hasBrokenText = (value: unknown): boolean => /[?]/.test(String(value ?? ""));
+
+const humanizeSlug = (slug: string): string => {
+	const wordMap: Record<string, string> = {
+		swr: "SWR",
+		return: "Return",
+		loss: "Loss",
+		donusumu: "Dönüşümü",
+		donusum: "Dönüşüm",
+		anten: "Anten",
+		kazanci: "Kazancı",
+		serbest: "Serbest",
+		uzay: "Uzay",
+		yol: "Yol",
+		kaybi: "Kaybı",
+		hesaplama: "Hesaplama",
+		hesabi: "Hesabı",
+		hesaplamasi: "Hesaplaması",
+		bolgesi: "Bölgesi",
+		radyo: "Radyo",
+		ufku: "Ufku",
+		gorus: "Görüş",
+		hatti: "Hattı",
+		mesafesi: "Mesafesi",
+		repeater: "Repeater",
+		kapsama: "Kapsama",
+		tahmini: "Tahmini",
+		dipol: "Dipol",
+		kol: "Kol",
+		uzunlugu: "Uzunluğu",
+		ceyrek: "Çeyrek",
+		yarim: "Yarım",
+		bes: "Beş",
+		sekiz: "Sekiz",
+		dalga: "Dalga",
+		boyu: "Boyu",
+		frekans: "Frekans",
+		yansiyan: "Yansıyan",
+		erp: "ERP",
+		eirp: "EIRP",
+		dbi: "dBi",
+		dbd: "dBd",
+		fspl: "FSPL",
+		j: "J",
+		pole: "Pole",
+		olcu: "Ölçü",
+		ground: "Ground",
+		plane: "Plane",
+		radyal: "Radyal",
+		boylari: "Boyları",
+		yagi: "Yagi",
+		eleman: "Eleman",
+		aralik: "Aralık",
+		araliklari: "Aralıkları",
+		koaksiyel: "Koaksiyel",
+		vf: "VF",
+		fiziksel: "Fiziksel",
+		koaks: "Koaks",
+		kablo: "Kablo",
+		planlayici: "Planlayıcı",
+		stub: "Stub",
+		empedans: "Empedans",
+		orani: "Oranı",
+		balun: "Balun",
+		unun: "Unun",
+		watt: "Watt",
+		volt: "Volt",
+		amper: "Amper",
+		sigorta: "Sigorta",
+		degeri: "Değeri",
+		onerisi: "Önerisi",
+		kesiti: "Kesiti",
+		voltaj: "Voltaj",
+		dusumu: "Düşümü",
+		dc: "DC",
+		batarya: "Batarya",
+		kapasite: "Kapasite",
+		planlama: "Planlama",
+		sarj: "Şarj",
+		suresi: "Süresi",
+		duty: "Duty",
+		cycle: "Cycle",
+		ortalama: "Ortalama",
+		tuketim: "Tüketim",
+		gunes: "Güneş",
+		paneli: "Paneli",
+		aku: "Akü",
+		gunluk: "Günlük",
+		enerji: "Enerji",
+		dengesi: "Dengesi",
+		regulator: "Regülatör",
+		inverter: "Inverter",
+		konusma: "Konuşma",
+		calisma: "Çalışma",
+		el: "El",
+		telsizi: "Telsizi",
+		mobil: "Mobil",
+		roleye: "Röleye",
+		erisim: "Erişim",
+		yukseklik: "Yükseklik",
+		artisi: "Artışı",
+		etkisi: "Etkisi",
+		qrp: "QRP",
+		vs: "vs",
+		yuksek: "Yüksek",
+		guc: "Güç",
+		karsilastirma: "Karşılaştırma",
+		tablosu: "Tablosu",
+		unit: "Unit",
+		farki: "Farkı",
+		db: "dB",
+		artisi: "Artışı",
+		pratik: "Pratik",
+		kanal: "Kanal",
+		araligi: "Aralığı",
+		offset: "Offset",
+		duplex: "Duplex",
+		split: "Split",
+		ctcss: "CTCSS",
+		dcs: "DCS",
+		rehber: "Rehber",
+		araci: "Aracı",
+		aprs: "APRS",
+		beacon: "Beacon",
+		doppler: "Doppler",
+		duzeltme: "Düzeltme",
+		grid: "Grid",
+		locator: "Locator",
+		cevirici: "Çevirici",
+		bearing: "Bearing",
+		distance: "Distance",
+		arac: "Araç",
+		uydu: "Uydu",
+		gecis: "Geçiş",
+		gorunurluk: "Görünürlük",
+		aktivitesine: "Aktivitesine",
+		gore: "Göre",
+		hf: "HF",
+		band: "Band",
+		uygunlugu: "Uygunluğu",
+		muf: "MUF",
+		luf: "LUF",
+		temel: "Temel",
+		aciklamali: "Açıklamalı",
+		greyline: "Greyline",
+		gri: "Gri",
+		hat: "Hat",
+		gun: "Gün",
+		dogumu: "Doğumu",
+		batimi: "Batımı",
+		bazli: "Bazlı",
+	};
+	const title = slug
+		.split("-")
+		.map((part) => {
+			return wordMap[part] ?? (part.length <= 2 ? part.toUpperCase() : part.charAt(0).toUpperCase() + part.slice(1));
+		})
+		.join(" ");
+	return trList(title);
+};
+
+const displayGroupTitle = (group: { key: string; title: string }) => CATEGORY_FALLBACK[group.key]?.title ?? trList(group.title);
+
+const displayGroupDescription = (group: { key: string; description: string }) =>
+	CATEGORY_FALLBACK[group.key]?.description ?? trList(group.description);
+
+const displayItemTitle = (item: { slug: string; title: string }) => humanizeSlug(item.slug);
+
+const displayItemDescription = () => "Detaylar için hesaplama kartını açın.";
+
+const grouped = calculatorCategories.map((category) => ({
+	...category,
+	items: calculators.filter((item) => item.category === category.key),
+}));
+
+const calcBySlug = new Map(calculators.map((item) => [item.slug, item]));
+
+const popularItems = [
+	{ label: "Anten boyu", slug: "ceyrek-yarim-bes-sekiz-dalga-boyu" },
+	{ label: "Frekans <-> dalga boyu", slug: "frekans-dalga-boyu-donusumu" },
+	{ label: "Akü çalışma süresi", slug: "konusma-orani-calisma-suresi" },
+	{ label: "Panel şarj süresi", slug: "gunes-paneli-aku-gunluk-enerji-dengesi" },
+	{ label: "Kablo kaybı", slug: "anten-koaks-kablo-planlayici" },
+	{ label: "ERP / EIRP", slug: "erp-eirp-hesabi" },
+	{ label: "Watt / Volt / Amper", slug: "watt-volt-amper-hesabi" },
+	{ label: "Voltaj düşümü", slug: "voltaj-dusumu-hesaplama" },
+	{ label: "SWR -> yansıyan güç", slug: "swr-yansiyan-guc" },
+	{ label: "Radyo ufku mesafesi", slug: "radyo-ufku-gorus-hatti" },
+].map((entry) => ({
+	...entry,
+	item: entry.slug ? calcBySlug.get(entry.slug) : undefined,
+}));
+---
+
+<Layout
+	lang="tr"
+	title="Hesaplamalar | RadioHam"
+	description="RF, elektrik, kullanım, dijital planlama ve uydu yayınları başlıklarında telsiz hesaplayıcıları."
+>
+	<SiteNav lang="tr" current="calculators" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>Hesaplamalar</h1>
+			<p>Her hesaplama kendi sayfasında. Kategori seçip ilgili araca doğrudan gidebilirsiniz.</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container grouped">
+			<details class="quick-card" open>
+				<summary>
+					<strong>En Çok Kullanılan Hesaplamalar</strong>
+					<span>Açılır / kapanır hızlı liste</span>
+				</summary>
+				<div class="quick-grid">
+					{popularItems.map((entry) =>
+						entry.item && (
+							<a class="quick-link" href={`/hesaplamalar/${entry.item.slug}`}>
+								<strong>{trList(entry.label)}</strong>
+								<span>{displayItemTitle(entry.item)}</span>
+							</a>
+						)
+					)}
+				</div>
+			</details>
+
+			{grouped.map((group) => (
+				<article class="group-card">
+					<header>
+						<h2>{displayGroupTitle(group)}</h2>
+						<p>{displayGroupDescription(group)}</p>
+					</header>
+					<div class="calc-links">
+						{group.items.map((item) => (
+							<a class="calc-link" href={`/hesaplamalar/${item.slug}`}>
+								<strong>{displayItemTitle(item)}</strong>
+								<span>{displayItemDescription(item)}</span>
+							</a>
+						))}
+					</div>
+				</article>
+			))}
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<style>
+	.grouped {
+		display: grid;
+		gap: 18px;
+	}
+
+	.quick-card {
+		border: 1px solid #bfd4ea;
+		border-radius: 12px;
+		background: linear-gradient(180deg, #f4f9ff 0%, #ffffff 100%);
+		padding: 10px 12px 12px;
+	}
+
+	.quick-card summary {
+		list-style: none;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 10px;
+		cursor: pointer;
+	}
+
+	.quick-card summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.quick-card summary strong {
+		font: 700 20px/1.2 "Exo 2", sans-serif;
+		color: #123b6c;
+	}
+
+	.quick-card summary span {
+		font: 600 12px/1.2 "Barlow", sans-serif;
+		color: #3e648a;
+	}
+
+	.quick-grid {
+		margin-top: 10px;
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 10px;
+	}
+
+	.quick-link {
+		border: 1px solid #c8d9ec;
+		border-radius: 10px;
+		padding: 10px 11px;
+		background: #fff;
+		text-decoration: none;
+		display: grid;
+		gap: 4px;
+	}
+
+	.quick-link strong {
+		font: 700 15px/1.25 "Exo 2", sans-serif;
+		color: #0f3f72;
+	}
+
+	.quick-link span {
+		font: 500 12px/1.3 "Barlow", sans-serif;
+		color: #2f5b88;
+	}
+
+	.quick-link:hover {
+		border-color: #88b5e6;
+		background: #eef6ff;
+	}
+
+	.group-card {
+		border: 1px solid #d7e2ee;
+		border-radius: 12px;
+		background: #fff;
+		padding: 14px;
+		display: grid;
+		gap: 12px;
+	}
+
+	.group-card header h2 {
+		margin: 0;
+		font: 700 26px/1.2 "Exo 2", sans-serif;
+		color: #123b6c;
+	}
+
+	.group-card header p {
+		margin: 6px 0 0;
+		font: 500 15px/1.4 "Barlow", sans-serif;
+		color: #355b82;
+	}
+
+	.calc-links {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 10px;
+	}
+
+	.calc-link {
+		border: 1px solid #c8d9ec;
+		border-radius: 10px;
+		padding: 11px 12px;
+		display: grid;
+		gap: 4px;
+		text-decoration: none;
+		background: #f8fbff;
+	}
+
+	.calc-link strong {
+		font: 700 16px/1.25 "Exo 2", sans-serif;
+		color: #0f3f72;
+	}
+
+	.calc-link span {
+		font: 500 13px/1.35 "Barlow", sans-serif;
+		color: #2f5b88;
+	}
+
+	.calc-link:hover {
+		border-color: #88b5e6;
+		background: #eef6ff;
+	}
+
+	@media (max-width: 900px) {
+		.quick-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.calc-links {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.quick-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
+
+
+
+

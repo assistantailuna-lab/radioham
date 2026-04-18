@@ -1,0 +1,146 @@
+﻿---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import { getGuideData } from "../data/guide";
+import "../styles/site.css";
+
+const data = getGuideData("tr");
+---
+
+<Layout lang="tr" title={data.contactTitle} description={data.contactDescription}>
+	<SiteNav lang="tr" current="contact" />
+	<section class="page-hero">
+		<div class="container">
+			<h1>{data.contactHeroTitle}</h1>
+			<p>{data.contactHeroText}</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<h2>Geri Bildirimin Önemi</h2>
+			<div class="outline-section">
+				<p>
+					RadioHam içeriğini güncel ve sahada gerçekten işe yarar tutmanın en güçlü yolu kullanıcı geri
+					bildirimidir. Fark ettiğiniz eksik, hatalı veya geliştirilmesi gereken noktalar; rehber, frekans ve
+					hesaplama sayfalarının daha doğru hale gelmesine doğrudan katkı sağlar.
+				</p>
+				<p>
+					Gönderdiğiniz her geri bildirim; eksiklerin giderilmesi, anlatımın sadeleştirilmesi ve yeni içerik
+					önceliklerinin belirlenmesi için değerlendirilir. Özellikle teknik doğruluk ve yerel kullanım
+					pratikleri açısından katkılarınız platformun kalitesini belirgin biçimde artırır.
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<section class="section muted">
+		<div class="container">
+			<h2>{data.contactFormTitle}</h2>
+			<form id="contactForm" class="contact-form" action="https://formspree.io/f/xykljegd" method="POST">
+				<p id="contactFormError" class="contact-form-error" role="alert" aria-live="polite"></p>
+				<input type="text" name="name" placeholder={data.contactFormPlaceholders.name} required />
+				<input type="text" name="callsign" placeholder="Çağrı işareti" required />
+				<input type="email" name="email" placeholder={data.contactFormPlaceholders.email} required />
+				<input type="text" name="subject" placeholder={data.contactFormPlaceholders.subject} required />
+				<textarea name="message" placeholder={data.contactFormPlaceholders.message} rows={5} required></textarea>
+				<input type="hidden" name="_subject" value="RadioHam Iletisim Formu" />
+				<button id="contactSubmit" type="submit">{data.contactFormPlaceholders.submit}</button>
+			</form>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<script is:inline>
+	document.addEventListener("DOMContentLoaded", () => {
+		const form = document.getElementById("contactForm");
+		const errorBox = document.getElementById("contactFormError");
+		if (!(form instanceof HTMLFormElement) || !(errorBox instanceof HTMLElement)) return;
+
+		const requiredFields = Array.from(form.querySelectorAll("input[required], textarea[required]"));
+		const fieldLabels = {
+			name: "Ad Soyad",
+			callsign: "Çağrı işareti",
+			email: "E-posta",
+			subject: "Konu",
+			message: "Mesaj",
+		};
+
+		requiredFields.forEach((field) => {
+			field.addEventListener("input", () => {
+				errorBox.textContent = "";
+			});
+		});
+
+		form.addEventListener("submit", (event) => {
+			const missing = requiredFields
+				.filter((field) => {
+					if (!(field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement)) return false;
+					return field.value.trim().length === 0;
+				})
+				.map((field) => fieldLabels[field.name] ?? field.name);
+
+			if (missing.length > 0 || !form.checkValidity()) {
+				event.preventDefault();
+				const uniqueMissing = Array.from(new Set(missing));
+				errorBox.textContent = `Lütfen şu alanları da doldurun: ${uniqueMissing.join(", ")}.`;
+				form.reportValidity();
+				return;
+			}
+
+			errorBox.textContent = "";
+		});
+	});
+</script>
+
+<style>
+	.contact-form {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 12px;
+	}
+
+	.contact-form textarea {
+		grid-column: 1 / -1;
+		resize: vertical;
+		min-height: 140px;
+	}
+
+	.contact-form input,
+	.contact-form textarea {
+		font: 500 15px "Barlow", sans-serif;
+		border: 1px solid #c8d6e8;
+		padding: 12px;
+		border-radius: 7px;
+	}
+
+	.contact-form button {
+		grid-column: 1 / -1;
+		width: max-content;
+		padding: 11px 20px;
+		border: 0;
+		border-radius: 999px;
+		background: #0f7ce7;
+		color: #fff;
+		font: 700 12px "Exo 2", sans-serif;
+		text-transform: uppercase;
+		letter-spacing: 0.8px;
+	}
+
+	.contact-form-error {
+		grid-column: 1 / -1;
+		margin: 0;
+		color: #b42318;
+		font: 600 13px "Barlow", sans-serif;
+		min-height: 18px;
+	}
+
+	@media (max-width: 780px) {
+		.contact-form {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

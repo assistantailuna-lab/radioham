@@ -1,0 +1,100 @@
+﻿---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import { getGuideData } from "../data/guide";
+import "../styles/site.css";
+
+const data = getGuideData("tr");
+---
+
+<Layout lang="tr" title={data.glossaryTitle} description={data.glossaryDescription}>
+	<SiteNav lang="tr" current="glossary" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>Sözlük</h1>
+			<p>Fonetik alfabe, Q kodlar ve çağrı işareti örneklerine buradan ulaşabilirsin.</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="outline-section glossary-hub">
+				<a class="glossary-card" href="/sozluk/fonetik-alfabe">
+					<h2>Fonetik Alfabe</h2>
+					<p>Harflerin milli ve uluslararası fonetik karşılıkları.</p>
+					<span>Sayfaya Git</span>
+				</a>
+
+				<a class="glossary-card" href="/sozluk/q-kodlar">
+					<h2>Q Kodlar</h2>
+					<p>En çok kullanılanlar başta olmak üzere Q kodlarının anlamları.</p>
+					<span>Sayfaya Git</span>
+				</a>
+
+				<a class="glossary-card" href="/sozluk/cagri-isareti-ornekleri">
+					<h2>Çağrı İşareti Örnekleri</h2>
+					<p>Türkiye çağrı işareti yapısı, parçaları, bölge numarası ve pratik örnekler.</p>
+					<span>Sayfaya Git</span>
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<style>
+	.glossary-hub {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 14px;
+	}
+
+	.glossary-card {
+		display: grid;
+		gap: 8px;
+		padding: 16px;
+		border: 1px solid #d7e2ee;
+		border-radius: 12px;
+		text-decoration: none;
+		background: linear-gradient(180deg, #f8fbff, #fff);
+		transition: transform 0.18s ease, box-shadow 0.18s ease;
+	}
+
+	.glossary-card:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 10px 20px rgba(12, 76, 144, 0.12);
+	}
+
+	.glossary-card h2 {
+		margin: 0;
+		font: 700 22px/1.2 "Exo 2", sans-serif;
+		color: #123b6c;
+	}
+
+	.glossary-card p {
+		margin: 0;
+		color: #355b82;
+		font-size: 14px;
+	}
+
+	.glossary-card span {
+		margin-top: 4px;
+		color: #165da8;
+		font: 700 13px/1 "Exo 2", sans-serif;
+	}
+
+	@media (max-width: 1100px) {
+		.glossary-hub {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	@media (max-width: 820px) {
+		.glossary-hub {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

@@ -1,0 +1,46 @@
+﻿---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import "../styles/site.css";
+
+const pages = [
+	{
+		title: "Türkiye Röle Frekansları",
+		text: "Türkiye için röle frekanslarını, ton, shift ve offset bilgisiyle düzenli şekilde bu sayfada topluyoruz.",
+		href: "/frekanslar/turkiye-role-frekanslari",
+	},
+	{
+		title: "Genel Frekans Bilgileri",
+		text: "Simplex çağrı frekansları, band plan mantığı ve temel frekans okuma kuralları bu sayfada.",
+		href: "/frekanslar/genel-frekans-bilgileri",
+	},
+];
+---
+
+<Layout lang="tr" title="Frekanslar | RadioHam" description="Türkiye röle frekansları ve genel frekans bilgileri.">
+	<SiteNav lang="tr" current="categories" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>Frekanslar</h1>
+			<p>Röle ve genel frekans içeriklerini bu bölümde düzenli şekilde yönetiyoruz.</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container cards">
+			{
+				pages.map((item) => (
+					<article class="card">
+						<h3>{item.title}</h3>
+						<p>{item.text}</p>
+						<a href={item.href}>Sayfayı Aç</a>
+					</article>
+				))
+			}
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>

@@ -1,0 +1,108 @@
+﻿---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import "../styles/site.css";
+---
+
+<Layout lang="tr" title="Kullanım Koşulları | RadioHam" description="RadioHam kullanım koşulları.">
+	<SiteNav lang="tr" current="home" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>Kullanım Koşulları</h1>
+			<p>Son güncelleme: 17 Nisan 2026</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="outline-section legal">
+				<h2>1. Kapsam</h2>
+				<p>Bu koşullar, RadioHam web sitesinin kullanımına ilişkin kuralları belirler.</p>
+
+				<h2>2. İçerik Niteliği</h2>
+				<p>
+					Sitedeki içerikler bilgilendirme amaçlıdır. Teknik, hukuki veya operasyonel kararlarınızda tek kaynak olarak kullanılmamalıdır.
+					Lisans, frekans, band-plânı ve mevzuat konularında yetkili kurumların güncel yayınları esas alınmalıdır.
+				</p>
+				<p>
+					Sitede yer alan hiçbir içerik; taahhüt, garanti, teknik uygunluk beyanı, hukuki görüş veya profesyonel danışmanlık olarak yorumlanamaz.
+				</p>
+
+				<h2>3. Kullanıcı Yükümlülükleri</h2>
+				<ul>
+					<li>Siteyi hukuka aykırı, zarar verici veya hizmeti bozacak şekilde kullanmamak.</li>
+					<li>Başka kullanıcıların haklarını ihlal etmemek.</li>
+					<li>Yürürlükteki ulusal ve yerel mevzuata uygun hareket etmek.</li>
+				</ul>
+
+				<h2>4. Fikri Mülkiyet</h2>
+				<p>
+					Sitedeki metin, tasarım, görsel ve kod içerikleri, aksi belirtilmedikçe RadioHam veya ilgili hak sahiplerine aittir.
+					İzinsiz kopyalama, dağıtım veya ticari kullanım yapılamaz.
+				</p>
+
+				<h2>5. Üçüncü Taraf Bağlantılar</h2>
+				<p>
+					Site, üçüncü taraf sitelere bağlantı içerebilir. Bu sitelerin içeriği, güvenliği ve koşulları ilgili platformların sorumluluğundadır.
+				</p>
+
+				<h2>6. Sorumluluğun Sınırlandırılması</h2>
+				<p>
+					RadioHam, içeriklerin kesintisiz, hatasız veya her durumda güncel olacağını garanti etmez.
+					Site kullanımından doğan doğrudan veya dolaylı zararlardan sorumluluk kabul edilmez.
+				</p>
+				<p>
+					Kanunen emredici olarak üstlenilmesi zorunlu yükümlülükler dışında; açık veya zımni hiçbir garanti verilmez, performans, uygunluk veya belirli bir amaca elverişlilik konusunda sorumluluk kabul edilmez.
+				</p>
+
+				<h2>7. Hizmette Değişiklik</h2>
+				<p>Site içeriği, özellikleri veya erişimi önceden bildirim yapılmaksızın değiştirilebilir, sınırlandırılabilir veya durdurulabilir.</p>
+
+				<h2>8. Koşulların Güncellenmesi</h2>
+				<p>Bu koşullar zaman içinde güncellenebilir. Güncel metin bu sayfada yayımlandığı andan itibaren geçerlidir.</p>
+
+				<h2>9. Uygulanacak Hukuk ve Yetki</h2>
+				<p>
+					Kanunen farklı bir düzenleme zorunlu olmadıkça, bu koşullar Türkiye Cumhuriyeti hukukuna tabidir. Uyuşmazlıklarda, kanunen izin verilen en geniş ölçüde, İstanbul (Merkez) mahkeme ve icra daireleri yetkilidir.
+				</p>
+
+				<h2>10. İletişim</h2>
+				<p>
+					Kullanım koşullarıyla ilgili sorularınız için
+					<a href="/contact-us">İletişim</a>
+					sayfasını kullanabilirsiniz.
+				</p>
+
+				<p class="legal-note">Not: Bu metin hukuki danışmanlık yerine geçmez.</p>
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<style>
+	.legal h2 {
+		margin: 18px 0 8px;
+		font: 700 22px/1.2 "Exo 2", sans-serif;
+		color: #123b6c;
+	}
+
+	.legal p,
+	.legal li {
+		color: #355b82;
+	}
+
+	.legal ul {
+		padding-left: 18px;
+	}
+
+	.legal-note {
+		margin-top: 16px;
+		padding-top: 12px;
+		border-top: 1px dashed #c7d8ea;
+		font-size: 13px;
+	}
+</style>

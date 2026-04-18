@@ -1,0 +1,76 @@
+﻿---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import "../styles/site.css";
+
+const legalNotes = [
+	{ name: "BTK - Amatör Telsizcilik", url: "https://www.btk.gov.tr/amator-telsizcilik" },
+	{ name: "BTK - Telsiz İşlemlerine İlişkin Usul ve Esaslar", url: "https://www.btk.gov.tr/telsiz-islemlerine-iliskin-usul-ve-esaslar" },
+	{ name: "BTK - Frekans Tahsisinden Muaf Telsiz Cihaz ve Sistemleri", url: "https://www.btk.gov.tr/frekans-tahsisinden-muaf-telsiz-cihaz-ve-sistemleri" },
+	{ name: "BTK - Teknik Ölçütler (Ek-5 PDF)", url: "https://www.btk.gov.tr/uploads/pages/ftm-teknik-olcutler-ek-5.pdf" },
+	{ name: "Mevzuat - 5809 sayılı Elektronik Haberleşme Kanunu", url: "https://www.mevzuat.gov.tr/Metin1.Aspx?MevzuatIliski=0&MevzuatKod=1.5.5809&No=5809&Tertip=5&Tur=1&sourceXmlSearch=" },
+	{ name: "Mevzuat - Frekans Tahsisinden Muaf Cihazlar Yönetmeliği", url: "https://www.mevzuat.gov.tr/Metin.Aspx?MevzuatIliski=0&MevzuatKod=7.5.29010&sourceXmlSearch=frekans" },
+	{ name: "Mevzuat - Amatör Telsizcilik Yönetmeliği", url: "https://www.mevzuat.gov.tr/mevzuat?MevzuatNo=13226&MevzuatTur=7&MevzuatTertip=5" },
+	{ name: "Resmî Gazete - 18.07.2009 tarihli yayımlama metni", url: "https://www.resmigazete.gov.tr/eskiler/2009/07/20090718-7.htm" },
+	{ name: "Resmî Gazete - Amatör Telsizcilik Sınav ve Belgelendirme Yönetmeliği", url: "https://www.resmigazete.gov.tr/eskiler/2010/02/20100203-5.htm" },
+	{ name: "KEGM - Amatör Telsizcilik Sıkça Sorulan Sorular", url: "https://www.kiyiemniyeti.gov.tr/sss" },
+];
+
+const sources = [
+	{ name: "IARU Region 1 - VHF Handbook (Band planlar dahil)", url: "https://www.iaru-r1.org/wp-content/uploads/2024/11/VHF_Handbook_V10_02.pdf" },
+	{ name: "IARU Region 1 - Spectrum", url: "https://www.iaru-r1.org/spectrum/" },
+	{ name: "ITU - Radio Regulations (Amateur Service tanımları)", url: "https://www.itu.int/en/publications/ITU-R/pages/publications.aspx?parent=R-REG-RR-2024&media=electronic" },
+	{ name: "ETSI - DMR standard ailesi (TS 102 361)", url: "https://www.etsi.org/technologies/digital-mobile-radio" },
+	{ name: "ETSI TS 102 361-1 PDF", url: "https://www.etsi.org/deliver/etsi_ts/102300_102399/10236101/02.06.01_60/ts_10236101v020601p.pdf" },
+	{ name: "ARRL - Repeater offset ve tone (öğrenme modülü)", url: "https://learn.arrl.org/courses/35902/lectures/55005762" },
+	{ name: "CHIRP - Resmi proje sayfası", url: "https://chirpmyradio.com/" },
+	{ name: "APRS - Protocol Specification 1.0.1", url: "https://www.aprs.org/doc/APRS101.PDF" },
+];
+---
+
+<Layout lang="tr" title="Kaynakça | RadioHam" description="Rehber içeriğinde kullanılan teknik ve resmi kaynaklar.">
+	<SiteNav lang="tr" current="guide" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>Kaynakça</h1>
+			<p>Bu rehberde kullanılan mevzuat, standart ve teknik dokümanların listesi.</p>
+		</div>
+	</section>
+
+	<section class="section" id="lisans-ve-mevzuat-notlari">
+		<div class="container">
+			<h2>Lisans ve Mevzuat Notları</h2>
+			<p>Türkiye'de amatör telsizcilik ve telsiz cihaz kullanımı için güncel resmi kaynaklar:</p>
+			<div class="outline">
+				{
+					legalNotes.map((source) => (
+						<article class="outline-section">
+							<h3>{source.name}</h3>
+							<p><a href={source.url} target="_blank" rel="noreferrer">{source.url}</a></p>
+						</article>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<h2>Teknik ve Uluslararası Kaynaklar</h2>
+			<div class="outline">
+				{
+					sources.map((source) => (
+						<article class="outline-section">
+							<h3>{source.name}</h3>
+							<p><a href={source.url} target="_blank" rel="noreferrer">{source.url}</a></p>
+						</article>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>

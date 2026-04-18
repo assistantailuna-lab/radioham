@@ -1,0 +1,106 @@
+﻿---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import { getSubtopicsBySection } from "../data/guide";
+import "../styles/site.css";
+
+const firstSpeaking = getSubtopicsBySection("tr", "first-speaking");
+const repeaterLogic = getSubtopicsBySection("tr", "repeater-logic");
+
+const setupItems = [
+	...firstSpeaking.filter((item) => [2, 3, 4].includes(item.itemNumber)),
+	...repeaterLogic.filter((item) => [3, 4, 5, 6, 8].includes(item.itemNumber)),
+];
+---
+
+<Layout lang="tr" title="İlk Kurulum | RadioHam" description="Simplex ve röle ayarlarını adım adım ilk kurulum sekmesinde öğrenin.">
+	<SiteNav lang="tr" current="firstSetup" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>İlk Kurulum</h1>
+			<p>Bu sekmede simplex ve röle ekleme ayarlarını adım adım, sahada uygulanabilir sırayla bulacaksın.</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="outline">
+				<article class="outline-section">
+					<h3>Simplex Ayarı</h3>
+					<p><strong>Amaç:</strong> iki telsiz doğrudan konuşsun.</p>
+					<ul>
+						<li><strong>VFO/MR</strong> - frekans moduna geç</li>
+						<li><strong>Frekansı yaz</strong> - örnek: <code>145.500</code></li>
+						<li><strong>T-CTCSS</strong> = <code>OFF</code></li>
+						<li><strong>R-CTCSS</strong> = <code>OFF</code></li>
+						<li><strong>T-DCS</strong> = <code>OFF</code></li>
+						<li><strong>R-DCS</strong> = <code>OFF</code></li>
+						<li><strong>SFT-D / Shift Direction</strong> = <code>OFF</code></li>
+						<li><strong>OFFSET</strong> = <code>0.0000</code></li>
+						<li><strong>W/N (Wide-Narrow)</strong> = karşı cihazla aynı (genelde FM konuşma için <code>Wide</code>)</li>
+						<li><strong>TX Power</strong> = ilk testte <code>Low</code>, gerekirse yükselt</li>
+						<li><strong>Duplex</strong> menüsü varsa <code>OFF</code> veya <code>Simplex</code></li>
+						<li><strong>İstersen hafızaya kaydet</strong> - bazı modellerde <code>2</code> tuşuna uzun basma veya <code>MEM-CH</code></li>
+					</ul>
+					<p><strong>Mantık:</strong> simplex'te dinleme frekansı = gönderme frekansı. Ton kapalı kurulum, başlangıçta en az hata veren yöntemdir.</p>
+				</article>
+
+				<article class="outline-section">
+					<h3>Röle Ayarı</h3>
+					<p><strong>Amaç:</strong> röle üzerinden konuşmak.</p>
+					<p><strong>Gerekli bilgi:</strong> röle çıkış frekansı, ton, shift yönü, offset.</p>
+					<p><strong>Örnek:</strong> <code>145.750 / ton 88.5 / - / 0.600</code></p>
+					<ul>
+						<li><strong>VFO/MR</strong> - frekans moduna geç</li>
+						<li><strong>Frekansı yaz</strong> - <code>145.750</code> (röle çıkışı)</li>
+						<li><strong>T-CTCSS</strong> = <code>88.5</code></li>
+						<li><strong>R-CTCSS</strong> = başlangıçta <code>OFF</code> bırakabilirsin</li>
+						<li><strong>T-DCS / R-DCS</strong> = <code>OFF</code> (röle CTCSS istiyorsa)</li>
+						<li><strong>SFT-D / Shift Direction</strong> = <code>-</code></li>
+						<li><strong>OFFSET</strong> = <code>0.6000</code></li>
+						<li><strong>W/N (Wide-Narrow)</strong> = rölenin istediği bant genişliğiyle aynı</li>
+						<li><strong>TX Power</strong> = ilk testte <code>Low/Med</code>, erişim zayıfsa artır</li>
+						<li><strong>Reverse</strong> menüsü varsa test dışında <code>OFF</code> tut</li>
+						<li><strong>Hafızaya kaydet</strong> - kanal adıyla birlikte (ör. <code>R145750</code>)</li>
+					</ul>
+					<p><strong>Kontrol:</strong> röleyi duyup açamıyorsan önce <code>Shift + Offset + TX Tone</code> üçlüsünü tekrar kontrol et.</p>
+				</article>
+
+				<article class="outline-section">
+					<h3>Marka/Model Farkı İçin Menü Karşılıkları</h3>
+					<ul>
+						<li><strong>SFT-D</strong> bazı cihazlarda: <code>Shift</code>, <code>Duplex</code>, <code>Direction</code></li>
+						<li><strong>OFFSET</strong> bazı cihazlarda: <code>Offset Freq</code>, <code>RPT Offset</code>, <code>Delta</code></li>
+						<li><strong>T-CTCSS</strong> bazı cihazlarda: <code>Tone</code>, <code>TX Tone</code>, <code>Encode</code></li>
+						<li><strong>R-CTCSS</strong> bazı cihazlarda: <code>TSQL</code>, <code>RX Tone</code>, <code>Decode</code></li>
+						<li><strong>T-DCS / R-DCS</strong> bazı cihazlarda: <code>DCS Encode/Decode</code>, <code>DTCS</code></li>
+						<li><strong>W/N</strong> bazı cihazlarda: <code>Bandwidth</code>, <code>Channel Width</code></li>
+						<li><strong>VFO/MR</strong> bazı cihazlarda: <code>Frequency/Channel Mode</code></li>
+					</ul>
+				</article>
+			</div>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<h2>Simplex ve Röle Ayar Akışı</h2>
+			<div class="cards">
+				{
+					setupItems.map((item) => (
+						<article class="card">
+							<h3>{item.code}</h3>
+							<p>{item.title}</p>
+							<a href={`/konu/${item.slug}`}>Detaylı Anlatım</a>
+						</article>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+

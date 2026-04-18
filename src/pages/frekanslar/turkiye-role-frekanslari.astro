@@ -1,0 +1,1428 @@
+﻿---
+import Layout from "../../layouts/Layout.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import { trRepeaters } from "../../data/tr-repeaters";
+import "../../styles/site.css";
+import { Buffer } from "node:buffer";
+
+const trFixMap: Record<string, string> = {
+	"İ? Anadolu": "İç Anadolu",
+	"G?neydoğu Anadolu": "Güneydoğu Anadolu",
+	Yayinda: "Yayında",
+	Calismiyor: "Çalışmıyor",
+};
+
+const brokenTokenMap: Record<string, string> = {
+	"Do�Yu": "Doğu",
+	"neydo�Yu": "neydoğu",
+	"KARAB�oK": "KARABÜK",
+	"BAH�": "BAHÇ",
+	"G�-LC": "GÖLC",
+	"�oK": "ÜK",
+	"KADIK�-Y": "KADIKÖY",
+	"K�-Y": "KÖY",
+	"�o": "Ü",
+	"BOZ�oY": "BOZÜY",
+	"K�-M": "KÖM",
+	"�oRSU": "ÜRSU",
+	"VEZİRK�-PR": "VEZİRKÖPR",
+	"MERAK�oM": "MERAKÜM",
+	"SA�": "SAÇ",
+	"K�o": "KÜ",
+	"T�oRK": "TÜRK",
+	"R�oZGARLI": "RÜZGARLI",
+	"S�oLEMİŞ": "SÜLEMİŞ",
+	"G�-ZNE": "GÖZNE",
+	"TOLK�-Y": "TOLKÖY",
+	"U�": "UÇ",
+	"G�-ZC": "GÖZC",
+	"Y�oCE": "YÜCE",
+	"AĞLAYAN�": "AĞLAYANÇ",
+	"SEL�": "SELÇ",
+	"T�oNEKTEPE": "TÜNEKTEPE",
+	"G�-K": "GÖK",
+	"�-KELEZ": "ÇÖKELEZ",
+	"K�oTAHYA": "KÜTAHYA",
+	"G�oLBAYIR": "GÜLBAYIR",
+	"D�oL": "DÜL",
+	"�oKBABA": "ÜKBABA",
+	"G�-BEKLİDAĞ": "GÖBEKLİDAĞ",
+	"KARAG�-L": "KARAGÖL",
+	"L�oLEBURGAZ/KIRKLARELİ": "LÜLEBURGAZ/KIRKLARELİ",
+	"L�oLEBURGAZ": "LÜLEBURGAZ",
+	"PALAND�-KEN": "PALANDÖKEN",
+	"PAŞAK�-Y": "PAŞAKÖY",
+	"G�oRPINAR": "GÜRPINAR",
+	"�-MER": "ÖMER",
+	"ATAT�oRK": "ATATÜRK",
+	"G�-LK": "GÖLK",
+	"�-Y": "ÖY",
+	"G�-LCUVEZ": "GÖLCUVEZ",
+};
+
+const decodeHtmlEntities = (value: string): string =>
+	value
+		.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+		.replace(/&amp;/g, "&")
+		.replace(/&quot;/g, "\"")
+		.replace(/&apos;/g, "'")
+		.replace(/&lt;/g, "<")
+		.replace(/&gt;/g, ">");
+
+const mojibakeMarkerRegex = /[ÃÄÅ�]/;
+
+const repairMojibake = (value: string): string => {
+	const input = String(value ?? "");
+	if (!mojibakeMarkerRegex.test(input)) return input;
+	try {
+		const repaired = Buffer.from(input, "latin1").toString("utf8");
+		const inputPenalty = (input.match(mojibakeMarkerRegex) ?? []).length;
+		const repairedPenalty = (repaired.match(mojibakeMarkerRegex) ?? []).length;
+		return repairedPenalty <= inputPenalty ? repaired : input;
+	} catch {
+		return input;
+	}
+};
+
+const normalizeText = (value: string): string => {
+	let cleaned = repairMojibake(decodeHtmlEntities(String(value ?? "").trim()));
+	for (const [broken, fixed] of Object.entries(brokenTokenMap)) {
+		cleaned = cleaned.split(broken).join(fixed);
+	}
+	cleaned = cleaned
+		.replace(/Do�u/gi, "Doğu")
+		.replace(/G�ney/gi, "Güney")
+		.replace(/I�/g, "İ")
+		.replace(/SA�INKA/gi, "SAÇINKA")
+		.replace(/�OBANDEDE/gi, "ÇOBANDEDE")
+		.replace(/(\d)\�/g, "$1°");
+	return trFixMap[cleaned] ?? cleaned;
+};
+
+const normalizeRegion = (value: string): string => {
+	const v = normalizeText(value).toLocaleLowerCase("tr");
+	if (v.includes("akdeniz")) return "Akdeniz";
+	if (v.includes("ege")) return "Ege";
+	if (v.includes("marmara")) return "Marmara";
+	if (v.includes("orta") && v.includes("karadeniz")) return "Orta Karadeniz";
+	if ((v.includes("bati") || v.includes("batı")) && v.includes("karadeniz")) return "Batı Karadeniz";
+	if ((v.includes("dogu") || v.includes("doğu") || v.includes("do�u")) && v.includes("karadeniz")) return "Doğu Karadeniz";
+	if ((v.includes("dogu") || v.includes("doğu") || v.includes("do�u")) && v.includes("anadolu")) return "Doğu Anadolu";
+	if ((v.includes("guney") || v.includes("güney") || v.includes("g?ney")) && v.includes("anadolu")) return "Güneydoğu Anadolu";
+	if (v.includes("ic") && v.includes("anadolu")) return "İç Anadolu";
+	if ((v.includes("i?") || v.includes("iç")) && v.includes("anadolu")) return "İç Anadolu";
+	return normalizeText(value);
+};
+
+const normalizeLocatorText = (value: string): string => {
+	const v = normalizeText(value)
+		.replace(/K{2,}/g, "K")
+		.replace(/D{2,}/g, "D")
+		.replace(/\s{2,}/g, " ")
+		.trim();
+	return v;
+};
+
+const normalizeIlName = (value: string): string => {
+	const v = normalizeText(value)
+		.replace(/[-\s]+$/g, "")
+		.replace(/\s+/g, " ")
+		.trim();
+	const main = v.split("/")[0]?.trim() ?? v;
+	return main || v;
+};
+
+const isNumericHeight = (value: string): boolean => /^\d+(?:[.,]\d+)?(?:\s*m)?$/i.test(value.trim());
+const isHeightMarker = (value: string): boolean => /^[-?]$/.test(value.trim());
+const cleanHeight = (value: string): string => value.replace(/\s*m$/i, "").trim();
+
+const normalizeFreq = (value: string): string => {
+	const base = normalizeText(value).replace(/,/g, ".").trim();
+	if (!base) return "";
+
+	// Bazı girdiler "439275" gibi noktasız gelebiliyor.
+	const fixed = /^\d{6}$/.test(base) ? `${base.slice(0, 3)}.${base.slice(3)}` : base;
+
+	// Bazı girdiler "439.162.5" gibi fazla noktalı gelebiliyor.
+	const singleDot = /^\d+\.\d+\.\d+$/.test(fixed)
+		? `${fixed.slice(0, fixed.lastIndexOf("."))}${fixed.slice(fixed.lastIndexOf(".") + 1)}`
+		: fixed;
+
+	if (/^\d{3}\.\d+$/.test(singleDot)) {
+		const num = Number(singleDot);
+		if (Number.isFinite(num)) return num.toFixed(3);
+	}
+
+	return singleDot;
+};
+
+const ruhsatValues = new Set(["Var", "Yok"]);
+const durumValues = new Set(["Yayinda", "Calismiyor", "Bakimda", "Yayında", "Çalışmıyor", "Bakımda"]);
+
+const preparedRows = trRepeaters.map((item) => {
+	const rawHeight = normalizeText(item.yukseklik);
+	const rawPlace = normalizeText(item.yeri);
+	const heightIsNumeric = isNumericHeight(rawHeight);
+	const heightIsMarker = isHeightMarker(rawHeight);
+
+	let yukseklik = "";
+	let yeri = "";
+
+	if (heightIsNumeric || heightIsMarker) {
+		yukseklik = heightIsNumeric ? cleanHeight(rawHeight) : rawHeight;
+		yeri = rawPlace;
+	} else {
+		yukseklik = "";
+		yeri = [rawHeight, rawPlace].filter(Boolean).join(" / ");
+	}
+
+	// Yer'e yanlış kaymış "- / ..." veya "? / ..." değerlerinde işareti Yükseklik'e geri taşı.
+	const placeMarkerMatch = yeri.match(/^([\-?])\s*\/\s*(.+)$/);
+	if (placeMarkerMatch) {
+		yukseklik = placeMarkerMatch[1];
+		yeri = placeMarkerMatch[2].trim();
+	}
+
+	let ruhsat = normalizeText(item.ruhsat);
+	let durum = normalizeText(item.durum);
+	if (durumValues.has(ruhsat) && ruhsatValues.has(durum)) {
+		const tmp = ruhsat;
+		ruhsat = durum;
+		durum = tmp;
+	}
+
+	return {
+		...item,
+		il: normalizeIlName(item.il),
+		anaIl: normalizeText(item.anaIl),
+		taBolge: normalizeText(item.taBolge),
+		cografiBolge: normalizeRegion(item.cografiBolge),
+		band: normalizeText(item.band),
+		yukseklik,
+		yeri,
+		guc: normalizeText(item.guc),
+		kanal: normalizeText(item.kanal),
+		frekans: normalizeFreq(item.frekans),
+		tone: normalizeText(item.tone),
+		sql: normalizeText(item.sql),
+		ruhsat,
+		durum,
+		locator: normalizeLocatorText(item.locator),
+		tesekkurler: normalizeText(item.tesekkurler),
+	};
+});
+
+const dedupedRows = (() => {
+	const map = new Map<string, (typeof preparedRows)[number]>();
+	const locatorRank = (value: string): number => {
+		const v = String(value ?? "").trim();
+		if (!v) return 0;
+		// Öncelik: açık koordinat > maidenhead locator > diğer metin
+		if (/[°]/.test(v) || /(\d{1,3}[:.'´\s]+\d{1,2}).*[-].*(\d{1,3}[:.'´\s]+\d{1,2})/.test(v)) return 3;
+		if (/^[A-R]{2}\d{2}([A-X]{2}(\d{2})?)?$/i.test(v.replace(/\s+/g, ""))) return 2;
+		return 1;
+	};
+	const score = (row: (typeof preparedRows)[number]) => {
+		const fields = ["yukseklik", "yeri", "guc", "kanal", "tone", "sql", "durum", "locator", "tesekkurler"] as const;
+		return fields.reduce((n, f) => n + (String(row[f] ?? "").trim() ? 1 : 0), 0);
+	};
+	for (const row of preparedRows) {
+		const key = `${normalizeIlName(row.il).toUpperCase()}|${row.frekans}`;
+		const prev = map.get(key);
+		if (!prev) {
+			map.set(key, row);
+			continue;
+		}
+		const rowRank = locatorRank(row.locator);
+		const prevRank = locatorRank(prev.locator);
+		if (rowRank > prevRank || (rowRank === prevRank && score(row) > score(prev))) {
+			map.set(key, row);
+		}
+	}
+	return Array.from(map.values());
+})();
+
+const sortedRows = dedupedRows.slice().sort((a, b) => {
+	const ilCmp = a.anaIl.localeCompare(b.anaIl, "tr");
+	if (ilCmp !== 0) return ilCmp;
+	const subIlCmp = a.il.localeCompare(b.il, "tr");
+	if (subIlCmp !== 0) return subIlCmp;
+	const bandCmp = a.band.localeCompare(b.band, "tr");
+	if (bandCmp !== 0) return bandCmp;
+	return a.frekans.localeCompare(b.frekans, "tr");
+});
+
+const iller = Array.from(new Set(sortedRows.map((item) => item.anaIl))).sort((a, b) => a.localeCompare(b, "tr"));
+---
+
+<Layout lang="tr" title="Türkiye Röle Frekansları | RadioHam" description="İl seçimiyle Türkiye röle frekanslarını filtreleyin.">
+	<SiteNav lang="tr" current="categories" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>Türkiye Röle Frekansları</h1>
+			<p>İl seçerek kendi ilindeki röleleri hızlıca görüntüleyebilirsin.</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="outline-section">
+				<div class="tr-map-shell">
+					<div class="tr-map-head">
+						<h2>Türkiye Röle Haritası</h2>
+						<p>VHF, UHF, APRS, ECHO ve CROSS noktalarını filtreleyip haritadan seçebilirsin.</p>
+					</div>
+					<div class="tr-map-controls" id="mapBandFilters" role="group" aria-label="Bant filtreleri">
+						<button type="button" class="band-filter is-active" data-band="ALL">Tümü</button>
+						<button type="button" class="band-filter" data-band="VHF">VHF</button>
+						<button type="button" class="band-filter" data-band="UHF">UHF</button>
+						<button type="button" class="band-filter" data-band="APRS">APRS</button>
+						<button type="button" class="band-filter" data-band="ECHO">ECHO</button>
+						<button type="button" class="band-filter" data-band="CROSS">CROSS</button>
+						<button type="button" class="band-filter band-locate" id="mapLocateMe">Konumuma Git</button>
+					</div>
+					<p id="mapBandMeta" class="map-band-meta">Harita hazırlanıyor...</p>
+					<div id="trRepeaterMap" class="tr-repeater-map" aria-label="Türkiye röle haritası"></div>
+					<div id="mapSelectedInfo" class="map-selected-info">
+						Haritadaki bir noktaya tıklayınca röle bilgileri burada görünür.
+					</div>
+				</div>
+				<div class="filter-row">
+					<label for="ilSecimi">İl Seçimi</label>
+					<select id="ilSecimi">
+						<option value="">Tüm İller</option>
+						{
+							iller.map((il) => (
+								<option value={il}>{il}</option>
+							))
+						}
+					</select>
+					<span id="kayitSayisi">{sortedRows.length} kayıt</span>
+				</div>
+
+				<div class="table-wrap">
+					<table>
+						<colgroup>
+							<col />
+							<col />
+							<col />
+							<col />
+							<col />
+							<col class="col-yer-width" />
+							<col class="col-guc-width" />
+							<col />
+							<col />
+							<col class="col-tone-width" />
+							<col class="col-sql-width" />
+							<col />
+							<col class="col-lokasyon-width" />
+							<col />
+						</colgroup>
+						<thead>
+							<tr>
+								<th>İl</th>
+								<th>TA Bölge</th>
+								<th>Coğrafi Bölge</th>
+								<th>Band</th>
+								<th>Yükseklik</th>
+								<th class="col-yer">Yer</th>
+								<th>Güç</th>
+								<th>Kanal</th>
+								<th>Frekans</th>
+								<th>Tone</th>
+								<th>SQL</th>
+								<th>Durum</th>
+								<th>Lokasyon</th>
+								<th>Operatör</th>
+							</tr>
+						</thead>
+						<tbody id="roleTabloGovde">
+							{
+								sortedRows.map((item) => (
+									<tr data-ana-il={item.anaIl} data-row-id={String(item.id)}>
+										<td>{item.il}</td>
+										<td>{item.taBolge}</td>
+										<td>{item.cografiBolge}</td>
+										<td>{item.band}</td>
+										<td>{item.yukseklik}</td>
+										<td class="col-yer">{item.yeri}</td>
+										<td>{item.guc}</td>
+										<td>{item.kanal}</td>
+										<td>{item.frekans}</td>
+										<td>{item.tone}</td>
+										<td>{item.sql}</td>
+										<td>{item.durum}</td>
+										<td>
+											{
+												item.locator ? (
+													<button
+														type="button"
+														class="locator-link"
+														data-locator={item.locator}
+														data-title={`${item.il} ${item.band} ${item.frekans}`}
+														data-place={item.yeri}
+														data-il={item.il}
+													>
+														{item.locator}
+													</button>
+												) : (
+													""
+												)
+											}
+										</td>
+										<td>{item.tesekkurler}</td>
+									</tr>
+								))
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<script id="trRepeatersData" type="application/json" set:html={JSON.stringify(sortedRows)}></script>
+
+	<div id="mapModal" class="map-modal" aria-hidden="true">
+		<div class="map-modal-backdrop" data-close="true"></div>
+		<div class="map-modal-card" role="dialog" aria-modal="true" aria-labelledby="mapModalTitle">
+			<div class="map-modal-header">
+				<h3 id="mapModalTitle">Röle Konumu</h3>
+				<button id="mapModalClose" type="button" class="map-modal-close" aria-label="Kapat">×</button>
+			</div>
+			<p id="mapModalStatus" class="map-modal-status">Harita hazırlanıyor...</p>
+			<div class="map-modal-frame-wrap">
+				<iframe
+					id="mapModalFrame"
+					title="Röle harita görünümü"
+					loading="lazy"
+					referrerpolicy="no-referrer-when-downgrade"
+				></iframe>
+			</div>
+			<div class="map-modal-actions">
+				<a id="mapModalRoute" class="button button-secondary" href="#" target="_blank" rel="noopener noreferrer">Yol Tarifi Aç</a>
+				<a id="mapModalFull" class="button button-primary" href="#" target="_blank" rel="noopener noreferrer">Haritayı Büyüt</a>
+			</div>
+		</div>
+	</div>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<script>
+	const select = document.getElementById("ilSecimi");
+	const tbody = document.getElementById("roleTabloGovde");
+	const count = document.getElementById("kayitSayisi");
+	const repeatersDataNode = document.getElementById("trRepeatersData");
+	const mapBandFilters = document.getElementById("mapBandFilters");
+	const mapBandMeta = document.getElementById("mapBandMeta");
+	const trRepeaterMap = document.getElementById("trRepeaterMap");
+	const mapSelectedInfo = document.getElementById("mapSelectedInfo");
+	const mapLocateMe = document.getElementById("mapLocateMe");
+
+	if (select instanceof HTMLSelectElement && tbody && count) {
+		const rows = Array.from(tbody.querySelectorAll("tr"));
+		const modal = document.getElementById("mapModal");
+		const modalFrame = document.getElementById("mapModalFrame");
+		const modalTitle = document.getElementById("mapModalTitle");
+		const modalStatus = document.getElementById("mapModalStatus");
+		const modalRoute = document.getElementById("mapModalRoute");
+		const modalFull = document.getElementById("mapModalFull");
+		const modalClose = document.getElementById("mapModalClose");
+		const tableRowsById = new Map(rows.map((row) => [row.getAttribute("data-row-id"), row]));
+		let lastFocusedButton = null;
+		let cachedUserPosition = null;
+		let activeMapPayload = null;
+		let repeatersData = [];
+		let leafletMap = null;
+		let markerLayer = null;
+		let userMarker = null;
+		let bandFilter = "ALL";
+		let mapMarkers = [];
+		let mapInitialized = false;
+		let hasInitialFit = false;
+
+		try {
+			repeatersData = repeatersDataNode ? JSON.parse(repeatersDataNode.textContent || "[]") : [];
+		} catch {
+			repeatersData = [];
+		}
+
+		const escapeHtml = (v) =>
+			String(v ?? "")
+				.replaceAll("&", "&amp;")
+				.replaceAll("<", "&lt;")
+				.replaceAll(">", "&gt;")
+				.replaceAll('"', "&quot;");
+
+		const TR_BOUNDS = {
+			latMin: 35,
+			latMax: 43.5,
+			lonMin: 25,
+			lonMax: 46.5,
+		};
+
+		const isInTurkeyBounds = (coords) =>
+			coords &&
+			Number.isFinite(coords.lat) &&
+			Number.isFinite(coords.lon) &&
+			coords.lat >= TR_BOUNDS.latMin &&
+			coords.lat <= TR_BOUNDS.latMax &&
+			coords.lon >= TR_BOUNDS.lonMin &&
+			coords.lon <= TR_BOUNDS.lonMax;
+
+		const normalizeTurkeyCoords = (coords) => {
+			if (!coords) return null;
+			if (isInTurkeyBounds(coords)) return coords;
+			const swapped = { lat: coords.lon, lon: coords.lat };
+			if (isInTurkeyBounds(swapped)) return swapped;
+			return null;
+		};
+
+		const maidenheadToLatLon = (raw) => {
+			const loc = String(raw ?? "").toUpperCase().replace(/\s+/g, "");
+			if (!/^[A-R]{2}\d{2}([A-X]{2}(\d{2})?)?$/.test(loc)) return null;
+
+			let lon = -180;
+			let lat = -90;
+			let lonWidth = 20;
+			let latHeight = 10;
+
+			lon += (loc.charCodeAt(0) - 65) * 20;
+			lat += (loc.charCodeAt(1) - 65) * 10;
+
+			lon += Number(loc.slice(2, 3)) * 2;
+			lat += Number(loc.slice(3, 4)) * 1;
+			lonWidth = 2;
+			latHeight = 1;
+
+			if (loc.length >= 6) {
+				lon += (loc.charCodeAt(4) - 65) * (2 / 24);
+				lat += (loc.charCodeAt(5) - 65) * (1 / 24);
+				lonWidth = 2 / 24;
+				latHeight = 1 / 24;
+			}
+
+			if (loc.length >= 8) {
+				lon += Number(loc.slice(6, 7)) * (2 / 24 / 10);
+				lat += Number(loc.slice(7, 8)) * (1 / 24 / 10);
+				lonWidth = 2 / 24 / 10;
+				latHeight = 1 / 24 / 10;
+			}
+
+			return { lat: lat + latHeight / 2, lon: lon + lonWidth / 2 };
+		};
+
+		const tokenToDecimal = (rawNumber, isLat) => {
+			const raw = String(rawNumber ?? "").replace(/,/g, ".").trim();
+			if (!raw) return null;
+
+			// DMS sembollü format: 37°46'20.5
+			const dmsMarked = raw.match(/(\d{1,3})\s*[°º]\s*(\d{1,3})?\s*[':]?\s*(\d{1,3}(?:\.\d+)?)?/);
+			if (dmsMarked) {
+				const deg = Number(dmsMarked[1] ?? 0);
+				const min = Number(dmsMarked[2] ?? 0);
+				const sec = Number(dmsMarked[3] ?? 0);
+				let value = null;
+				if (Number.isFinite(deg) && Number.isFinite(min) && Number.isFinite(sec)) {
+					if (min <= 59 && sec <= 59) {
+						value = deg + min / 60 + sec / 3600;
+					} else {
+						const decimalLike = Number(`${deg}.${String(Math.trunc(min)).padStart(2, "0")}${String(sec).replace(/\D/g, "")}`);
+						value = Number.isFinite(decimalLike) ? decimalLike : null;
+					}
+				}
+				if (value !== null) {
+					if (isLat && Math.abs(value) > 90) return null;
+					if (!isLat && Math.abs(value) > 180) return null;
+					return value;
+				}
+			}
+
+			// Sembolsuz DMS formatı: "38 26 20" veya "43 23 21.5"
+			const dmsSpaced = raw.match(/^\s*(\d{1,3})\s+(\d{1,2})\s+(\d{1,2}(?:\.\d+)?)\s*$/);
+			if (dmsSpaced) {
+				const deg = Number(dmsSpaced[1] ?? 0);
+				const min = Number(dmsSpaced[2] ?? 0);
+				const sec = Number(dmsSpaced[3] ?? 0);
+				if (Number.isFinite(deg) && Number.isFinite(min) && Number.isFinite(sec) && min <= 59 && sec <= 59) {
+					const value = deg + min / 60 + sec / 3600;
+					if (isLat && Math.abs(value) > 90) return null;
+					if (!isLat && Math.abs(value) > 180) return null;
+					return value;
+				}
+			}
+
+			const cleaned = String(rawNumber ?? "")
+				.replace(/,/g, ".")
+				.replace(/[^\d.\-]/g, "")
+				.trim();
+			if (!cleaned) return null;
+
+			const onlyDot = cleaned.replace(/^\-/, "");
+			const dotCount = (onlyDot.match(/\./g) ?? []).length;
+			const parts = onlyDot.split(".").filter(Boolean).map(Number).filter(Number.isFinite);
+			if (parts.length === 0) return null;
+
+			let value = null;
+			if (dotCount >= 2 || parts.length >= 3) {
+				const [deg = 0, min = 0, sec = 0] = parts;
+				const dmsLike = min <= 59 && sec <= 59;
+				if (dmsLike) {
+					value = deg + min / 60 + sec / 3600;
+				} else {
+					// Bazı veriler "37.837.209" gibi gelir; bu durumda 37.837209 olarak yorumla.
+					const [head = "0", ...tail] = onlyDot.split(".").filter(Boolean);
+					const decimalLike = Number(`${head}.${tail.join("")}`);
+					value = Number.isFinite(decimalLike) ? decimalLike : null;
+				}
+			} else if (dotCount === 1 && parts.length === 2) {
+				const [deg = 0, fracOrMin = 0] = parts;
+				const fracLen = (onlyDot.split(".")[1] || "").length;
+				if (fracLen > 2) {
+					value = Number(cleaned);
+				} else {
+					value = deg + fracOrMin / 60;
+				}
+			} else {
+				value = Number(cleaned);
+			}
+
+			if (!Number.isFinite(value)) return null;
+			if (isLat && Math.abs(value) > 90) return null;
+			if (!isLat && Math.abs(value) > 180) return null;
+			return value;
+		};
+
+		const extractCoordToken = (text, positiveDirections, negativeDirections, isLat) => {
+			const clean = String(text ?? "")
+				.replace(/,/g, ".")
+				.replace(/[′’`]/g, "'")
+				.replace(/[″“”]/g, "\"")
+				.replace(/[º]/g, "°")
+				.replace(/\bKK\b/g, "K")
+				.replace(/\bDD\b/g, "D")
+				.replace(/\bNORTH\b/g, "N")
+				.replace(/\bSOUTH\b/g, "S")
+				.replace(/\bEAST\b/g, "E")
+				.replace(/\bWEST\b/g, "W")
+				.toUpperCase();
+
+			const dirs = [...positiveDirections, ...negativeDirections];
+			for (const dir of dirs) {
+				const regex = new RegExp(`([\\d.\\s°'":]{2,}?)\\s*${dir}(?![A-Z])`, "g");
+				const matches = Array.from(clean.matchAll(regex));
+				for (const m of matches) {
+					const numberToken = (m[1] ?? "").replace(/\s+/g, " ").trim();
+					const decimal = tokenToDecimal(numberToken, isLat);
+					if (decimal === null) continue;
+					const sign = positiveDirections.includes(dir) ? 1 : -1;
+					return Math.abs(decimal) * sign;
+				}
+			}
+			return null;
+		};
+
+		const parseLatLon = (raw) => {
+			const source = String(raw ?? "").trim();
+			if (!source) return null;
+			const normalized = source.replace(/[–—]/g, "-");
+
+			// En güvenilir format: "LAT(K/N) - LON(D/E)" ya da tersi.
+			const latLonPair = normalized.match(/(.+?[KNSG])\s*-\s*(.+?[DEWB])/i);
+			if (latLonPair) {
+				const latPart = latLonPair[1] ?? "";
+				const lonPart = latLonPair[2] ?? "";
+				const latVal = extractCoordToken(latPart, ["N", "K"], ["S", "G"], true);
+				const lonVal = extractCoordToken(lonPart, ["E", "D"], ["W", "B"], false);
+				if (latVal !== null && lonVal !== null) {
+					return { lat: latVal, lon: lonVal };
+				}
+			}
+
+			const lonLatPair = normalized.match(/(.+?[DEWB])\s*-\s*(.+?[KNSG])/i);
+			if (lonLatPair) {
+				const lonPart = lonLatPair[1] ?? "";
+				const latPart = lonLatPair[2] ?? "";
+				const latVal = extractCoordToken(latPart, ["N", "K"], ["S", "G"], true);
+				const lonVal = extractCoordToken(lonPart, ["E", "D"], ["W", "B"], false);
+				if (latVal !== null && lonVal !== null) {
+					return { lat: latVal, lon: lonVal };
+				}
+			}
+
+			const dmsLat = extractCoordToken(source, ["N", "K"], ["S", "G"], true);
+			const dmsLon = extractCoordToken(source, ["E", "D"], ["W", "B"], false);
+			if (
+				dmsLat !== null &&
+				dmsLon !== null &&
+				Math.abs(dmsLat) <= 90 &&
+				Math.abs(dmsLon) <= 180
+			) {
+				return { lat: dmsLat, lon: dmsLon };
+			}
+
+			const nums = source
+				.replace(/[^\d,.\-+\s]/g, " ")
+				.replace(/,/g, ".")
+				.trim()
+				.split(/\s+/)
+				.map(Number)
+				.filter((n) => Number.isFinite(n));
+			if (nums.length >= 2) {
+				const [a, b] = nums;
+				// Yön harfleri varsa ("K/D/N/E"), ilk iki sayı fallback'i yanlış eşleşme üretebilir.
+				if (/[KNSGDEWB]/i.test(source)) return null;
+				if (Math.abs(a) <= 90 && Math.abs(b) <= 180) return { lat: a, lon: b };
+			}
+
+			return null;
+		};
+
+		const buildMapPayload = ({ locator, title, place, il }) => {
+			const fixedLocator = String(locator ?? "").trim();
+			const fixedTitle = String(title ?? "").trim();
+			const fixedPlace = String(place ?? "").trim();
+			const fixedIl = String(il ?? "").trim();
+
+			const maiden = normalizeTurkeyCoords(maidenheadToLatLon(fixedLocator));
+			if (maiden) {
+				const destination = `${maiden.lat.toFixed(6)},${maiden.lon.toFixed(6)}`;
+				return {
+					title: fixedTitle,
+					searchText: [fixedTitle, fixedPlace, fixedIl, "Türkiye"].filter(Boolean).join(" "),
+					destination,
+					searchEmbed: `https://www.google.com/maps?q=${encodeURIComponent(destination)}&output=embed`,
+					searchOpen: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destination)}`,
+				};
+			}
+			const direct = normalizeTurkeyCoords(parseLatLon(fixedLocator));
+			if (direct) {
+				const destination = `${direct.lat.toFixed(6)},${direct.lon.toFixed(6)}`;
+				return {
+					title: fixedTitle,
+					searchText: [fixedTitle, fixedPlace, fixedIl, "Türkiye"].filter(Boolean).join(" "),
+					destination,
+					searchEmbed: `https://www.google.com/maps?q=${encodeURIComponent(destination)}&output=embed`,
+					searchOpen: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destination)}`,
+				};
+			}
+
+			const searchText = [fixedTitle, fixedPlace, fixedIl, "Türkiye"].filter(Boolean).join(" ");
+			return {
+				title: fixedTitle,
+				searchText,
+				destination: "",
+				searchEmbed: `https://www.google.com/maps?q=${encodeURIComponent(searchText)}&output=embed`,
+				searchOpen: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchText)}`,
+			};
+		};
+
+		const setModalState = (payload, userPosition) => {
+			if (!(modalFrame instanceof HTMLIFrameElement)) return;
+			if (!(modalRoute instanceof HTMLAnchorElement) || !(modalFull instanceof HTMLAnchorElement)) return;
+
+			modalTitle.textContent = payload.title || "Röle Konumu";
+			modalFull.href = payload.searchOpen;
+
+			if (payload.destination && userPosition) {
+				const origin = `${userPosition.latitude.toFixed(6)},${userPosition.longitude.toFixed(6)}`;
+				const dest = payload.destination;
+				modalFrame.src = `https://www.google.com/maps?saddr=${encodeURIComponent(origin)}&daddr=${encodeURIComponent(dest)}&output=embed`;
+				modalRoute.href = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(dest)}`;
+				modalRoute.removeAttribute("aria-disabled");
+				modalRoute.classList.remove("disabled");
+				modalStatus.textContent = "Konum izni alındı. Haritada size göre rota gösteriliyor.";
+				return;
+			}
+
+			modalFrame.src = payload.searchEmbed;
+			modalRoute.href = payload.searchOpen;
+			modalRoute.setAttribute("aria-disabled", "true");
+			modalRoute.classList.add("disabled");
+			modalStatus.textContent = payload.destination
+				? "Konum izni verilmezse rota yerine röle konumu gösterilir."
+				: "Bu kayıtta koordinat bulunamadı. Yakın konum araması gösteriliyor.";
+		};
+
+		const openModalWithPayload = (payload, focusRef) => {
+			lastFocusedButton = focusRef instanceof HTMLButtonElement ? focusRef : null;
+			activeMapPayload = payload;
+			setModalState(activeMapPayload, null);
+			openModal();
+			requestUserPosition().then((coords) => {
+				if (!activeMapPayload) return;
+				setModalState(activeMapPayload, coords);
+			});
+		};
+
+		const openModal = () => {
+			if (!(modal instanceof HTMLElement)) return;
+			modal.setAttribute("aria-hidden", "false");
+			document.body.classList.add("map-modal-open");
+		};
+		const closeModal = () => {
+			if (!(modal instanceof HTMLElement)) return;
+			modal.setAttribute("aria-hidden", "true");
+			document.body.classList.remove("map-modal-open");
+			if (lastFocusedButton instanceof HTMLButtonElement) {
+				lastFocusedButton.focus();
+			}
+		};
+		const requestUserPosition = () =>
+			new Promise((resolve) => {
+				if (cachedUserPosition) {
+					resolve(cachedUserPosition);
+					return;
+				}
+				if (!("geolocation" in navigator)) {
+					resolve(null);
+					return;
+				}
+				navigator.geolocation.getCurrentPosition(
+					(pos) => {
+						cachedUserPosition = pos.coords;
+				resolve(pos.coords);
+					},
+					() => resolve(null),
+					{ enableHighAccuracy: true, timeout: 8000, maximumAge: 120000 },
+				);
+			});
+
+		const getBandKey = (row) => {
+			const bandRaw = String(row.band ?? "").toUpperCase();
+			const channelRaw = String(row.kanal ?? "").toUpperCase();
+			const combined = `${bandRaw} ${channelRaw}`;
+			if (combined.includes("CROSS")) return "CROSS";
+			if (combined.includes("APRS")) return "APRS";
+			if (combined.includes("ECHO")) return "ECHO";
+			if (combined.includes("UHF")) return "UHF";
+			if (combined.includes("VHF")) return "VHF";
+			return "VHF";
+		};
+
+		const bandColor = {
+			VHF: "#1d4ed8",
+			UHF: "#0f766e",
+			APRS: "#7e22ce",
+			ECHO: "#ea580c",
+			CROSS: "#374151",
+		};
+
+		const ensureLeaflet = () =>
+			new Promise((resolve, reject) => {
+				if (window.L) {
+					resolve(window.L);
+					return;
+				}
+
+				if (!document.getElementById("leaflet-css")) {
+					const css = document.createElement("link");
+					css.id = "leaflet-css";
+					css.rel = "stylesheet";
+					css.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+					css.crossOrigin = "";
+					document.head.appendChild(css);
+				}
+
+				const existing = document.getElementById("leaflet-js");
+				if (existing) {
+					existing.addEventListener("load", () => resolve(window.L), { once: true });
+					existing.addEventListener("error", () => reject(new Error("Leaflet script error")), { once: true });
+					return;
+				}
+
+				const script = document.createElement("script");
+				script.id = "leaflet-js";
+				script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+				script.crossOrigin = "";
+				script.defer = true;
+				script.onload = () => resolve(window.L);
+				script.onerror = () => reject(new Error("Leaflet script error"));
+				document.head.appendChild(script);
+			});
+
+		const rowToCoords = (row) => {
+			const locator = String(row.locator ?? "").trim();
+			if (!locator) return null;
+			const maiden = normalizeTurkeyCoords(maidenheadToLatLon(locator));
+			if (maiden) return maiden;
+			return normalizeTurkeyCoords(parseLatLon(locator));
+		};
+
+		const focusTableRow = (rowId, targetIl) => {
+			if (targetIl && select.value !== targetIl) {
+				select.value = targetIl;
+				update();
+			}
+			const row = tableRowsById.get(String(rowId));
+			if (!(row instanceof HTMLTableRowElement)) return;
+			row.classList.remove("row-focus");
+			row.scrollIntoView({ behavior: "smooth", block: "center" });
+			row.classList.add("row-focus");
+			window.setTimeout(() => row.classList.remove("row-focus"), 2200);
+		};
+
+		const setSelectedInfo = (row) => {
+			if (!(mapSelectedInfo instanceof HTMLElement)) return;
+			mapSelectedInfo.innerHTML = `
+				<div class="map-selected-card">
+					<div class="map-selected-title">${escapeHtml(row.il)} - ${escapeHtml(row.band)} - ${escapeHtml(row.frekans)}</div>
+					<div class="map-selected-meta">${escapeHtml(row.yeri || "Yer bilgisi yok")} | ${escapeHtml(row.kanal || "-")} | ${escapeHtml(row.durum || "Durum yok")}</div>
+					<div class="map-selected-actions">
+						<button type="button" class="map-selected-btn" data-action="focus-row" data-row-id="${escapeHtml(String(row.id))}" data-il="${escapeHtml(row.anaIl || "")}">Tabloda Göster</button>
+						<button type="button" class="map-selected-btn" data-action="open-map" data-row-id="${escapeHtml(String(row.id))}">Haritada Aç</button>
+					</div>
+				</div>
+			`;
+		};
+
+		const updateMapMeta = (visibleCount, totalCount) => {
+			if (!(mapBandMeta instanceof HTMLElement)) return;
+			const filterText = bandFilter === "ALL" ? "Tüm Bantlar" : bandFilter;
+			const ilText = select.value || "Tüm İller";
+			mapBandMeta.textContent = `${filterText} | ${ilText} | ${visibleCount}/${totalCount} nokta`;
+		};
+
+		const applyMapFilters = () => {
+			if (!leafletMap || !markerLayer) return;
+			let visibleCount = 0;
+			const bounds = [];
+			const ilFilter = select.value.trim();
+
+			for (const entry of mapMarkers) {
+				const bandOk = bandFilter === "ALL" || entry.bandKey === bandFilter;
+				const ilOk = !ilFilter || String(entry.row.anaIl ?? "") === ilFilter;
+				const visible = bandOk && ilOk;
+				if (visible) {
+					visibleCount += 1;
+					entry.marker.addTo(markerLayer);
+					bounds.push(entry.latlng);
+				} else {
+					markerLayer.removeLayer(entry.marker);
+				}
+			}
+
+			updateMapMeta(visibleCount, mapMarkers.length);
+			if (bounds.length > 0 && (!hasInitialFit || bandFilter !== "ALL" || ilFilter)) {
+				leafletMap.fitBounds(bounds, { padding: [28, 28], maxZoom: 10 });
+				hasInitialFit = true;
+			} else if (bounds.length === 0) {
+				leafletMap.setView([39, 35], 6);
+			}
+		};
+
+		const initMap = async () => {
+			if (!(trRepeaterMap instanceof HTMLElement)) return;
+			if (mapInitialized) return;
+			mapInitialized = true;
+			try {
+				const L = await ensureLeaflet();
+				leafletMap = L.map(trRepeaterMap, { zoomControl: true, scrollWheelZoom: true }).setView([39, 35], 6);
+				L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+					attribution: "&copy; OpenStreetMap katkıcıları",
+					maxZoom: 18,
+				}).addTo(leafletMap);
+				markerLayer = L.layerGroup().addTo(leafletMap);
+
+				mapMarkers = repeatersData
+					.map((row) => {
+						const coords = rowToCoords(row);
+						if (!coords) return null;
+						const bandKey = getBandKey(row);
+						const latlng = [coords.lat, coords.lon];
+						const marker = L.circleMarker(latlng, {
+							radius: 6,
+							color: bandColor[bandKey] || "#334155",
+							weight: 2,
+							fillColor: bandColor[bandKey] || "#334155",
+							fillOpacity: 0.75,
+						});
+						marker.bindTooltip(`${row.il} - ${row.band} - ${row.frekans}`);
+						marker.on("click", () => {
+							setSelectedInfo(row);
+							focusTableRow(row.id, row.anaIl);
+						});
+						return { row, bandKey, marker, latlng };
+					})
+					.filter(Boolean);
+
+				applyMapFilters();
+			} catch {
+				if (mapBandMeta instanceof HTMLElement) {
+					mapBandMeta.textContent = "Harita yüklenemedi. İnternet bağlantısını kontrol edin.";
+				}
+			}
+		};
+		const fitYerCells = () => {
+			const cells = Array.from(tbody.querySelectorAll("td.col-yer"));
+			for (const cell of cells) {
+				const el = cell as HTMLTableCellElement;
+				el.style.fontSize = "";
+				el.style.letterSpacing = "";
+				let size = 13;
+				while (el.scrollWidth > el.clientWidth && size > 8) {
+					size -= 0.5;
+					el.style.fontSize = `${size}px`;
+				}
+				if (el.scrollWidth > el.clientWidth) {
+					el.style.letterSpacing = "-0.2px";
+				}
+			}
+		};
+		const update = () => {
+			const selected = select.value.trim();
+			let visible = 0;
+			rows.forEach((row) => {
+				const rowIl = row.getAttribute("data-ana-il") ?? "";
+				const show = !selected || rowIl === selected;
+				row.style.display = show ? "" : "none";
+				if (show) visible += 1;
+			});
+			count.textContent = `${visible} kayıt`;
+			applyMapFilters();
+			requestAnimationFrame(fitYerCells);
+		};
+		select.addEventListener("change", update);
+		tbody.addEventListener("click", (event) => {
+			const target = event.target;
+			if (!(target instanceof Element)) return;
+			const btn = target.closest("button.locator-link");
+			if (!(btn instanceof HTMLButtonElement)) return;
+			const payload = buildMapPayload({
+				locator: btn.dataset.locator ?? "",
+				title: btn.dataset.title ?? "",
+				place: btn.dataset.place ?? "",
+				il: btn.dataset.il ?? "",
+			});
+			openModalWithPayload(payload, btn);
+		});
+
+		mapBandFilters?.addEventListener("click", (event) => {
+			const target = event.target;
+			if (!(target instanceof HTMLElement)) return;
+			const btn = target.closest("button.band-filter");
+			if (!(btn instanceof HTMLButtonElement)) return;
+			const nextBand = String(btn.dataset.band ?? "").toUpperCase();
+			if (!nextBand) return;
+			bandFilter = nextBand;
+			const allButtons = Array.from(mapBandFilters.querySelectorAll("button.band-filter"));
+			for (const item of allButtons) {
+				item.classList.toggle("is-active", item === btn);
+			}
+			applyMapFilters();
+		});
+
+		mapSelectedInfo?.addEventListener("click", (event) => {
+			const target = event.target;
+			if (!(target instanceof HTMLElement)) return;
+			const btn = target.closest("button.map-selected-btn");
+			if (!(btn instanceof HTMLButtonElement)) return;
+			const rowId = btn.dataset.rowId ?? "";
+			if (!rowId) return;
+			const rowData = repeatersData.find((item) => String(item.id) === String(rowId));
+			if (!rowData) return;
+
+			if (btn.dataset.action === "focus-row") {
+				focusTableRow(rowData.id, rowData.anaIl);
+				return;
+			}
+
+			if (btn.dataset.action === "open-map") {
+				const payload = buildMapPayload({
+					locator: rowData.locator,
+					title: `${rowData.il} ${rowData.band} ${rowData.frekans}`,
+					place: rowData.yeri,
+					il: rowData.il,
+				});
+				openModalWithPayload(payload, null);
+			}
+		});
+
+		mapLocateMe?.addEventListener("click", () => {
+			if (!leafletMap) return;
+			requestUserPosition().then((coords) => {
+				if (!coords) {
+					if (mapBandMeta instanceof HTMLElement) {
+						mapBandMeta.textContent = "Konum izni verilmedi. Harita Türkiye görünümünde kaldı.";
+					}
+					return;
+				}
+				if (!window.L) return;
+				if (userMarker) leafletMap.removeLayer(userMarker);
+				userMarker = window.L.circleMarker([coords.latitude, coords.longitude], {
+					radius: 7,
+					color: "#dc2626",
+					fillColor: "#dc2626",
+					fillOpacity: 0.85,
+					weight: 2,
+				});
+				userMarker.bindTooltip("Konumunuz");
+				userMarker.addTo(leafletMap);
+				leafletMap.setView([coords.latitude, coords.longitude], 9);
+			});
+		});
+
+		modal?.addEventListener("click", (event) => {
+			const target = event.target;
+			if (!(target instanceof Element)) return;
+			if (target.getAttribute("data-close") === "true") closeModal();
+		});
+		modalClose?.addEventListener("click", closeModal);
+		window.addEventListener("keydown", (event) => {
+			if (event.key === "Escape" && modal?.getAttribute("aria-hidden") === "false") {
+				closeModal();
+			}
+		});
+		window.addEventListener("resize", () => requestAnimationFrame(fitYerCells));
+		initMap();
+		update();
+	}
+</script>
+
+<style>
+	.tr-map-shell {
+		border: 1px solid #d7e2ee;
+		border-radius: 12px;
+		padding: 12px;
+		margin-bottom: 14px;
+		background: linear-gradient(180deg, #f8fbff, #ffffff);
+	}
+
+	.tr-map-head h2 {
+		margin: 0;
+		font: 700 22px/1.2 "Exo 2", sans-serif;
+		color: #123b6c;
+	}
+
+	.tr-map-head p {
+		margin: 6px 0 10px;
+		color: #355b82;
+		font-size: 14px;
+	}
+
+	.tr-map-controls {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		margin-bottom: 8px;
+	}
+
+	.band-filter {
+		border: 1px solid #bcd2e9;
+		background: #ffffff;
+		color: #164575;
+		border-radius: 999px;
+		padding: 7px 12px;
+		font: 700 12px/1.1 "Exo 2", sans-serif;
+		cursor: pointer;
+	}
+
+	.band-filter.is-active {
+		background: #0f5da9;
+		border-color: #0f5da9;
+		color: #fff;
+	}
+
+	.band-locate {
+		margin-left: auto;
+	}
+
+	.map-band-meta {
+		margin: 0 0 8px;
+		color: #4a6480;
+		font: 600 13px/1.2 "Barlow", sans-serif;
+	}
+
+	.tr-repeater-map {
+		width: 100%;
+		height: min(58vh, 460px);
+		border: 1px solid #d7e2ee;
+		border-radius: 10px;
+		overflow: hidden;
+		background: #eef4fb;
+	}
+
+	.map-selected-info {
+		margin-top: 10px;
+		padding: 10px;
+		border: 1px dashed #c2d6eb;
+		border-radius: 10px;
+		color: #355b82;
+		font-size: 13px;
+		background: #fafdff;
+	}
+
+	.map-selected-card {
+		display: grid;
+		gap: 6px;
+	}
+
+	.map-selected-title {
+		font-weight: 800;
+		color: #123b6c;
+	}
+
+	.map-selected-meta {
+		color: #355b82;
+		font-size: 13px;
+	}
+
+	.map-selected-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	.map-selected-btn {
+		border: 1px solid #bfd4ea;
+		background: #ffffff;
+		color: #12477f;
+		border-radius: 8px;
+		padding: 6px 10px;
+		font: 700 12px/1 "Exo 2", sans-serif;
+		cursor: pointer;
+	}
+
+	.leaflet-container {
+		font: 600 12px/1.2 "Barlow", sans-serif;
+	}
+
+	.filter-row {
+		display: flex;
+		gap: 12px;
+		align-items: center;
+		flex-wrap: wrap;
+		margin-bottom: 14px;
+	}
+
+	.filter-row label {
+		font-weight: 700;
+		color: #103f74;
+	}
+
+	.filter-row select {
+		min-width: 220px;
+		height: 40px;
+		padding: 0 10px;
+		border: 1px solid #c8d9eb;
+		border-radius: 8px;
+		background: #fff;
+	}
+
+	#kayitSayisi {
+		font-weight: 600;
+		color: #355b82;
+	}
+
+	.col-yer-width {
+		width: 180px;
+	}
+
+	.col-lokasyon-width {
+		width: 80px;
+	}
+
+	.col-guc-width {
+		width: 50px;
+	}
+
+	.col-tone-width {
+		width: 70px;
+	}
+
+	.col-sql-width {
+		width: 55px;
+	}
+
+	.table-wrap {
+		width: 100%;
+		max-height: 68vh;
+		overflow-y: auto;
+		overflow-x: hidden;
+		-webkit-overflow-scrolling: touch;
+		border: 1px solid #d7e2ee;
+		border-radius: 10px;
+	}
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		table-layout: fixed;
+		font-size: 13px;
+	}
+
+	th,
+	td {
+		border: 1px solid #d7e2ee;
+		padding: 8px 8px;
+		text-align: left;
+		vertical-align: middle;
+		white-space: nowrap;
+		word-break: normal;
+		overflow-wrap: normal;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	th {
+		background: #f2f7fd;
+		color: #0e3f73;
+		font-weight: 700;
+		position: sticky;
+		top: 0;
+		z-index: 2;
+	}
+
+	.section > .container {
+		max-width: 96vw;
+	}
+
+	.col-yer {
+		white-space: nowrap;
+		text-overflow: clip;
+	}
+
+	.locator-link {
+		border: 0;
+		background: transparent;
+		padding: 0;
+		color: #0f4f8f;
+		font: inherit;
+		font-weight: 700;
+		text-decoration: underline;
+		cursor: pointer;
+	}
+
+	.locator-link:hover {
+		color: #0b3f72;
+	}
+
+	#roleTabloGovde tr.row-focus td {
+		background: #e9f4ff;
+	}
+
+	.map-modal {
+		position: fixed;
+		inset: 0;
+		display: none;
+		z-index: 2000;
+	}
+
+	.map-modal[aria-hidden="false"] {
+		display: block;
+	}
+
+	.map-modal-backdrop {
+		position: absolute;
+		inset: 0;
+		background: rgba(8, 23, 40, 0.55);
+	}
+
+	.map-modal-card {
+		position: relative;
+		max-width: 760px;
+		width: calc(100% - 24px);
+		margin: 5vh auto 0;
+		background: #fff;
+		border-radius: 12px;
+		border: 1px solid #c8d9eb;
+		box-shadow: 0 18px 48px rgba(12, 36, 68, 0.3);
+		overflow: hidden;
+	}
+
+	.map-modal-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 12px 14px;
+		border-bottom: 1px solid #d7e2ee;
+	}
+
+	.map-modal-header h3 {
+		margin: 0;
+		font-size: 17px;
+		color: #103f74;
+	}
+
+	.map-modal-close {
+		width: 30px;
+		height: 30px;
+		border-radius: 50%;
+		border: 1px solid #b7cce3;
+		background: #f7fbff;
+		color: #133f6f;
+		font-size: 20px;
+		line-height: 1;
+		cursor: pointer;
+	}
+
+	.map-modal-status {
+		margin: 0;
+		padding: 10px 14px;
+		color: #355b82;
+		font-size: 13px;
+	}
+
+	.map-modal-frame-wrap {
+		padding: 0 14px 14px;
+	}
+
+	#mapModalFrame {
+		width: 100%;
+		height: min(54vh, 440px);
+		border: 1px solid #d7e2ee;
+		border-radius: 10px;
+	}
+
+	.map-modal-actions {
+		display: flex;
+		gap: 10px;
+		padding: 0 14px 14px;
+		flex-wrap: wrap;
+	}
+
+	.map-modal-actions .button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 40px;
+		padding: 0 14px;
+		border-radius: 8px;
+		text-decoration: none;
+		font-weight: 700;
+	}
+
+	.map-modal-actions .button-primary {
+		background: #1568c3;
+		color: #fff;
+	}
+
+	.map-modal-actions .button-secondary {
+		background: #eaf3fc;
+		color: #12477f;
+		border: 1px solid #c8d9eb;
+	}
+
+	.map-modal-actions .button.disabled {
+		opacity: 0.5;
+		pointer-events: none;
+	}
+
+	body.map-modal-open {
+		overflow: hidden;
+	}
+
+	@media (max-width: 820px) {
+		.band-locate {
+			margin-left: 0;
+		}
+
+		.tr-repeater-map {
+			height: min(52vh, 380px);
+		}
+
+	}
+</style>

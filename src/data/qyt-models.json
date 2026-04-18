@@ -1,0 +1,56 @@
+[
+  {
+    "model": "CB-58",
+    "title": "QYT CB-58 4W 4000mAh 27MHz 40 kanal",
+    "image": "/radios/qyt/models/cb-58.jpg",
+    "source": "https://www.telsizsepeti.com/urun/qyt-cb-58-4w-4000mah-27mhz-40-kanal"
+  },
+  {
+    "model": "KT-8R",
+    "title": "QYT KT-8R",
+    "image": "/radios/qyt/models/kt-8r.jpg",
+    "source": "https://www.telsizsepeti.com/urun/qyt-kt-8r"
+  },
+  {
+    "model": "KT7900D-HH",
+    "title": "QYT KT7900D Handheld (KT-8R Version)",
+    "image": "/radios/qyt/models/kt-8r.jpg",
+    "source": "https://www.hi-radio.com/product/kt7900d-newest-handheld-quad-band-radio-qyt-kt-8r/"
+  },
+  {
+    "model": "AH-UV4",
+    "title": "QYT AH-UV4 Dual Band 7W Handheld",
+    "image": "/radios/qyt/models/ah-uv4.jpg",
+    "source": "https://www.qytradio.com/new-arrival-qyt-dual-band-7w-powerful-long-range-walkie-talkie-ah-uv4_p191.html"
+  },
+  {
+    "model": "M83",
+    "title": "QYT M83 VHF Marine Handheld (IPX7)",
+    "image": "/radios/qyt/models/m83.jpg",
+    "source": "https://www.qytradio.com/qyt-5w-vhf-ipx7-marine-float-weather-channel-waterproof-walkie-talkie-m83_p359.html"
+  },
+  {
+    "model": "KT-7900D",
+    "title": "QYT KT-7900D VHF/UHF Mobile Transceiver",
+    "image": "/radios/qyt/models/kt-7900d.jpg",
+    "source": "https://www.rigpix.com/qyt/kt7900d.htm"
+  },
+  {
+    "model": "KT-8900",
+    "title": "QYT KT-8900 VHF/UHF Mobile Transceiver",
+    "image": "/radios/qyt/models/kt-8900.jpg",
+    "source": "https://www.rigpix.com/qyt/kt8900.htm"
+  },
+  {
+    "model": "KT-8900D",
+    "title": "QYT KT-8900D VHF/UHF Mobile Transceiver",
+    "image": "/radios/qyt/models/kt-8900d.jpg",
+    "source": "https://www.rigpix.com/qyt/kt8900d.htm"
+  },
+  {
+    "model": "KT-8900R",
+    "title": "QYT KT-8900R VHF/UHF Mobile Transceiver",
+    "image": "/radios/qyt/models/kt-8900r.jpg",
+    "source": "https://www.rigpix.com/qyt/kt8900r.htm"
+  }
+]

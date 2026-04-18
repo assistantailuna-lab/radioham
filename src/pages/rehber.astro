@@ -1,0 +1,127 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import { getGuideData, getSubtopicsBySection } from "../data/guide";
+import { getSectionDetails } from "../data/guide-content";
+import "../styles/site.css";
+
+const data = getGuideData("tr");
+const details = getSectionDetails("tr");
+---
+
+<Layout lang="tr" title={data.guideTitle} description={data.guideDescription}>
+	<SiteNav lang="tr" current="guide" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>{data.guideHeroTitle}</h1>
+			<p>{data.guideHeroText}</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container content-layout">
+			<aside class="toc-box">
+				<h3>{data.tocLabel}</h3>
+				{
+					data.sections.map((section) => (
+						<a href={`#${section.id}`}>
+							{section.number}. {section.title}
+						</a>
+					))
+				}
+			</aside>
+
+			<div class="outline">
+				{
+					data.sections.map((section) => (
+						<section class="outline-section" id={section.id}>
+							<h3>
+								{section.number}. {section.title}
+							</h3>
+							<p class="detail-summary">{details[section.id]?.summary}</p>
+							<ul>
+								{
+									getSubtopicsBySection("tr", section.id).map((item) => (
+										<li>
+											<a href={`/konu/${item.slug}`} class="topic-link">
+												{item.fullTitle}
+											</a>
+										</li>
+									))
+								}
+							</ul>
+							<div class="detail-grid">
+								<div>
+									<h4>Kritik Notlar</h4>
+									<ul>
+										{details[section.id]?.keyPoints.map((point) => <li>{point}</li>)}
+									</ul>
+								</div>
+								<div>
+									<h4>Sık Hatalar</h4>
+									<ul>
+										{details[section.id]?.commonMistakes.map((mistake) => <li>{mistake}</li>)}
+									</ul>
+									<h4>Uygulama Adımları</h4>
+									<ul>
+										{details[section.id]?.actionSteps.map((step) => <li>{step}</li>)}
+									</ul>
+								</div>
+							</div>
+						</section>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<style>
+	.detail-summary {
+		color: #455b79;
+		font-size: 16px;
+		line-height: 1.7;
+		margin: 0 0 12px;
+	}
+
+	.detail-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 14px;
+		margin-top: 16px;
+	}
+
+	.detail-grid h4 {
+		margin: 0 0 8px;
+		font: 700 14px "Exo 2", sans-serif;
+		text-transform: uppercase;
+		color: #165da8;
+	}
+
+	.detail-grid ul {
+		margin: 0;
+		padding-left: 18px;
+		display: grid;
+		gap: 7px;
+	}
+
+	.topic-link {
+		color: #134f94;
+		text-decoration: none;
+		border-bottom: 1px dotted #8fb5e0;
+	}
+
+	.topic-link:hover {
+		color: #0d3d72;
+	}
+
+	@media (max-width: 900px) {
+		.detail-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

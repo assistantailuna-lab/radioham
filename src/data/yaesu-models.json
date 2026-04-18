@@ -1,0 +1,50 @@
+[
+  {
+    "model": "FT-4XR",
+    "title": "Yaesu FT-4XR VHF/UHF Dual Band FM Handheld",
+    "image": "/radios/yaesu/models/ft-4xr.jpg",
+    "source": "https://www.yaesu.com/product-detail.aspx?CatName=VHF%2FUHF+Handhelds&Model=FT-4XR"
+  },
+  {
+    "model": "FT-60R",
+    "title": "Yaesu FT-60R VHF/UHF Dual Band FM Handheld",
+    "image": "/radios/yaesu/models/ft-60r.jpg",
+    "source": "https://www.yaesu.com/product-detail.aspx?CatName=VHF%2FUHF%2FHandhelds&Model=FT-60R"
+  },
+  {
+    "model": "FT-65R",
+    "title": "Yaesu FT-65R VHF/UHF Dual Band FM Handheld",
+    "image": "/radios/yaesu/models/ft-65r.jpg",
+    "source": "https://www.yaesu.com/product-detail.aspx?CatName=VHF%2FUHF%2FHandhelds&Model=FT-65R"
+  },
+  {
+    "model": "FT-70DR",
+    "title": "Yaesu FT-70DR C4FM/FM Dual Band Handheld",
+    "image": "/radios/yaesu/models/ft-70dr.jpg",
+    "source": "https://www.yaesu.com/product-detail.aspx?CatName=VHF%2FUHF%2FHandhelds&Model=FT-70DR"
+  },
+  {
+    "model": "FT3DR",
+    "title": "Yaesu FT3DR C4FM/FM Dual Band Digital Handheld",
+    "image": "/radios/yaesu/models/ft3dr.jpg",
+    "source": "https://www.yaesu.com/product-detail.aspx?CatName=VHF%2FUHF%2FHandhelds&Model=FT3DR"
+  },
+  {
+    "model": "FT5DR",
+    "title": "Yaesu FT5DR C4FM/FM Dual Band Digital Handheld",
+    "image": "/radios/yaesu/models/ft5dr.jpg",
+    "source": "https://www.yaesu.com/product-detail.aspx?CatName=VHF%2FUHF+Handhelds&Model=FT5DR"
+  },
+  {
+    "model": "VX-6R",
+    "title": "Yaesu VX-6R Tri-Band Waterproof Handheld",
+    "image": "/radios/yaesu/models/vx-6r.jpg",
+    "source": "https://www.yaesu.com/product-detail.aspx?CatName=VHF%2FUHF%2FHandhelds&Model=VX-6R"
+  },
+  {
+    "model": "VX-8DR",
+    "title": "Yaesu VX-8DR APRS/GPS/Bluetooth Handheld (Legacy)",
+    "image": "/radios/yaesu/models/vx-8dr.jpg",
+    "source": "https://www.yaesu.com/product-detail.aspx?CatName=Legacy&Model=VX-8DR"
+  }
+]

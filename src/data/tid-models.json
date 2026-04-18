@@ -1,0 +1,38 @@
+[
+  {
+    "model": "TD-738",
+    "title": "TID TD-738 DMR 10W",
+    "image": "/radios/tid/models/td-738.jpg",
+    "source": "https://www.telsizsepeti.com/urun/tid-td-738-dmr-10w"
+  },
+  {
+    "model": "TD-H3",
+    "title": "TD-H3 5W 8-Band Ham | UNLOCK | GMRS Radio (support open source)",
+    "image": "https://cdn.shopify.com/s/files/1/0096/6479/0607/files/tidradiotdh3hamgmrsraido2packs-_17.webp?v=1774341731",
+    "source": "https://tidradio.com/products/tidradio-td-h3-ham-gmrs-unlocked-8-band-walkie-talkie"
+  },
+  {
+    "model": "TD-H3 Plus",
+    "title": "TD-H3 Plus 5W Bluetooth Ham GMRS 8-Band Radio Handheld",
+    "image": "https://cdn.shopify.com/s/files/1/0096/6479/0607/files/H3-Plus_10W_Ham_GMRS_Handheld_Radio_Unlocked_APRS_GPS_Tracker_Spectrum_Analyzer_128MB_Large_Memory_SMS_Texting_Customizable_Screen_Global_Repeater_Compatible_Bluetooth_AM_Airband_Programmable_Long-Range_Upgradable_Firmwar.jpg?v=1762138344",
+    "source": "https://tidradio.com/products/h3-plus-5w-ham-gmrs-bluetooth-radio"
+  },
+  {
+    "model": "TD-H8",
+    "title": "3rd Gen TD-H8 10W Ham GMRS Radio Handheld 8-Band",
+    "image": "https://cdn.shopify.com/s/files/1/0096/6479/0607/files/h8-f6a4c317-78a2-4cea-8992-2b2c72e1feae-_1.jpg?v=1762138607",
+    "source": "https://tidradio.com/products/3rd-gen-td-h8-10w-ham-gmrs-radio-handheld-8-band"
+  },
+  {
+    "model": "TD-H9",
+    "title": "TD-H9 10W APRS & GPS Bluetooth Handheld Radio",
+    "image": "https://cdn.shopify.com/s/files/1/0096/6479/0607/files/TIDRADIO-Orange-TD-H9-10W-APRS-GPS-UHF-VHF-AM-FM-Handheld-Radio-Wireless-Programming-SMS-Text-HA_8368_1.jpg?v=1775209677",
+    "source": "https://tidradio.com/products/td-h9-10w-bluetooth-aprs-radio-handheld"
+  },
+  {
+    "model": "TD-P3",
+    "title": "TID TD-P3 16 KANAL PMR (RENK VE ADET SEÇİNİZ)",
+    "image": "/radios/tid/models/td-p3.jpg",
+    "source": "https://www.telsizsepeti.com/urun/tid-td-p3-16-kanal-pmr-renk-ve-adet-seciniz"
+  }
+]

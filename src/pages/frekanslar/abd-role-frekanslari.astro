@@ -1,0 +1,34 @@
+﻿---
+import Layout from "../../layouts/Layout.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import "../../styles/site.css";
+---
+
+<Layout lang="tr" title="ABD Röle Frekansları | RadioHam" description="ABD amatör röle frekansları için çalışma sayfası.">
+	<SiteNav lang="tr" current="categories" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>ABD Röle Frekansları</h1>
+			<p>Bu sayfada ABD repeater listelerini bölge ve eyalet kırılımında, başlangıç için anlaşılır bir yapıda toplayacağız.</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="outline-section">
+				<h3>Yakında Eklenecek İçerik Düzeni</h3>
+				<ul>
+					<li>Eyalet bazlı repeater özetleri</li>
+					<li>2 m / 70 cm ayrımı</li>
+					<li>CTCSS/DCS ve offset alanları</li>
+					<li>Yerel koordinasyon notları</li>
+				</ul>
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+

@@ -1,0 +1,113 @@
+﻿---
+import AdBlock from "../components/AdBlock.astro";
+
+interface Props {
+	title?: string;
+	description?: string;
+	canonical?: string;
+	ogImage?: string;
+	noindex?: boolean;
+	lang?: "tr" | "en";
+	showGlobalAd?: boolean;
+	jsonLd?: Record<string, unknown> | Array<Record<string, unknown>>;
+}
+
+const {
+	title = "RadioHam",
+	description = "Amatör telsizcilik için başlangıç ve gelişim rehberi.",
+	canonical,
+	ogImage = "/og-default.jpg",
+	noindex = false,
+	lang = "tr",
+	showGlobalAd = true,
+	jsonLd,
+} = Astro.props;
+const adsenseClient = import.meta.env.PUBLIC_ADSENSE_CLIENT ?? "";
+const globalSlot =
+	import.meta.env.PUBLIC_ADSENSE_SLOT_HOME_MID ??
+	import.meta.env.PUBLIC_ADSENSE_SLOT_DEFAULT ??
+	"";
+const siteBase = Astro.site?.toString().replace(/\/$/, "") ?? "";
+const pagePath = Astro.url?.pathname ?? "/";
+const canonicalUrl = canonical ?? (siteBase ? `${siteBase}${pagePath}` : undefined);
+const ogImageUrl = ogImage.startsWith("http") ? ogImage : siteBase ? `${siteBase}${ogImage}` : ogImage;
+const jsonLdScripts = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
+---
+
+<!doctype html>
+<html lang={lang}>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/png" href="/logo2.png" />
+		<link rel="apple-touch-icon" href="/logo2.png" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&family=Barlow:wght@400;500;600&display=swap"
+			rel="stylesheet"
+		/>
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<meta name="robots" content={noindex ? "noindex,nofollow" : "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:type" content="website" />
+		<meta property="og:image" content={ogImageUrl} />
+		{canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
+		<meta property="og:locale" content={lang === "tr" ? "tr_TR" : "en_US"} />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogImageUrl} />
+		{canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+		{
+			jsonLdScripts.map((item) => (
+				<script type="application/ld+json" set:html={JSON.stringify(item)} />
+			))
+		}
+		{adsenseClient && (
+			<script
+				async
+				src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
+				crossorigin="anonymous"
+			></script>
+		)}
+		<slot name="head" />
+	</head>
+	<body>
+		<slot />
+		{
+			showGlobalAd && (
+				<section class="layout-global-ad section">
+					<div class="container">
+						<AdBlock slotId={globalSlot} minHeight="150px" />
+					</div>
+				</section>
+			)
+		}
+		{
+			showGlobalAd && (
+				<script is:inline>
+					document.addEventListener("DOMContentLoaded", () => {
+						const ad = document.querySelector(".layout-global-ad");
+						const footer = document.querySelector("footer");
+						if (!ad || !footer || !footer.parentNode) return;
+						footer.parentNode.insertBefore(ad, footer);
+					});
+				</script>
+			)
+		}
+	</body>
+</html>
+
+<style>
+	html,
+	body {
+		margin: 0;
+		width: 100%;
+		min-height: 100%;
+	}
+</style>
+

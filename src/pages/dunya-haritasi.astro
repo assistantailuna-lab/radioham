@@ -1,0 +1,793 @@
+﻿---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import { trRepeaters } from "../data/tr-repeaters";
+import "../styles/site.css";
+
+const rows = trRepeaters.map((item) => ({
+	id: item.id,
+	il: String(item.il ?? ""),
+	anaIl: String(item.anaIl ?? ""),
+	band: String(item.band ?? ""),
+	frekans: String(item.frekans ?? ""),
+	kanal: String(item.kanal ?? ""),
+	yeri: String(item.yeri ?? ""),
+	locator: String(item.locator ?? ""),
+}));
+---
+
+<Layout
+	lang="tr"
+	title="Dünya Haritası | RadioHam"
+	description="ISS, Güneş alt noktası ve Türkiye röleleri dünya haritasında."
+>
+	<SiteNav lang="tr" current="worldMap" />
+
+	<section class="world-map-page">
+		<div class="world-map-head container">
+			<h1>Dünya Haritası</h1>
+			<p>ISS, Güneş ve röle noktalarını tek ekranda izleyin.</p>
+		</div>
+		<div class="world-map-wrap">
+			<div class="world-map-controls">
+				<button class="wm-btn is-active" type="button" data-filter="ALL">Tüm Katmanlar</button>
+				<button class="wm-btn" type="button" data-filter="ISS">ISS</button>
+				<button class="wm-btn" type="button" data-filter="SUN">Güneş</button>
+				<button class="wm-btn" type="button" data-filter="REP">Röleler</button>
+				<span id="wmStatus" class="wm-status">Harita hazirlaniyor...</span>
+			</div>
+			<div id="worldMap" class="world-map-canvas" aria-label="Dünya haritası"></div>
+		</div>
+	</section>
+
+	<script id="worldRepeaterData" type="application/json" set:html={JSON.stringify(rows)}></script>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<script>
+	const mapEl = document.getElementById("worldMap");
+	const statusEl = document.getElementById("wmStatus");
+	const controls = document.querySelector(".world-map-controls");
+	const repeaterDataNode = document.getElementById("worldRepeaterData");
+
+	const rows = (() => {
+		try {
+			return JSON.parse(repeaterDataNode?.textContent || "[]");
+		} catch {
+			return [];
+		}
+	})();
+	const normalizeIlKey = (value) =>
+		String(value ?? "")
+			.trim()
+			.split("/")[0]
+			.trim()
+			.toUpperCase("tr-TR");
+	const locatorRank = (value) => {
+		const v = String(value ?? "").trim();
+		if (!v) return 0;
+		if (/[°]/.test(v) || /(\d{1,3}[:.'´\s]+\d{1,2}).*[-].*(\d{1,3}[:.'´\s]+\d{1,2})/.test(v)) return 3;
+		if (/^[A-R]{2}\d{2}([A-X]{2}(\d{2})?)?$/i.test(v.replace(/\s+/g, ""))) return 2;
+		return 1;
+	};
+	const rowScore = (row) =>
+		["yeri", "kanal", "locator"]
+			.map((k) => String(row?.[k] ?? "").trim())
+			.filter(Boolean).length;
+	const dedupedRows = (() => {
+		const map = new Map();
+		for (const row of rows) {
+			const key = `${normalizeIlKey(row.il)}|${String(row.frekans ?? "").trim()}`;
+			const prev = map.get(key);
+			if (!prev) {
+				map.set(key, row);
+				continue;
+			}
+			const rowRank = locatorRank(row.locator);
+			const prevRank = locatorRank(prev.locator);
+			if (rowRank > prevRank || (rowRank === prevRank && rowScore(row) > rowScore(prev))) {
+				map.set(key, row);
+			}
+		}
+		return Array.from(map.values());
+	})();
+
+	const ISS_ICON_URL = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/International_Space_Station.svg/120px-International_Space_Station.svg.png";
+	const HAMQSL_IMG = "https://www.hamqsl.com/solar101vhf.php";
+	const REFRESH_SEC = 10;
+	const TLE_REFRESH_HOURS = 6;
+	const TLE_FALLBACK = {
+		line1: "1 25544U 98067A   26108.54791667  .00015988  00000+0  28629-3 0  9991",
+		line2: "2 25544  51.6392 177.4014 0004497 154.2950 268.1806 15.49955166505183",
+	};
+
+	const TR_BOUNDS = { latMin: 35, latMax: 43.5, lonMin: 25, lonMax: 46.5 };
+	const normalizeLon = (lon) => {
+		let v = Number(lon);
+		while (v > 180) v -= 360;
+		while (v < -180) v += 360;
+		return v;
+	};
+	const inTR = (c) =>
+		c && Number.isFinite(c.lat) && Number.isFinite(c.lon) && c.lat >= TR_BOUNDS.latMin && c.lat <= TR_BOUNDS.latMax && c.lon >= TR_BOUNDS.lonMin && c.lon <= TR_BOUNDS.lonMax;
+	const clampTR = (c) => {
+		if (inTR(c)) return c;
+		const swapped = c ? { lat: c.lon, lon: c.lat } : null;
+		return inTR(swapped) ? swapped : null;
+	};
+
+	const maidenheadToLatLon = (raw) => {
+		const loc = String(raw || "").toUpperCase().replace(/\s+/g, "");
+		if (!/^[A-R]{2}\d{2}([A-X]{2}(\d{2})?)?$/.test(loc)) return null;
+		let lon = -180;
+		let lat = -90;
+		let lonWidth = 20;
+		let latHeight = 10;
+		lon += (loc.charCodeAt(0) - 65) * 20;
+		lat += (loc.charCodeAt(1) - 65) * 10;
+		lon += Number(loc.slice(2, 3)) * 2;
+		lat += Number(loc.slice(3, 4));
+		lonWidth = 2;
+		latHeight = 1;
+		if (loc.length >= 6) {
+			lon += (loc.charCodeAt(4) - 65) * (2 / 24);
+			lat += (loc.charCodeAt(5) - 65) * (1 / 24);
+			lonWidth = 2 / 24;
+			latHeight = 1 / 24;
+		}
+		if (loc.length >= 8) {
+			lon += Number(loc.slice(6, 7)) * (2 / 24 / 10);
+			lat += Number(loc.slice(7, 8)) * (1 / 24 / 10);
+			lonWidth = 2 / 24 / 10;
+			latHeight = 1 / 24 / 10;
+		}
+		return { lat: lat + latHeight / 2, lon: lon + lonWidth / 2 };
+	};
+
+	const tokenToDecimal = (rawNumber, isLat) => {
+		const raw = String(rawNumber ?? "").replace(/,/g, ".").trim();
+		if (!raw) return null;
+
+		const dmsMarked = raw.match(/(\d{1,3})\s*[°º]\s*(\d{1,3})?\s*[':]?\s*(\d{1,3}(?:\.\d+)?)?/);
+		if (dmsMarked) {
+			const deg = Number(dmsMarked[1] ?? 0);
+			const min = Number(dmsMarked[2] ?? 0);
+			const sec = Number(dmsMarked[3] ?? 0);
+			let value = null;
+			if (Number.isFinite(deg) && Number.isFinite(min) && Number.isFinite(sec)) {
+				if (min <= 59 && sec <= 59) {
+					value = deg + min / 60 + sec / 3600;
+				} else {
+					const decimalLike = Number(`${deg}.${String(Math.trunc(min)).padStart(2, "0")}${String(sec).replace(/\D/g, "")}`);
+					value = Number.isFinite(decimalLike) ? decimalLike : null;
+				}
+			}
+			if (value !== null) {
+				if (isLat && Math.abs(value) > 90) return null;
+				if (!isLat && Math.abs(value) > 180) return null;
+				return value;
+			}
+		}
+
+		const dmsSpaced = raw.match(/^\s*(\d{1,3})\s+(\d{1,2})\s+(\d{1,2}(?:\.\d+)?)\s*$/);
+		if (dmsSpaced) {
+			const deg = Number(dmsSpaced[1] ?? 0);
+			const min = Number(dmsSpaced[2] ?? 0);
+			const sec = Number(dmsSpaced[3] ?? 0);
+			if (Number.isFinite(deg) && Number.isFinite(min) && Number.isFinite(sec) && min <= 59 && sec <= 59) {
+				const value = deg + min / 60 + sec / 3600;
+				if (isLat && Math.abs(value) > 90) return null;
+				if (!isLat && Math.abs(value) > 180) return null;
+				return value;
+			}
+		}
+
+		const cleaned = String(rawNumber ?? "")
+			.replace(/,/g, ".")
+			.replace(/[^\d.\-]/g, "")
+			.trim();
+		if (!cleaned) return null;
+
+		const onlyDot = cleaned.replace(/^\-/, "");
+		const dotCount = (onlyDot.match(/\./g) ?? []).length;
+		const parts = onlyDot
+			.split(".")
+			.filter(Boolean)
+			.map(Number)
+			.filter(Number.isFinite);
+		if (parts.length === 0) return null;
+
+		let value = null;
+		if (dotCount >= 2 || parts.length >= 3) {
+			const [deg = 0, min = 0, sec = 0] = parts;
+			if (min <= 59 && sec <= 59) {
+				value = deg + min / 60 + sec / 3600;
+			} else {
+				const [head = "0", ...tail] = onlyDot.split(".").filter(Boolean);
+				const decimalLike = Number(`${head}.${tail.join("")}`);
+				value = Number.isFinite(decimalLike) ? decimalLike : null;
+			}
+		} else if (dotCount === 1 && parts.length === 2) {
+			const [deg = 0, fracOrMin = 0] = parts;
+			const fracLen = (onlyDot.split(".")[1] || "").length;
+			value = fracLen > 2 ? Number(cleaned) : deg + fracOrMin / 60;
+		} else {
+			value = Number(cleaned);
+		}
+
+		if (!Number.isFinite(value)) return null;
+		if (isLat && Math.abs(value) > 90) return null;
+		if (!isLat && Math.abs(value) > 180) return null;
+		return value;
+	};
+
+	const extractCoordToken = (text, positiveDirections, negativeDirections, isLat) => {
+		const clean = String(text ?? "")
+			.replace(/,/g, ".")
+			.replace(/[′’`]/g, "'")
+			.replace(/[″“”]/g, "\"")
+			.replace(/[º]/g, "°")
+			.replace(/\bKK\b/g, "K")
+			.replace(/\bDD\b/g, "D")
+			.replace(/\bNORTH\b/g, "N")
+			.replace(/\bSOUTH\b/g, "S")
+			.replace(/\bEAST\b/g, "E")
+			.replace(/\bWEST\b/g, "W")
+			.toUpperCase();
+
+		const dirs = [...positiveDirections, ...negativeDirections];
+		for (const dir of dirs) {
+			const regex = new RegExp(`([\\d.\\s°'":]{2,}?)\\s*${dir}(?![A-Z])`, "g");
+			const matches = Array.from(clean.matchAll(regex));
+			for (const m of matches) {
+				const numberToken = (m[1] ?? "").replace(/\s+/g, " ").trim();
+				const decimal = tokenToDecimal(numberToken, isLat);
+				if (decimal === null) continue;
+				const sign = positiveDirections.includes(dir) ? 1 : -1;
+				return Math.abs(decimal) * sign;
+			}
+		}
+		return null;
+	};
+
+	const parseLatLon = (raw) => {
+		const source = String(raw ?? "").trim();
+		if (!source) return null;
+		const normalized = source.replace(/[–—]/g, "-");
+
+		const latLonPair = normalized.match(/(.+?[KNSG])\s*-\s*(.+?[DEWB])/i);
+		if (latLonPair) {
+			const latPart = latLonPair[1] ?? "";
+			const lonPart = latLonPair[2] ?? "";
+			const latVal = extractCoordToken(latPart, ["N", "K"], ["S", "G"], true);
+			const lonVal = extractCoordToken(lonPart, ["E", "D"], ["W", "B"], false);
+			if (latVal !== null && lonVal !== null) return { lat: latVal, lon: lonVal };
+		}
+
+		const lonLatPair = normalized.match(/(.+?[DEWB])\s*-\s*(.+?[KNSG])/i);
+		if (lonLatPair) {
+			const lonPart = lonLatPair[1] ?? "";
+			const latPart = lonLatPair[2] ?? "";
+			const latVal = extractCoordToken(latPart, ["N", "K"], ["S", "G"], true);
+			const lonVal = extractCoordToken(lonPart, ["E", "D"], ["W", "B"], false);
+			if (latVal !== null && lonVal !== null) return { lat: latVal, lon: lonVal };
+		}
+
+		const dmsLat = extractCoordToken(source, ["N", "K"], ["S", "G"], true);
+		const dmsLon = extractCoordToken(source, ["E", "D"], ["W", "B"], false);
+		if (dmsLat !== null && dmsLon !== null && Math.abs(dmsLat) <= 90 && Math.abs(dmsLon) <= 180) {
+			return { lat: dmsLat, lon: dmsLon };
+		}
+
+		const nums = source
+			.replace(/[^\d,.\-+\s]/g, " ")
+			.replace(/,/g, ".")
+			.trim()
+			.split(/\s+/)
+			.map(Number)
+			.filter((n) => Number.isFinite(n));
+		if (nums.length >= 2) {
+			const [a, b] = nums;
+			if (/[KNSGDEWB]/i.test(source)) return null;
+			if (Math.abs(a) <= 90 && Math.abs(b) <= 180) return { lat: a, lon: b };
+		}
+		return null;
+	};
+
+	const repeaterPoints = dedupedRows
+		.map((row) => {
+			const coords = clampTR(maidenheadToLatLon(row.locator)) || clampTR(parseLatLon(row.locator));
+			if (!coords) return null;
+			return { ...row, ...coords };
+		})
+		.filter(Boolean);
+
+	const ensureLeaflet = () =>
+		new Promise((resolve, reject) => {
+			if (window.L) return resolve(window.L);
+			if (!document.getElementById("leaflet-css")) {
+				const css = document.createElement("link");
+				css.id = "leaflet-css";
+				css.rel = "stylesheet";
+				css.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+				document.head.appendChild(css);
+			}
+			const existing = document.getElementById("leaflet-js");
+			if (existing) {
+				existing.addEventListener("load", () => resolve(window.L), { once: true });
+				existing.addEventListener("error", () => reject(new Error("leaflet")), { once: true });
+				return;
+			}
+			const script = document.createElement("script");
+			script.id = "leaflet-js";
+			script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+			script.defer = true;
+			script.onload = () => resolve(window.L);
+			script.onerror = () => reject(new Error("leaflet"));
+			document.head.appendChild(script);
+		});
+
+	const ensureSatelliteJs = () =>
+		new Promise((resolve, reject) => {
+			if (window.satellite) return resolve(window.satellite);
+			const existing = document.getElementById("satellite-js");
+			if (existing) {
+				existing.addEventListener("load", () => resolve(window.satellite), { once: true });
+				existing.addEventListener("error", () => reject(new Error("satellite")), { once: true });
+				return;
+			}
+			const script = document.createElement("script");
+			script.id = "satellite-js";
+			script.src = "https://unpkg.com/satellite.js@5.0.0/dist/satellite.min.js";
+			script.defer = true;
+			script.onload = () => resolve(window.satellite);
+			script.onerror = () => reject(new Error("satellite"));
+			document.head.appendChild(script);
+		});
+
+	const calcSunSubpoint = (date) => {
+		const now = date instanceof Date ? date : new Date();
+		const d = now.getTime() / 86400000 + 2440587.5 - 2451545;
+		const g = ((357.528 + 0.9856003 * d) % 360) * (Math.PI / 180);
+		const q = (280.46 + 0.9856474 * d) % 360;
+		const ls = (q + 1.915 * Math.sin(g) + 0.02 * Math.sin(2 * g)) * (Math.PI / 180);
+		const e = (23.439 - 0.0000004 * d) * (Math.PI / 180);
+		const ra = Math.atan2(Math.cos(e) * Math.sin(ls), Math.cos(ls));
+		const dec = Math.asin(Math.sin(e) * Math.sin(ls));
+		const gmst = ((18.697374558 + 24.06570982441908 * d) % 24 + 24) % 24;
+		return { lat: (dec * 180) / Math.PI, lon: normalizeLon((ra * 180) / Math.PI - gmst * 15) };
+	};
+
+	let map;
+	let L;
+	let satellite;
+	let repeaterLayer;
+	let issMarker;
+	let issFootprint;
+	let issPath;
+	let sunMarker;
+	let nightLayer;
+	let filter = "ALL";
+	let issHistory = [];
+	let issSatrec = null;
+	let lastTleFetchAt = 0;
+
+	const setStatus = (text) => {
+		if (statusEl) statusEl.textContent = text;
+	};
+
+	const applyFilter = () => {
+		const showISS = filter === "ALL" || filter === "ISS";
+		const showSUN = filter === "ALL" || filter === "SUN";
+		const showREP = filter === "ALL" || filter === "REP";
+		if (issMarker) (showISS ? issMarker.addTo(map) : map.removeLayer(issMarker));
+		if (issFootprint) (showISS ? issFootprint.addTo(map) : map.removeLayer(issFootprint));
+		if (issPath) (showISS ? issPath.addTo(map) : map.removeLayer(issPath));
+		if (sunMarker) (showSUN ? sunMarker.addTo(map) : map.removeLayer(sunMarker));
+		if (repeaterLayer) (showREP ? repeaterLayer.addTo(map) : map.removeLayer(repeaterLayer));
+	};
+
+	const splitTrackByDateline = (coords) => {
+		const segments = [];
+		let current = [];
+		for (let i = 0; i < coords.length; i += 1) {
+			const point = coords[i];
+			if (i > 0) {
+				const prev = coords[i - 1];
+				const diff = Math.abs(point[1] - prev[1]);
+				if (diff > 170 && current.length) {
+					segments.push(current);
+					current = [];
+				}
+			}
+			current.push(point);
+		}
+		if (current.length) segments.push(current);
+		return segments;
+	};
+
+	const calcTerminatorLine = (sun) => {
+		const sunLatRad = (sun.lat * Math.PI) / 180;
+		const points = [];
+		for (let lon = -180; lon <= 180; lon += 2) {
+			const h = ((lon - sun.lon) * Math.PI) / 180;
+			const tanSun = Math.tan(sunLatRad);
+			let latDeg = 0;
+			if (Math.abs(tanSun) < 1e-5) {
+				latDeg = 0;
+			} else {
+				latDeg = (Math.atan(-Math.cos(h) / tanSun) * 180) / Math.PI;
+			}
+			points.push([latDeg, lon]);
+		}
+		return points;
+	};
+
+	const upsertNightLayer = (sun) => {
+		const term = calcTerminatorLine(sun);
+		const northNight = sun.lat <= 0;
+		const poly = northNight ? [[90, -180], [90, 180], ...term.slice().reverse()] : [[-90, 180], [-90, -180], ...term];
+		if (!nightLayer) {
+			nightLayer = L.polygon(poly, {
+				stroke: false,
+				fillColor: "#020617",
+				fillOpacity: 0.26,
+				interactive: false,
+				pane: "overlayPane",
+			}).addTo(map);
+			return;
+		}
+		nightLayer.setLatLngs(poly);
+	};
+
+	const buildPrediction = (epochSec) => {
+		if (!satellite || !issSatrec || !Number.isFinite(epochSec)) return [];
+		const points = [];
+		for (let sec = -2700; sec <= 2700; sec += 60) {
+			const d = new Date((epochSec + sec) * 1000);
+			const pv = satellite.propagate(issSatrec, d);
+			if (!pv?.position) continue;
+			const gmst = satellite.gstime(d);
+			const geo = satellite.eciToGeodetic(pv.position, gmst);
+			if (!geo) continue;
+			const lat = (geo.latitude * 180) / Math.PI;
+			const lon = normalizeLon((geo.longitude * 180) / Math.PI);
+			if (Number.isFinite(lat) && Number.isFinite(lon)) points.push([lat, lon]);
+		}
+		return splitTrackByDateline(points);
+	};
+
+	const upsertIss = (data) => {
+		const lat = Number(data?.latitude);
+		const lon = Number(data?.longitude);
+		const altKm = Number(data?.altitude);
+		const velKmh = Number(data?.velocity);
+		const ts = Number(data?.timestamp);
+		if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+
+		const nowPoint = { lat, lon, t: Number.isFinite(ts) ? ts : Math.floor(Date.now() / 1000) };
+		issHistory.push(nowPoint);
+		if (issHistory.length > 20) issHistory = issHistory.slice(-20);
+
+		const latlng = [lat, lon];
+		const footprintKm = Number.isFinite(altKm) ? Math.sqrt(Math.max(altKm, 0)) * 200 : 2200;
+
+		if (!issMarker) {
+			const icon = L.icon({ iconUrl: ISS_ICON_URL, iconSize: [108, 60], iconAnchor: [54, 30] });
+			issMarker = L.marker(latlng, { title: "ISS", icon, zIndexOffset: 1200 }).addTo(map);
+		}
+		issMarker.setLatLng(latlng);
+		issMarker.bindPopup(`
+			<div class="wm-popup">
+				<h3>ISS international space station</h3>
+				<p>Cross band FM repeater</p>
+				<p>TX:145.990 | RX:437.800 MHz T.67 Hz</p>
+				<p>FM SSTV downlink 145.800 MHz</p>
+				<p class="wm-links">
+					<a href="https://www.nasa.gov/" target="_blank" rel="noopener noreferrer">NASA</a>
+					<a href="https://www.funclub.pm/" target="_blank" rel="noopener noreferrer">FUN CLUB</a>
+					<a href="https://www.telemetry.space/" target="_blank" rel="noopener noreferrer">ISS TELEMETRY</a>
+				</p>
+				<p class="wm-meta">Url: <a href="https://wheretheiss.at/" target="_blank" rel="noopener noreferrer">wheretheiss.at</a> <span>${REFRESH_SEC}s</span></p>
+				<p class="wm-mini">Lat/Lon: ${lat.toFixed(4)}, ${lon.toFixed(4)} | Alt: ${Number.isFinite(altKm) ? altKm.toFixed(1) : "-"} km | Vel: ${Number.isFinite(velKmh) ? velKmh.toFixed(0) : "-"} km/h</p>
+			</div>
+		`);
+
+		if (!issFootprint) {
+			issFootprint = L.circle(latlng, {
+				radius: footprintKm * 1000,
+				color: "#111827",
+				weight: 1.5,
+				fillColor: "#94a3b8",
+				fillOpacity: 0.1,
+			}).addTo(map);
+		}
+		issFootprint.setLatLng(latlng);
+		issFootprint.setRadius(footprintKm * 1000);
+
+		const predicted = buildPrediction(nowPoint.t);
+		if (!issPath) {
+			issPath = L.polyline(predicted, { color: "#16a34a", weight: 3, opacity: 0.9, dashArray: "8 10" }).addTo(map);
+		}
+		issPath.setLatLngs(predicted);
+
+		const apiSunLat = Number(data?.solar_lat);
+		const apiSunLon = Number(data?.solar_lon);
+		const sun =
+			Number.isFinite(apiSunLat) && Number.isFinite(apiSunLon)
+				? { lat: apiSunLat, lon: normalizeLon(apiSunLon) }
+				: calcSunSubpoint(new Date());
+		if (!sunMarker) {
+			const sunIcon = L.divIcon({
+				className: "wm-sun-icon",
+				html: '<span style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:999px;background:radial-gradient(circle at 35% 35%,#fde68a,#f59e0b);box-shadow:0 8px 18px rgba(234,179,8,.35);font:700 10px/1 Exo 2,sans-serif;color:#7c2d12">SUN</span>',
+				iconSize: [34, 34],
+				iconAnchor: [17, 17],
+			});
+			sunMarker = L.marker([sun.lat, sun.lon], { title: "Güneş", icon: sunIcon, zIndexOffset: 1100 }).addTo(map);
+		}
+		sunMarker.setLatLng([sun.lat, sun.lon]);
+		sunMarker.bindPopup(`
+			<div class="wm-popup">
+				<h3>Güneş</h3>
+				<p>Yuzey sicakligi (ortalama): 5504 °C</p>
+				<img src="${HAMQSL_IMG}" alt="HamQSL Solar Data" loading="lazy" />
+				<p class="wm-mini">Konum: ${sun.lat.toFixed(4)}, ${sun.lon.toFixed(4)}</p>
+			</div>
+		`);
+		upsertNightLayer(sun);
+
+		applyFilter();
+		setStatus(`ISS guncellendi: ${new Date().toLocaleTimeString("tr-TR")}`);
+	};
+
+	const parseTlePayload = (text) => {
+		const lines = String(text || "")
+			.split(/\r?\n/)
+			.map((x) => x.trim())
+			.filter(Boolean);
+		const l1 = lines.find((x) => x.startsWith("1 25544"));
+		const l2 = lines.find((x) => x.startsWith("2 25544"));
+		return l1 && l2 ? { line1: l1, line2: l2 } : null;
+	};
+
+	const loadIssTle = async () => {
+		const now = Date.now();
+		if (issSatrec && now - lastTleFetchAt < TLE_REFRESH_HOURS * 3600000) return;
+		const sources = [
+			"https://celestrak.org/NORAD/elements/gp.php?CATNR=25544&FORMAT=TLE",
+			"https://celestrak.org/NORAD/elements/stations.txt",
+		];
+		for (const src of sources) {
+			try {
+				const res = await fetch(src, { cache: "no-store" });
+				if (!res.ok) throw new Error("tle");
+				const text = await res.text();
+				const tle = parseTlePayload(text);
+				if (!tle) throw new Error("tle-parse");
+				issSatrec = satellite.twoline2satrec(tle.line1, tle.line2);
+				lastTleFetchAt = now;
+				return;
+			} catch {
+				try {
+					const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(src)}`;
+					const res2 = await fetch(proxyUrl, { cache: "no-store" });
+					if (!res2.ok) throw new Error("tle-proxy");
+					const text2 = await res2.text();
+					const tle2 = parseTlePayload(text2);
+					if (!tle2) throw new Error("tle-parse2");
+					issSatrec = satellite.twoline2satrec(tle2.line1, tle2.line2);
+					lastTleFetchAt = now;
+					return;
+				} catch {
+					// continue
+				}
+			}
+		}
+		issSatrec = satellite.twoline2satrec(TLE_FALLBACK.line1, TLE_FALLBACK.line2);
+		lastTleFetchAt = now;
+	};
+
+	const fetchIss = async () => {
+		try {
+			const res = await fetch("https://api.wheretheiss.at/v1/satellites/25544", { cache: "no-store" });
+			if (!res.ok) throw new Error("api");
+			const data = await res.json();
+			upsertIss(data);
+		} catch {
+			try {
+				const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent("https://api.wheretheiss.at/v1/satellites/25544")}`;
+				const res2 = await fetch(proxyUrl, { cache: "no-store" });
+				if (!res2.ok) throw new Error("proxy");
+				const data2 = await res2.json();
+				upsertIss(data2);
+				setStatus("ISS verisi proxy ile guncellendi.");
+			} catch {
+				setStatus("ISS verisi alinamadi.");
+			}
+		}
+	};
+
+	const init = async () => {
+		if (!(mapEl instanceof HTMLElement)) return;
+		try {
+			L = await ensureLeaflet();
+		} catch {
+			setStatus("Leaflet yuklenemedi.");
+			return;
+		}
+		try {
+			satellite = await ensureSatelliteJs();
+		} catch {
+			setStatus("Yorunge kutuphanesi yuklenemedi.");
+			return;
+		}
+
+		map = L.map(mapEl, {
+			center: [20, 0],
+			zoom: 2,
+			minZoom: 1,
+			maxZoom: 18,
+			maxBounds: [
+				[-85, -179.999],
+				[85, 179.999],
+			],
+			maxBoundsViscosity: 1,
+			worldCopyJump: false,
+			scrollWheelZoom: true,
+		});
+		L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+			maxZoom: 18,
+			noWrap: true,
+			bounds: [
+				[-85, -180],
+				[85, 180],
+			],
+			attribution: "&copy; OpenStreetMap katkilari",
+		}).addTo(map);
+		map.fitBounds(
+			[
+				[-60, -180],
+				[80, 180],
+			],
+			{ animate: false, padding: [8, 8] },
+		);
+		await loadIssTle();
+
+		repeaterLayer = L.layerGroup(
+			repeaterPoints.map((r) => {
+				const m = L.circleMarker([r.lat, r.lon], {
+					radius: 4,
+					color: "#0f766e",
+					weight: 1.5,
+					fillColor: "#14b8a6",
+					fillOpacity: 0.72,
+				});
+				m.bindPopup(`<div class="wm-popup"><h3>${r.il} - ${r.band}</h3><p>${r.frekans} | ${r.kanal || "-"}</p><p>${r.yeri || "-"}</p></div>`);
+				return m;
+			}),
+		).addTo(map);
+
+		controls?.addEventListener("click", (event) => {
+			const target = event.target;
+			if (!(target instanceof HTMLElement)) return;
+			const btn = target.closest("button.wm-btn");
+			if (!(btn instanceof HTMLButtonElement)) return;
+			filter = String(btn.dataset.filter || "ALL").toUpperCase();
+			controls.querySelectorAll("button.wm-btn").forEach((x) => x.classList.remove("is-active"));
+			btn.classList.add("is-active");
+			applyFilter();
+		});
+
+		await fetchIss();
+		window.setInterval(fetchIss, REFRESH_SEC * 1000);
+		window.setInterval(loadIssTle, TLE_REFRESH_HOURS * 3600000);
+	};
+
+	init();
+</script>
+
+<style>
+	.world-map-page {
+		padding: 8px 0 0;
+	}
+	.world-map-head h1 {
+		margin: 0;
+		font: 800 34px/1.05 "Exo 2", sans-serif;
+		color: #103a66;
+	}
+	.world-map-head p {
+		margin: 8px 0 12px;
+		color: #355b82;
+	}
+	.world-map-wrap {
+		width: 100%;
+		max-width: 100%;
+		padding: 0 10px 14px;
+	}
+	.world-map-controls {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		align-items: center;
+		margin: 0 0 8px;
+	}
+	.wm-btn {
+		border: 1px solid #bbd2e8;
+		background: #fff;
+		color: #174a7c;
+		border-radius: 999px;
+		padding: 8px 12px;
+		font: 700 12px/1 "Exo 2", sans-serif;
+		cursor: pointer;
+	}
+	.wm-btn.is-active {
+		background: #0f5da9;
+		color: #fff;
+		border-color: #0f5da9;
+	}
+	.wm-status {
+		margin-left: auto;
+		color: #3b5d80;
+		font: 600 13px/1.2 "Barlow", sans-serif;
+	}
+	.world-map-canvas {
+		height: calc(100vh - 220px);
+		min-height: 580px;
+		border: 1px solid #d8e5f2;
+		border-radius: 12px;
+		overflow: hidden;
+		background: #e8f4ff;
+	}
+	:global(.wm-popup h3) {
+		margin: 0 0 4px;
+		font: 800 17px/1.12 "Barlow", sans-serif;
+		color: #2b2f36;
+	}
+	:global(.wm-popup p) {
+		margin: 0 0 3px;
+		color: #2f2f2f;
+		font: 500 14px/1.25 "Barlow", sans-serif;
+	}
+	:global(.wm-popup .wm-links) {
+		display: flex;
+		gap: 8px;
+		flex-wrap: wrap;
+	}
+	:global(.wm-popup .wm-links a) {
+		color: #0d5baa;
+		text-decoration: underline;
+		font-weight: 700;
+	}
+	:global(.wm-popup .wm-meta) {
+		display: flex;
+		gap: 10px;
+		align-items: center;
+	}
+	:global(.wm-popup .wm-mini) {
+		margin-top: 6px;
+		font-size: 12px;
+		color: #4b5563;
+	}
+	:global(.wm-popup img) {
+		display: block;
+		width: 100%;
+		max-width: 290px;
+		border-radius: 8px;
+		border: 1px solid #d7e4f1;
+		margin: 6px 0;
+	}
+	@media (max-width: 900px) {
+		.world-map-canvas {
+			height: calc(100vh - 260px);
+			min-height: 480px;
+		}
+		.wm-status {
+			margin-left: 0;
+			width: 100%;
+		}
+	}
+</style>
+

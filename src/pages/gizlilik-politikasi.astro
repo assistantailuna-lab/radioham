@@ -1,0 +1,95 @@
+﻿---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import "../styles/site.css";
+---
+
+<Layout lang="tr" title="Gizlilik Politikası | RadioHam" description="RadioHam gizlilik politikası.">
+	<SiteNav lang="tr" current="home" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>Gizlilik Politikası</h1>
+			<p>Son güncelleme: 17 Nisan 2026</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="outline-section legal">
+				<h2>1. Genel Yaklaşım</h2>
+				<p>RadioHam, ziyaretçi gizliliğine önem verir ve veri işleme faaliyetlerinde asgari veri ilkesini benimser.</p>
+
+				<h2>2. İşlenen Veriler</h2>
+				<p>Siteyi gezerken teknik loglar (IP, tarayıcı bilgisi, tarih-saat, hata kayıtları) sunucu güvenliği ve hizmet sürekliliği amacıyla işlenebilir.</p>
+				<p>
+					Kanunen zorunlu olmadıkça özel nitelikli kişisel veri toplama hedeflenmez. Kullanıcıların gereksiz kişisel veri paylaşmaktan kaçınması beklenir.
+				</p>
+
+				<h2>3. Çerezler ve Benzer Teknolojiler</h2>
+				<p>Site performansı, temel işlevler ve ölçümleme amacıyla çerezler kullanılabilir. Tarayıcı ayarlarınızdan çerezleri sınırlandırabilir veya silebilirsiniz.</p>
+
+				<h2>4. İletişim Formu ve E-posta</h2>
+				<p>İletişim kanalları üzerinden paylaştığınız ad, e-posta ve mesaj içeriği; talebinizi yanıtlamak, kayıt tutmak ve kötüye kullanımları önlemek amacıyla işlenebilir.</p>
+
+				<h2>5. Üçüncü Taraf Servisler</h2>
+				<p>Harici bağlantılar, harita servisleri veya analiz araçları kullanıldığında ilgili servis sağlayıcıların kendi gizlilik politikaları geçerlidir.</p>
+				<p>
+					Üçüncü taraf servislerin veri işleme faaliyetleri, güvenlik uygulamaları ve uyumluluk seviyeleri üzerinde kontrolümüz bulunmaz; bu servislerden doğabilecek sonuçlardan kanunen zorunlu olmadıkça sorumluluk kabul edilmez.
+				</p>
+
+				<h2>6. Veri Saklama ve Güvenlik</h2>
+				<p>Veriler, meşru amaçlar için gerekli olduğu süre boyunca saklanır. Makul teknik ve idari güvenlik önlemleri uygulanır.</p>
+
+				<h2>7. Haklarınız</h2>
+				<p>Yerel mevzuatın tanıdığı kapsamda veriyle ilgili bilgi talep etme, düzeltme ve silme taleplerinizi iletebilirsiniz.</p>
+				<p>
+					Bu haklar, uygulanabilir mevzuatın izin verdiği sınırlar içinde değerlendirilir; kimlik doğrulama ve suistimal önleme kontrolleri uygulanabilir.
+				</p>
+
+				<h2>8. Çocukların Gizliliği</h2>
+				<p>Site içeriği genel bilgilendirme amaçlıdır; bilerek çocuklardan kişisel veri toplama hedeflenmez.</p>
+
+				<h2>9. Politika Güncellemeleri</h2>
+				<p>Bu politika zaman zaman güncellenebilir. Güncel metin bu sayfada yayımlandığı tarihten itibaren geçerlidir.</p>
+
+				<h2>10. Sorumluluk Sınırı</h2>
+				<p>
+					Kanunen emredici olarak üstlenilmesi gereken durumlar dışında; veri kaybı, yetkisiz erişim, hizmet kesintisi veya üçüncü taraf kaynaklı ihlaller dahil olmak üzere doğrudan veya dolaylı zararlara ilişkin sorumluluk kabul edilmez.
+				</p>
+
+				<h2>11. İletişim</h2>
+				<p>
+					Gizlilikle ilgili sorularınız için
+					<a href="/contact-us">İletişim</a>
+					sayfasından bize ulaşabilirsiniz.
+				</p>
+
+				<p class="legal-note">Not: Bu metin genel bilgilendirme amaçlıdır ve hukuki danışmanlık yerine geçmez.</p>
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<style>
+	.legal h2 {
+		margin: 18px 0 8px;
+		font: 700 22px/1.2 "Exo 2", sans-serif;
+		color: #123b6c;
+	}
+
+	.legal p,
+	.legal li {
+		color: #355b82;
+	}
+
+	.legal-note {
+		margin-top: 16px;
+		padding-top: 12px;
+		border-top: 1px dashed #c7d8ea;
+		font-size: 13px;
+	}
+</style>

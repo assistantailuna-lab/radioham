@@ -1,0 +1,23 @@
+[
+  {
+    "model": "DR-880UV",
+    "title": "KYDERA DR-880UV DR-880UV GPS APRS",
+    "handle": "urun/kydera-dr-880uv-dr-880uv-gps-aprs",
+    "bands": "Dual Band",
+    "frequency": "136-174MHz / 400-480MHz",
+    "power": "10W",
+    "battery": "3000mAh",
+    "channels": "3000",
+    "waterproof": "Standart (IP derecesi belirtilmemi?)",
+    "mode": "Analog",
+    "updatedAt": "2026-04-17",
+    "bluetooth": "Yok",
+    "gps": "Var",
+    "aprs": "Var",
+    "sms": "Yok",
+    "dualPtt": "Duzenlenebilir",
+    "sideKeyProgrammable": "Var",
+    "screenSize": "Veri yok",
+    "typeC": "Yok"
+  }
+]

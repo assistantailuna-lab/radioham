@@ -1,0 +1,70 @@
+﻿---
+interface Props {
+	lang?: "tr" | "en";
+}
+
+const t = {
+	brand: "RadioHam",
+	text: "Amatör telsizciliğe yeni başlayanlar için düzenli, uygulanabilir ve teknik olarak net bir bilgi merkezi.",
+	col1: "Rehber",
+	col2: "Kaynaklar",
+	allSections: "Tüm Bölümler",
+	categoryMap: "Frekanslar",
+	firstSetup: "İlk Kurulum",
+	faq: "Sık Sorulan Sorular",
+	glossary: "Mini Sözlük",
+	references: "Kaynakça",
+	contact: "İletişim",
+	legal: "Lisans ve mevzuat notları",
+	bottom: ["Kullanım Koşulları", "Gizlilik Politikası", "İletişim"],
+	links: {
+		guide: "/rehber",
+		categories: "/frekanslar",
+		firstSetup: "/ilk-kurulum",
+		faq: "/sss",
+		glossary: "/sozluk",
+		references: "/kaynakca",
+		legalNotes: "/kaynakca#lisans-ve-mevzuat-notlari",
+		contact: "/contact-us",
+		terms: "/kullanim-kosullari",
+		privacy: "/gizlilik-politikasi",
+	},
+};
+---
+
+<footer class="site-footer">
+	<div class="container footer-grid">
+		<div>
+			<img class="footer-logo" src="/logo2.png" alt={t.brand} />
+			<p class="footer-brand">{t.brand}</p>
+			<p>{t.text}</p>
+		</div>
+		<div>
+			<h3>{t.col1}</h3>
+			<ul>
+				<li><a href={t.links.guide}>{t.allSections}</a></li>
+				<li><a href={t.links.categories}>{t.categoryMap}</a></li>
+				<li><a href={t.links.firstSetup}>{t.firstSetup}</a></li>
+				<li><a href={t.links.faq}>{t.faq}</a></li>
+			</ul>
+		</div>
+		<div>
+			<h3>{t.col2}</h3>
+			<ul>
+				<li><a href={t.links.glossary}>{t.glossary}</a></li>
+				<li><a href={t.links.references}>{t.references}</a></li>
+				<li><a href={t.links.contact}>{t.contact}</a></li>
+				<li><a href={t.links.legalNotes}>{t.legal}</a></li>
+			</ul>
+		</div>
+	</div>
+	<div class="footer-bottom">
+		<div class="container">
+			<a href={t.links.terms}>{t.bottom[0]}</a>
+			<a href={t.links.privacy}>{t.bottom[1]}</a>
+			<a href={t.links.contact}>{t.bottom[2]}</a>
+			<span>2026 RadioHam. Her hakkı saklıdır.</span>
+		</div>
+	</div>
+</footer>
+

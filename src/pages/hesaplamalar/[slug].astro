@@ -1,0 +1,1191 @@
+﻿---
+import Layout from "../../layouts/Layout.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import "../../styles/site.css";
+import { calculatorBySlug, calculatorCategories, calculators } from "../../data/calculators";
+import { trDisplay } from "../../utils/trDisplay";
+
+export function getStaticPaths() {
+	return calculators.map((item) => ({ params: { slug: item.slug } }));
+}
+
+const slug = Astro.params.slug ?? "";
+const calc = calculatorBySlug.get(slug);
+
+if (!calc) {
+	throw new Error(`Hesaplama bulunamadı: ${slug}`);
+}
+
+const category = calculatorCategories.find((item) => item.key === calc.category);
+---
+
+<Layout lang="tr" title={`${trDisplay(calc.title)} | RadioHam`} description={trDisplay(calc.description)}>
+	<SiteNav lang="tr" current="calculators" />
+
+	<section class="page-hero">
+		<div class="container">
+			<nav class="crumb"><a href="/hesaplamalar">Hesaplamalar</a> / <span>{trDisplay(calc.title)}</span></nav>
+			<h1>{trDisplay(calc.title)}</h1>
+			<p>{trDisplay(calc.description)}</p>
+			{category && <p class="cat">Kategori: {trDisplay(category.title)}</p>}
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<article class="calc-box" data-formula={calc.formula}>
+				<div class="fields">
+					{calc.fields.map((field) => (
+						<label>
+							<span>{trDisplay(field.label)}{field.unit ? ` (${field.unit})` : ""}</span>
+							{field.type === "select" ? (
+								<select id={field.id} data-field={field.id} data-default={field.value}>
+									{field.options?.map((opt) => (
+										<option value={opt.value} selected={String(field.value ?? "") === opt.value}>{trDisplay(opt.label)}</option>
+									))}
+								</select>
+							) : (
+								<input
+									id={field.id}
+									data-field={field.id}
+									data-default={field.value}
+									type={field.type === "date" ? "date" : field.type === "datetime-local" ? "datetime-local" : field.type === "text" ? "text" : "number"}
+									step={field.type === "number" ? field.step ?? "any" : undefined}
+									min={field.type === "number" ? field.min : undefined}
+									value={field.value}
+									placeholder={field.placeholder}
+								/>
+							)}
+						</label>
+					))}
+				</div>
+				<div class="actions">
+					<button type="button" id="runCalc" class="calc-btn">Hesapla</button>
+					<a href="/hesaplamalar" class="back-link">Tüm hesaplamalar</a>
+				</div>
+				<p class="result" id="calcResult">-</p>
+				{calc.note && <p class="note">Not: {trDisplay(calc.note)}</p>}
+			</article>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<script>
+	document.addEventListener("DOMContentLoaded", () => {
+		const box = document.querySelector(".calc-box");
+		if (!(box instanceof HTMLElement)) return;
+		const formula = box.dataset.formula || "";
+
+		const resultEl = document.getElementById("calcResult");
+		const trText = (value) => {
+			const map = [
+				["Akim", "Ak\u0131m"],
+				["akim", "ak\u0131m"],
+				["Aku", "Ak\u00fc"],
+				["aku", "ak\u00fc"],
+				["Alici", "Al\u0131c\u0131"],
+				["Ayni", "Ayn\u0131"],
+				["ayni", "ayn\u0131"],
+				["Arasi", "Aras\u0131"],
+				["Baslangic", "Ba\u015flang\u0131\u00e7"],
+				["Cekisi", "\u00c7eki\u015fi"],
+				["Calisma", "\u00c7al\u0131\u015fma"],
+				["calisma", "\u00e7al\u0131\u015fma"],
+				["Cevre", "\u00c7evre"],
+				["cevre", "\u00e7evre"],
+				["ceyrek", "\u00e7eyrek"],
+				["Cikis", "\u00c7\u0131k\u0131\u015f"],
+				["Donusum", "D\u00f6n\u00fc\u015f\u00fcm"],
+				["Dusumu", "D\u00fc\u015f\u00fcm\u00fc"],
+				["Duzeltme", "D\u00fczeltme"],
+				["Gore", "G\u00f6re"],
+				["gore", "g\u00f6re"],
+				["Gorus", "G\u00f6r\u00fc\u015f"],
+				["Guc", "G\u00fc\u00e7"],
+				["guc", "g\u00fc\u00e7"],
+				["Gunes", "G\u00fcne\u015f"],
+				["gunes", "g\u00fcne\u015f"],
+				["Gunluk", "G\u00fcnl\u00fck"],
+				["gunluk", "g\u00fcnl\u00fck"],
+				["Hesabi", "Hesab\u0131"],
+				["Ikinci", "\u0130kinci"],
+				["Ileri", "\u0130leri"],
+				["Isletme", "\u0130\u015fletme"],
+				["Istasyon", "\u0130stasyon"],
+				["Karsilastirma", "Kar\u015f\u0131la\u015ft\u0131rma"],
+				["karsilastirir", "kar\u015f\u0131la\u015ft\u0131r\u0131r"],
+				["Kazanci", "Kazanc\u0131"],
+				["Kullanim", "Kullan\u0131m"],
+				["kullanim", "kullan\u0131m"],
+				["Konusma", "Konu\u015fma"],
+				["konusma", "konu\u015fma"],
+				["Oranina", "Oran\u0131na"],
+				["oranina", "oran\u0131na"],
+				["Oneri", "\u00d6neri"],
+				["Ozel", "\u00d6zel"],
+				["Role", "R\u00f6le"],
+				["Sarj", "\u015earj"],
+				["sarj", "\u015farj"],
+				["Secili", "Se\u00e7ili"],
+				["Surekli", "S\u00fcrekli"],
+				["surekli", "s\u00fcrekli"],
+				["Sure", "S\u00fcre"],
+				["Suresi", "S\u00fcresi"],
+				["sure", "s\u00fcre"],
+				["suresi", "s\u00fcresi"],
+				["Tuketim", "T\u00fcketim"],
+				["Uretim", "\u00dcretim"],
+				["Yansiyan", "Yans\u0131yan"],
+				["Yaklasik", "Yakla\u015f\u0131k"],
+				["Yonu", "Y\u00f6n\u00fc"],
+				["Yon", "Y\u00f6n"],
+				["Yuksek", "Y\u00fcksek"],
+				["Yukseklik", "Y\u00fckseklik"],
+				["yuksek", "y\u00fcksek"],
+				["yukseklik", "y\u00fckseklik"],
+				["cikisi", "\u00e7\u0131k\u0131\u015f\u0131"],
+				["degerlerinden", "de\u011ferlerinden"],
+				["degerleri", "de\u011ferleri"],
+				["degerler", "de\u011ferler"],
+				["degeri", "de\u011feri"],
+				["gecersiz", "ge\u00e7ersiz"],
+				["girisi", "giri\u015fi"],
+				["kisa", "k\u0131sa"],
+				["olamadi", "olamad\u0131"],
+				["olmali", "olmal\u0131"],
+				["olustu", "olu\u015ftu"],
+				["olc", "\u00f6l\u00e7"],
+				["bakir", "bak\u0131r"],
+				["kaybi", "kayb\u0131"],
+				["hatti", "hatt\u0131"],
+				["acik", "a\u00e7\u0131k"],
+				["gecis", "ge\u00e7i\u015f"],
+				["gorunurluk", "g\u00f6r\u00fcn\u00fcrl\u00fck"],
+				["Turkiye", "T\u00fcrkiye"],
+				["yon", "y\u00f6n"],
+				["ucuncu", "\u00fc\u00e7\u00fcnc\u00fc"],
+				["sagda", "sa\u011fda"],
+				["siddeti", "\u015fiddeti"],
+				["ust", "\u00fcst"],
+				["yukari", "yukar\u0131"],
+				["Tum", "T\u00fcm"],
+				["tum", "t\u00fcm"],
+				["Yuzde", "Y\u00fczde"],
+				["yuzde", "y\u00fczde"],
+				["Hiz", "H\u0131z"],
+				["yarim", "yar\u0131m"],
+				["Yarim", "Yar\u0131m"],
+				["bes", "be\u015f"],
+				["Bes", "Be\u015f"],
+			];
+			let text = String(value ?? "");
+			for (const [from, to] of map) text = text.replaceAll(from, to);
+			text = text
+				.replaceAll("\u00c3\u00bc", "\u00fc")
+				.replaceAll("\u00c3\u009c", "\u00dc")
+				.replaceAll("\u00c3\u00b6", "\u00f6")
+				.replaceAll("\u00c3\u0096", "\u00d6")
+				.replaceAll("\u00c3\u00a7", "\u00e7")
+				.replaceAll("\u00c3\u0087", "\u00c7")
+				.replaceAll("\u00c4\u00b1", "\u0131")
+				.replaceAll("\u00c4\u00b0", "\u0130")
+				.replaceAll("\u00c5\u009f", "\u015f")
+				.replaceAll("\u00c5\u009e", "\u015e")
+				.replaceAll("\u00c4\u009f", "\u011f")
+				.replaceAll("\u00c4\u009e", "\u011e");
+			return text;
+		};
+		const setResult = (text) => {
+			if (resultEl) resultEl.textContent = trText(text);
+		};
+		const getEl = (id) => document.getElementById(id);
+		const n = (id) => {
+			const el = getEl(id);
+			if (!(el instanceof HTMLInputElement || el instanceof HTMLSelectElement)) return NaN;
+			if (el instanceof HTMLInputElement && el.type === "number") {
+				if (el.value.trim() === "") {
+					const d = Number(el.dataset.default ?? "");
+					return Number.isFinite(d) ? d : NaN;
+				}
+				return el.valueAsNumber;
+			}
+			if (String(el.value).trim() === "") {
+				const d = Number(el.dataset.default ?? "");
+				return Number.isFinite(d) ? d : NaN;
+			}
+			const parsed = Number(el.value);
+			return Number.isFinite(parsed) ? parsed : NaN;
+		};
+		const t = (id) => {
+			const el = getEl(id);
+			if (!(el instanceof HTMLInputElement || el instanceof HTMLSelectElement)) return "";
+			const raw = String(el.value || "").trim();
+			if (raw !== "") return raw;
+			return String(el.dataset.default || "").trim();
+		};
+		const setField = (id, value) => {
+			const el = getEl(id);
+			if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement) el.value = String(value);
+		};
+		const fmt = (value, digits = 3) => (Number.isFinite(value) ? value.toFixed(digits) : "-");
+		const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
+		const dbmToW = (dbm) => Math.pow(10, (dbm - 30) / 10);
+		const wToDbm = (w) => 10 * Math.log10(w * 1000);
+		const fsplDb = (freqMHz, distKm) => 32.44 + 20 * Math.log10(freqMHz) + 20 * Math.log10(distKm);
+		const copperR = 0.0175;
+		const earthR = 6371;
+		const standards = [0.5, 1, 1.5, 2, 3, 4, 5, 6, 7.5, 10, 12.5, 15, 20, 25, 30, 40, 50, 63, 80, 100, 125, 160, 200];
+		const cableStandards = [0.75, 1, 1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70];
+		const coaxCatalog = {
+			RG58: { label: "RG-58", loss100At100: 10.5, diamMm: 4.95 },
+			H155: { label: "H155", loss100At100: 9.0, diamMm: 5.4 },
+			LMR240: { label: "LMR-240", loss100At100: 8.6, diamMm: 6.1 },
+			RG213: { label: "RG-213", loss100At100: 6.7, diamMm: 10.3 },
+			LMR400: { label: "LMR-400", loss100At100: 3.9, diamMm: 10.3 },
+			HELIA12: { label: "1/2 in Heliax", loss100At100: 1.8, diamMm: 13.9 },
+		};
+
+		const deg2rad = (d) => (d * Math.PI) / 180;
+		const rad2deg = (r) => (r * 180) / Math.PI;
+		const norm360 = (d) => ((d % 360) + 360) % 360;
+		const dayOfYear = (date) => {
+			const start = Date.UTC(date.getUTCFullYear(), 0, 0);
+			const now = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+			return Math.floor((now - start) / 86400000);
+		};
+		const solarDeclEqTime = (date) => {
+			const doy = dayOfYear(date);
+			const gamma = (2 * Math.PI / 365) * (doy - 1 + (date.getUTCHours() - 12) / 24);
+			const eqTime = 229.18 * (0.000075 + 0.001868 * Math.cos(gamma) - 0.032077 * Math.sin(gamma) - 0.014615 * Math.cos(2 * gamma) - 0.040849 * Math.sin(2 * gamma));
+			const decl = 0.006918 - 0.399912 * Math.cos(gamma) + 0.070257 * Math.sin(gamma) - 0.006758 * Math.cos(2 * gamma) + 0.000907 * Math.sin(2 * gamma) - 0.002697 * Math.cos(3 * gamma) + 0.00148 * Math.sin(3 * gamma);
+			return { eqTime, decl };
+		};
+		const solarElevation = (lat, lon, date) => {
+			const { eqTime, decl } = solarDeclEqTime(date);
+			const minutes = date.getUTCHours() * 60 + date.getUTCMinutes() + date.getUTCSeconds() / 60;
+			const trueSolar = norm360((minutes + eqTime + 4 * lon) * 0.25);
+			const hourAngle = deg2rad(trueSolar < 180 ? trueSolar - 180 : trueSolar - 540);
+			const latR = deg2rad(lat);
+			const cosZenith = Math.sin(latR) * Math.sin(decl) + Math.cos(latR) * Math.cos(decl) * Math.cos(hourAngle);
+			const zenith = Math.acos(clamp(cosZenith, -1, 1));
+			return 90 - rad2deg(zenith);
+		};
+		const sunriseSunsetUTC = (lat, lon, date) => {
+			const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 12, 0, 0));
+			const { eqTime, decl } = solarDeclEqTime(d);
+			const latR = deg2rad(lat);
+			const cosHa = (Math.cos(deg2rad(90.833)) / (Math.cos(latR) * Math.cos(decl))) - Math.tan(latR) * Math.tan(decl);
+			if (cosHa < -1 || cosHa > 1) return null;
+			const ha = rad2deg(Math.acos(cosHa));
+			const noonMin = 720 - 4 * lon - eqTime;
+			const sunriseMin = noonMin - 4 * ha;
+			const sunsetMin = noonMin + 4 * ha;
+			const toHHMM = (m) => {
+				const x = ((m % 1440) + 1440) % 1440;
+				const hh = Math.floor(x / 60);
+				const mm = Math.floor(x % 60);
+				return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+			};
+			return { sunrise: toHHMM(sunriseMin), sunset: toHHMM(sunsetMin), noon: toHHMM(noonMin) };
+		};
+		const estimatePassDuration = (maxElDeg, periodMin) => {
+			const T = periodMin * 60;
+			const mu = 3.986004418e14;
+			const re = earthR * 1000;
+			const a = Math.cbrt(mu * (T / (2 * Math.PI)) ** 2);
+			const h = Math.max(100000, a - re);
+			const q = re / (re + h);
+			const alpha = Math.acos(clamp(q, -1, 1));
+			const eMax = deg2rad(clamp(maxElDeg, 0.5, 89.9));
+			const elev = (psi) => Math.atan2(Math.cos(psi) - q, Math.sin(psi));
+			let lo = 0;
+			let hi = alpha;
+			for (let i = 0; i < 40; i += 1) {
+				const mid = (lo + hi) / 2;
+				if (elev(mid) > eMax) lo = mid;
+				else hi = mid;
+			}
+			const psi0 = (lo + hi) / 2;
+			const omega = 2 * Math.PI / T;
+			const half = Math.sqrt(Math.max(0, alpha * alpha - psi0 * psi0)) / omega;
+			return 2 * half / 60;
+		};
+		const latLonToGrid = (lat, lon) => {
+			if (!(lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180)) return null;
+			const A = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+			const aLon = lon + 180;
+			const aLat = lat + 90;
+			const fLon = Math.floor(aLon / 20);
+			const fLat = Math.floor(aLat / 10);
+			const sLon = Math.floor((aLon % 20) / 2);
+			const sLat = Math.floor(aLat % 10);
+			const ssLon = Math.floor((((aLon % 2) * 60) / 5));
+			const ssLat = Math.floor((((aLat % 1) * 60) / 2.5));
+			return `${A[fLon]}${A[fLat]}${sLon}${sLat}${A[ssLon].toLowerCase()}${A[ssLat].toLowerCase()}`;
+		};
+		const gridToLatLon = (grid) => {
+			const clean = String(grid || "").trim();
+			if (clean.length < 4) return null;
+			const g = clean.toUpperCase();
+			const A = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+			const fLon = A.indexOf(g[0]);
+			const fLat = A.indexOf(g[1]);
+			const sLon = Number(g[2]);
+			const sLat = Number(g[3]);
+			if (fLon < 0 || fLat < 0 || !Number.isFinite(sLon) || !Number.isFinite(sLat)) return null;
+			let lon = fLon * 20 + sLon * 2;
+			let lat = fLat * 10 + sLat;
+			let lonStep = 2;
+			let latStep = 1;
+			if (g.length >= 6) {
+				const ssLon = A.indexOf(g[4]);
+				const ssLat = A.indexOf(g[5]);
+				if (ssLon >= 0 && ssLat >= 0) {
+					lon += ssLon * (2 / 24);
+					lat += ssLat * (1 / 24);
+					lonStep = 2 / 24;
+					latStep = 1 / 24;
+				}
+			}
+			return {
+				lat: lat - 90 + latStep / 2,
+				lon: lon - 180 + lonStep / 2,
+			};
+		};
+
+		const compute = () => {
+			try {
+				switch (formula) {
+					case "swr-reflected": {
+						const swr = n("swr");
+						const fwdW = n("fwdW");
+						if (!(swr >= 1) || !(fwdW > 0)) return setResult("SWR en az 1, ileri guc 0'dan buyuk olmali.");
+						const gamma = (swr - 1) / (swr + 1);
+						const reflectedPct = gamma * gamma * 100;
+						const reflectedW = fwdW * reflectedPct / 100;
+						const rl = -20 * Math.log10(gamma || 1e-9);
+						const mismatchLoss = -10 * Math.log10(1 - gamma * gamma);
+						return setResult(`|Gamma| ${fmt(gamma, 4)} | Yansiyan ${fmt(reflectedW, 2)} W (%${fmt(reflectedPct, 2)}) | Return loss ${fmt(rl, 2)} dB | Mismatch loss ${fmt(mismatchLoss, 2)} dB`);
+					}
+					case "returnloss-swr": {
+						const mode = t("mode");
+						const swr = n("swr");
+						const rl = n("rl");
+						if (mode === "swr-to-rl") {
+							if (!(swr >= 1)) return setResult("SWR en az 1 olmali.");
+							const gamma = (swr - 1) / (swr + 1);
+							const resultRl = -20 * Math.log10(gamma || 1e-9);
+							setField("rl", fmt(resultRl, 2));
+							return setResult(`SWR ${fmt(swr, 3)} icin Return loss: ${fmt(resultRl, 2)} dB`);
+						}
+						if (mode === "rl-to-swr") {
+							if (!(rl > 0)) return setResult("Return loss 0'dan buyuk olmali.");
+							const gamma = Math.pow(10, -rl / 20);
+							const resultSwr = (1 + gamma) / (1 - gamma);
+							setField("swr", fmt(resultSwr, 3));
+							return setResult(`Return loss ${fmt(rl, 2)} dB icin SWR: ${fmt(resultSwr, 3)}`);
+						}
+						return setResult("Donusum modunu secin.");
+					}
+					case "dbi-dbd": {
+						const mode = t("mode");
+						const dbi = n("dbi");
+						const dbd = n("dbd");
+						if (mode === "dbi-to-dbd") {
+							if (!Number.isFinite(dbi)) return setResult("dBi degeri girin.");
+							const out = dbi - 2.15;
+							setField("dbd", fmt(out, 2));
+							return setResult(`${fmt(dbi, 2)} dBi = ${fmt(out, 2)} dBd`);
+						}
+						if (mode === "dbd-to-dbi") {
+							if (!Number.isFinite(dbd)) return setResult("dBd degeri girin.");
+							const out = dbd + 2.15;
+							setField("dbi", fmt(out, 2));
+							return setResult(`${fmt(dbd, 2)} dBd = ${fmt(out, 2)} dBi`);
+						}
+						return setResult("Donusum modunu secin.");
+					}
+					case "fspl": {
+						const f = n("freqMHz");
+						const d = n("distanceKm");
+						if (!(f > 0) || !(d > 0)) return setResult("Frekans ve mesafe 0'dan buyuk olmali.");
+						return setResult(`FSPL: ${fmt(fsplDb(f, d), 2)} dB`);
+					}
+					case "link-budget": {
+						const f = n("freqMHz");
+						const d = n("distanceKm");
+						const txW = n("txW");
+						const txGain = n("txGain");
+						const rxGain = n("rxGain");
+						const lineLoss = n("lineLoss");
+						const extraLoss = n("extraLoss");
+						const rxSens = n("rxSens");
+						if (!(f > 0) || !(d > 0) || !(txW > 0)) return setResult("Frekans, mesafe ve TX gucu gecerli olmali.");
+						const path = fsplDb(f, d);
+						const txDbm = wToDbm(txW);
+						const rxDbm = txDbm + txGain + rxGain - lineLoss - extraLoss - path;
+						const margin = Number.isFinite(rxSens) ? rxDbm - rxSens : NaN;
+						return setResult(`FSPL ${fmt(path, 2)} dB | Rx ${fmt(rxDbm, 2)} dBm (${fmt(dbmToW(rxDbm) * 1000, 4)} mW) | Margin ${fmt(margin, 2)} dB`);
+					}
+					case "fresnel": {
+						const d1 = n("d1Km");
+						const d2 = n("d2Km");
+						const f = n("freqGHz");
+						const zone = n("zone");
+						if (!(d1 > 0) || !(d2 > 0) || !(f > 0) || !(zone >= 1)) return setResult("Tum alanlar pozitif olmali.");
+						const r = 17.32 * Math.sqrt((zone * d1 * d2) / (f * (d1 + d2)));
+						return setResult(`${fmt(zone, 0)}. Fresnel yaricapi: ${fmt(r, 2)} m | %60 aciklik hedefi: ${fmt(r * 0.6, 2)} m`);
+					}
+					case "radio-horizon": {
+						const h1 = n("h1");
+						const h2 = n("h2");
+						const k = n("k");
+						if (!(h1 > 0) || !(h2 > 0) || !(k > 0)) return setResult("Yukseklikler ve K-faktor gecerli olmali.");
+						const d = 3.57 * Math.sqrt(k / 1.33) * (Math.sqrt(h1) + Math.sqrt(h2));
+						return setResult(`Teorik LOS menzili: ${fmt(d, 2)} km`);
+					}
+					case "repeater-coverage": {
+						const hr = n("repeaterH");
+						const hu = n("userH");
+						const factor = n("envFactor");
+						if (!(hr > 0) || !(hu > 0) || !(factor > 0)) return setResult("Tum degerler pozitif olmali.");
+						const los = 3.57 * (Math.sqrt(hr) + Math.sqrt(hu));
+						const est = los * factor;
+						return setResult(`LOS ${fmt(los, 2)} km | Cevre duzeltilmis kapsama ${fmt(est, 2)} km`);
+					}
+					case "dipole-arm": {
+						const f = n("freqMHz");
+						const vf = n("vf");
+						if (!(f > 0) || !(vf > 0)) return setResult("Frekans ve VF pozitif olmali.");
+						const arm = (71.25 / f) * vf;
+						const total = arm * 2;
+						return setResult(`Her kol: ${fmt(arm, 3)} m (${fmt(arm * 100, 1)} cm) | Toplam dipol: ${fmt(total, 3)} m`);
+					}
+					case "wave-fractions": {
+						const f = n("freqMHz");
+						const vf = n("vf");
+						if (!(f > 0) || !(vf > 0)) return setResult("Frekans ve VF pozitif olmali.");
+						const lambda = 300 / f;
+						const q = lambda * 0.25 * vf;
+						const h = lambda * 0.5 * vf;
+						const s = lambda * 0.625 * vf;
+						return setResult(`1/4: ${fmt(q, 3)} m | 1/2: ${fmt(h, 3)} m | 5/8: ${fmt(s, 3)} m`);
+					}
+					case "freq-wavelength": {
+						const mode = t("mode");
+						const vf = n("vf");
+						if (!(vf > 0)) return setResult("Hiz faktoru 0'dan buyuk olmali.");
+						if (mode === "freq-to-wave") {
+							const f = n("freqMHz");
+							if (!(f > 0)) return setResult("Frekans 0'dan buyuk olmali.");
+							const lambda = (300 / f) * vf;
+							setField("wavelengthM", fmt(lambda, 4));
+							return setResult(`Dalga boyu: ${fmt(lambda, 4)} m (VF: ${fmt(vf, 2)})`);
+						}
+						if (mode === "wave-to-freq") {
+							const lambda = n("wavelengthM");
+							if (!(lambda > 0)) return setResult("Dalga boyu 0'dan buyuk olmali.");
+							const f = (300 * vf) / lambda;
+							setField("freqMHz", fmt(f, 4));
+							return setResult(`Frekans: ${fmt(f, 4)} MHz (VF: ${fmt(vf, 2)})`);
+						}
+						return setResult("Donusum modunu secin.");
+					}
+					case "erp-eirp": {
+						const txW = n("txW");
+						const lineLossDb = n("lineLossDb");
+						const antGainDbi = n("antGainDbi");
+						if (!(txW > 0) || !(lineLossDb >= 0) || !Number.isFinite(antGainDbi)) {
+							return setResult("TX gucu pozitif olmali, hat kaybi 0 veya buyuk olmali, anten kazanci gecerli olmali.");
+						}
+						const txDbm = wToDbm(txW);
+						const eirpDbm = txDbm - lineLossDb + antGainDbi;
+						const erpDbm = eirpDbm - 2.15;
+						const eirpW = dbmToW(eirpDbm);
+						const erpW = dbmToW(erpDbm);
+						return setResult(
+							`EIRP: ${fmt(eirpDbm, 2)} dBm (${fmt(eirpW, 3)} W) | ERP: ${fmt(erpDbm, 2)} dBm (${fmt(erpW, 3)} W)`
+						);
+					}
+					case "j-pole": {
+						const f = n("freqMHz");
+						const vf = n("vf");
+						if (!(f > 0) || !(vf > 0)) return setResult("Frekans ve VF pozitif olmali.");
+						const lambda = 300 / f;
+						const longEl = lambda * 0.75 * vf;
+						const shortEl = lambda * 0.25 * vf;
+						const feed = lambda * 0.05 * vf;
+						return setResult(`Uzun eleman: ${fmt(longEl, 3)} m | Kisa eleman: ${fmt(shortEl, 3)} m | Feedpoint tabandan: ${fmt(feed, 3)} m`);
+					}
+					case "ground-plane": {
+						const f = n("freqMHz");
+						const vf = n("vf");
+						const angle = n("radialAngle");
+						if (!(f > 0) || !(vf > 0) || !(angle >= 0)) return setResult("Alanlar gecerli olmali.");
+						const quarter = (75 / f) * vf;
+						const radialSuggested = quarter * 0.95;
+						const impedance = 36 + 14 * clamp(angle, 0, 50) / 50;
+						return setResult(`Dikey eleman: ${fmt(quarter, 3)} m | Onerilen radyal (droop): ${fmt(radialSuggested, 3)} m | Tahmini feed empedansi: ${fmt(impedance, 1)} ohm`);
+					}
+					case "yagi-3el": {
+						const f = n("freqMHz");
+						const vf = n("vf");
+						if (!(f > 0) || !(vf > 0)) return setResult("Frekans ve VF pozitif olmali.");
+						const lambda = 300 / f;
+						const driven = lambda * 0.475 * vf;
+						const reflector = lambda * 0.495 * vf;
+						const director = lambda * 0.455 * vf;
+						const spacing = lambda * 0.2;
+						return setResult(`Reflektor ${fmt(reflector, 3)} m | Surulen ${fmt(driven, 3)} m | Direktor ${fmt(director, 3)} m | Reflektor-surulen arasi ~${fmt(spacing, 3)} m | Surulen-direktor arasi ~${fmt(spacing, 3)} m`);
+					}
+					case "coax-physical": {
+						const f = n("freqMHz");
+						const frac = Number(t("fraction"));
+						const vf = n("vf");
+						if (!(f > 0) || !(frac > 0) || !(vf > 0)) return setResult("Tum alanlar gecerli olmali.");
+						const len = (300 / f) * frac * vf;
+						return setResult(`Fiziksel uzunluk: ${fmt(len, 3)} m (${fmt(len * 100, 1)} cm)`);
+					}
+					case "anten-coax": {
+						const mode = t("mode") || "impact";
+						const txWIn = n("txW");
+						const fIn = n("freqMHz");
+						const lenIn = n("lenM");
+						const pick = t("cablePick");
+						const manualLoss100In = n("manualLoss100");
+						const manualDiamIn = n("manualDiam");
+						const targetLossIn = n("targetLossDb");
+						const minPwrIn = n("minPwrPct");
+
+						const txW = txWIn > 0 ? txWIn : 10;
+						const f = fIn > 0 ? fIn : 433;
+						const lenM = lenIn > 0 ? lenIn : 20;
+						const targetLossDb = targetLossIn > 0 ? targetLossIn : 1.5;
+						const minPwrPct = minPwrIn > 0 && minPwrIn <= 100 ? minPwrIn : 80;
+						const manualLoss100 = manualLoss100In >= 0 ? manualLoss100In : 6.7;
+						const manualDiam = manualDiamIn > 0 ? manualDiamIn : 8;
+
+						const assumed = [];
+						if (!(txWIn > 0)) assumed.push("TX=10W");
+						if (!(fIn > 0)) assumed.push("f=433MHz");
+						if (!(lenIn > 0)) assumed.push("L=20m");
+						if (!(targetLossIn > 0)) assumed.push("hedef kayip=1.5dB");
+						if (!(minPwrIn > 0 && minPwrIn <= 100)) assumed.push("min guc=%80");
+
+						const lossForType = (loss100At100) => loss100At100 * Math.sqrt(f / 100);
+						const evaluate = (label, diamMm, loss100AtFreq, evalLenM = lenM) => {
+							const totalLoss = (evalLenM / 100) * loss100AtFreq;
+							const ratio = Math.pow(10, -totalLoss / 10);
+							const antW = txW * ratio;
+							const antPct = ratio * 100;
+							const maxLenAtTarget = (targetLossDb / loss100AtFreq) * 100;
+							const maxLenAtPower = Math.log10(100 / minPwrPct) * 10 * 100 / loss100AtFreq;
+							const maxLenCombined = Math.min(maxLenAtTarget, maxLenAtPower);
+							return { label, diamMm, totalLoss, antW, antPct, maxLenAtTarget, maxLenAtPower, maxLenCombined, loss100AtFreq };
+						};
+
+						const assumptionText = assumed.length > 0 ? ` | Varsayilanlar: ${assumed.join(", ")}` : "";
+
+						if (pick === "MANUAL") {
+							const loss100 = lossForType(manualLoss100);
+							const out = evaluate("Manuel", manualDiam, loss100);
+							const allCandidates = Object.values(coaxCatalog)
+								.map((item) => evaluate(item.label, item.diamMm, lossForType(item.loss100At100)))
+								.filter((r) => r.totalLoss <= targetLossDb && r.antPct >= minPwrPct)
+								.sort((a, b) => a.diamMm - b.diamMm);
+							const minNeededDiam = allCandidates.length > 0 ? allCandidates[0].diamMm : NaN;
+							if (mode === "maxlen") {
+								return setResult(
+									`Kablo: ${out.label} (${fmt(out.diamMm, 1)} mm) | Hedefe gore maksimum uzunluk: ${fmt(out.maxLenCombined, 1)} m (kayip:${fmt(out.maxLenAtTarget, 1)} m, guc:%${fmt(minPwrPct, 0)} icin ${fmt(out.maxLenAtPower, 1)} m)
+Bu uzunlukta (L=${fmt(lenM, 1)} m) kayip: ${fmt(out.totalLoss, 2)} dB | Anten gucu: ${fmt(out.antW, 2)} W (%${fmt(out.antPct, 1)}) | Gerekli minimum cap (katalog): ${fmt(minNeededDiam, 1)} mm${assumptionText}`
+								);
+							}
+							if (mode === "recommend") {
+								return setResult(
+									`Manuel kablo secili oldugu icin tek tip uzerinden hesaplandi. Kablo: ${out.label} (${fmt(out.diamMm, 1)} mm) | L=${fmt(lenM, 1)} m icin kayip: ${fmt(out.totalLoss, 2)} dB | Anten gucu: ${fmt(out.antW, 2)} W (%${fmt(out.antPct, 1)})
+Hedefe gore max uzunluk: ${fmt(out.maxLenCombined, 1)} m | Kataloga gore gerekli minimum cap: ${fmt(minNeededDiam, 1)} mm${assumptionText}`
+								);
+							}
+							return setResult(
+								`Kablo: ${out.label} (${fmt(out.diamMm, 1)} mm) | L=${fmt(lenM, 1)} m icin kayip: ${fmt(out.totalLoss, 2)} dB | Anten gucu: ${fmt(out.antW, 2)} W (%${fmt(out.antPct, 1)})
+Hedefe gore max uzunluk: ${fmt(out.maxLenCombined, 1)} m | Gerekli minimum cap (katalog): ${fmt(minNeededDiam, 1)} mm${assumptionText}`
+							);
+						}
+
+						const rows = Object.values(coaxCatalog)
+							.map((item) => {
+								const loss100 = lossForType(item.loss100At100);
+								return evaluate(item.label, item.diamMm, loss100);
+							})
+							.sort((a, b) => a.diamMm - b.diamMm);
+
+						if (mode === "maxlen") {
+							if (pick === "AUTO") {
+								const byLen = rows
+									.map((r) => `${r.label}: ${fmt(r.maxLenCombined, 1)} m`)
+									.join(" | ");
+								return setResult(`Hedef max uzunluk karsilastirmasi (%${fmt(minPwrPct, 0)} min guc, ${fmt(targetLossDb, 2)} dB kayip): ${byLen}${assumptionText}`);
+							}
+							const item = coaxCatalog[pick];
+							if (!item) return setResult("Kablo secimi gecersiz.");
+							const out = evaluate(item.label, item.diamMm, lossForType(item.loss100At100));
+							return setResult(
+								`Kablo: ${out.label} (${fmt(out.diamMm, 1)} mm) | Hedefe gore maksimum uzunluk: ${fmt(out.maxLenCombined, 1)} m
+Detay: kayip siniri ${fmt(out.maxLenAtTarget, 1)} m, min guc siniri ${fmt(out.maxLenAtPower, 1)} m | Bu anda L=${fmt(lenM, 1)} m icin kayip ${fmt(out.totalLoss, 2)} dB, antende ${fmt(out.antW, 2)} W (%${fmt(out.antPct, 1)})${assumptionText}`
+							);
+						}
+
+						if (pick !== "AUTO") {
+							const item = coaxCatalog[pick];
+							if (!item) return setResult("Kablo secimi gecersiz.");
+							const loss100 = lossForType(item.loss100At100);
+							const out = evaluate(item.label, item.diamMm, loss100);
+							const okLoss = out.totalLoss <= targetLossDb;
+							const okPwr = out.antPct >= minPwrPct;
+							const minCandidate = rows.find((r) => r.totalLoss <= targetLossDb && r.antPct >= minPwrPct);
+							return setResult(
+								`Kablo: ${out.label} (${fmt(out.diamMm, 1)} mm) | Toplam kayip: ${fmt(out.totalLoss, 2)} dB | Antene ulasan guc: ${fmt(out.antW, 2)} W (%${fmt(out.antPct, 1)})
+Hedef kontrolu -> Kayip: ${okLoss ? "Uygun" : "Sinirin ustu"} | Guc: ${okPwr ? "Uygun" : "Yetersiz"} | Bu kabloda hedefe gore maks uzunluk: ${fmt(out.maxLenCombined, 1)} m | Gerekli minimum cap (katalog): ${fmt(minCandidate?.diamMm, 1)} mm${assumptionText}`
+							);
+						}
+
+						const candidates = rows.filter((r) => r.totalLoss <= targetLossDb && r.antPct >= minPwrPct);
+						const best = candidates.length > 0 ? candidates[0] : rows[rows.length - 1];
+						const preview = rows
+							.slice(0, 4)
+							.map((r) => `${r.label}: ${fmt(r.totalLoss, 2)} dB, ${fmt(r.antW, 1)} W`)
+							.join(" | ");
+						const reason = candidates.length > 0
+							? "Hedefleri saglayan en ince kablo secildi."
+							: "Hedefleri hicbir tip tam saglayamadi; en dusuk kayipli tip secildi.";
+						return setResult(
+							`Onerilen kablo: ${best.label} (~${fmt(best.diamMm, 1)} mm) | Bu uzunlukta kayip: ${fmt(best.totalLoss, 2)} dB | Antene ulasan guc: ${fmt(best.antW, 2)} W (%${fmt(best.antPct, 1)})
+${reason} | Gerekli minimum cap: ~${fmt(best.diamMm, 1)} mm | Hedefe gore bu kabloda maks uzunluk: ${fmt(best.maxLenCombined, 1)} m
+Hizli karsilastirma: ${preview}${assumptionText}`
+						);
+					}
+					case "stub-length": {
+						const f = n("freqMHz");
+						const type = t("fraction");
+						const term = t("termination");
+						const vf = n("vf");
+						if (!(f > 0) || !(vf > 0)) return setResult("Frekans ve VF pozitif olmali.");
+						const frac = type === "half" ? 0.5 : 0.25;
+						const endEffect = term === "open" ? 0.95 : 1;
+						const len = (300 / f) * frac * vf * endEffect;
+						return setResult(`${type === "half" ? "1/2" : "1/4"} dalga ${term === "open" ? "acik" : "kisa"} stub uzunlugu: ${fmt(len, 3)} m`);
+					}
+					case "impedance-ratio": {
+						const zin = n("zin");
+						const zout = n("zout");
+						if (!(zin > 0) || !(zout > 0)) return setResult("Empedanslar pozitif olmali.");
+						const zRatio = zout / zin;
+						const turns = Math.sqrt(zRatio);
+						return setResult(`Empedans orani ${fmt(zRatio, 3)}:1 | Sarim orani (Ns/Np) ${fmt(turns, 3)}:1`);
+					}
+					case "balun-ratio": {
+						const np = n("np");
+						const ns = n("ns");
+						if (!(np > 0) || !(ns > 0)) return setResult("Sarim sayilari pozitif olmali.");
+						const vRatio = ns / np;
+						const zRatio = vRatio * vRatio;
+						return setResult(`Gerilim orani ${fmt(vRatio, 3)}:1 | Empedans orani ${fmt(zRatio, 3)}:1`);
+					}
+					case "pva": {
+						let w = n("w");
+						let v = n("v");
+						let a = n("a");
+						const known = [Number.isFinite(w), Number.isFinite(v), Number.isFinite(a)].filter(Boolean).length;
+						if (known < 2) return setResult("W, V, A degerlerinden en az ikisini girin.");
+						if (!Number.isFinite(w) && v > 0 && a > 0) w = v * a;
+						if (!Number.isFinite(v) && w > 0 && a > 0) v = w / a;
+						if (!Number.isFinite(a) && w > 0 && v > 0) a = w / v;
+						if (!(w > 0) || !(v > 0) || !(a > 0)) return setResult("Degerler fiziksel olarak gecerli olmali.");
+						if (known === 3) {
+							const expectedW = v * a;
+							const errPct = Math.abs((w - expectedW) / expectedW) * 100;
+							if (errPct > 3) return setResult(`Alanlar birbiriyle tutarsiz. V*A = ${fmt(expectedW, 3)} W beklenir.`);
+						}
+						setField("w", fmt(w, 3));
+						setField("v", fmt(v, 3));
+						setField("a", fmt(a, 3));
+						return setResult(`Guc: ${fmt(w, 3)} W | Voltaj: ${fmt(v, 3)} V | Akim: ${fmt(a, 3)} A`);
+					}
+					case "fuse": {
+						const current = n("current");
+						const factor = n("factor");
+						if (!(current > 0) || !(factor >= 1)) return setResult("Akim pozitif, emniyet carpani en az 1 olmali.");
+						const target = current * factor;
+						const suggested = standards.find((s) => s >= target) ?? standards[standards.length - 1];
+						return setResult(`Hedef sigorta: ${fmt(target, 2)} A | Onerilen standart: ${suggested} A`);
+					}
+					case "cable-section": {
+						const voltage = n("voltage");
+						const current = n("current");
+						const length = n("length");
+						const dropPct = n("dropPct");
+						if (!(voltage > 0) || !(current > 0) || !(length > 0) || !(dropPct > 0)) return setResult("Tum alanlar pozitif olmali.");
+						const vDrop = voltage * dropPct / 100;
+						const area = (2 * length * current * copperR) / vDrop;
+						const suggested = cableStandards.find((x) => x >= area) ?? cableStandards[cableStandards.length - 1];
+						return setResult(`Minimum kesit: ${fmt(area, 2)} mm^2 | Onerilen standart: ${suggested} mm^2`);
+					}
+					case "voltage-drop": {
+						const voltage = n("voltage");
+						const current = n("current");
+						const length = n("length");
+						const area = n("area");
+						if (!(voltage > 0) || !(current > 0) || !(length > 0) || !(area > 0)) return setResult("Tum alanlar pozitif olmali.");
+						const drop = (2 * length * current * copperR) / area;
+						const pct = (drop / voltage) * 100;
+						return setResult(`Voltaj dusumu: ${fmt(drop, 3)} V (%${fmt(pct, 2)})`);
+					}
+					case "dc-line-loss": {
+						const voltage = n("voltage");
+						const current = n("current");
+						const length = n("length");
+						const area = n("area");
+						if (!(voltage > 0) || !(current > 0) || !(length > 0) || !(area > 0)) return setResult("Tum alanlar pozitif olmali.");
+						const resistance = (2 * length * copperR) / area;
+						const lossW = current * current * resistance;
+						const inputW = voltage * current;
+						const eff = ((inputW - lossW) / inputW) * 100;
+						return setResult(`Hat direnci: ${fmt(resistance, 4)} ohm | Kayip: ${fmt(lossW, 2)} W | Verim: %${fmt(eff, 2)}`);
+					}
+					case "battery-plan": {
+						const loadW = n("loadW");
+						const hours = n("hours");
+						const voltage = n("voltage");
+						const dod = n("dod");
+						const eff = n("eff");
+						if (!(loadW > 0) || !(hours > 0) || !(voltage > 0) || !(dod > 0) || !(eff > 0)) return setResult("Tum alanlar pozitif olmali.");
+						const requiredWh = loadW * hours;
+						const requiredAh = requiredWh / (voltage * (dod / 100) * (eff / 100));
+						return setResult(`Toplam enerji: ${fmt(requiredWh, 1)} Wh | Gerekli kapasite: ${fmt(requiredAh, 1)} Ah`);
+					}
+					case "charge-time": {
+						const ah = n("ah");
+						const soc = n("soc");
+						const current = n("current");
+						const eff = n("eff");
+						if (!(ah > 0) || !(soc > 0) || !(current > 0) || !(eff > 0)) return setResult("Tum alanlar pozitif olmali.");
+						const neededAh = ah * soc / 100;
+						const cvTailFactor = 1.15;
+						const hours = (neededAh / (current * (eff / 100))) * cvTailFactor;
+						return setResult(`Doldurulacak kapasite: ${fmt(neededAh, 2)} Ah | Tahmini sarj suresi: ${fmt(hours, 2)} saat (CV son asama dahil)`);
+					}
+					case "duty-average": {
+						const voltage = n("voltage");
+						const txA = n("txA");
+						const rxA = n("rxA");
+						const idleA = n("idleA");
+						const txPct = n("txPct");
+						const rxPct = n("rxPct");
+						if (!(voltage > 0) || !(txA >= 0) || !(rxA >= 0) || !(idleA >= 0) || !(txPct >= 0) || !(rxPct >= 0) || txPct + rxPct > 100) {
+							return setResult("Yuzde alanlarinda TX + RX en fazla 100 olmali.");
+						}
+						const idlePct = 100 - txPct - rxPct;
+						const avgA = txA * txPct / 100 + rxA * rxPct / 100 + idleA * idlePct / 100;
+						const avgW = avgA * voltage;
+						return setResult(`Ortalama akim ${fmt(avgA, 3)} A | Ortalama guc ${fmt(avgW, 2)} W`);
+					}
+					case "solar-balance": {
+						const panelW = n("panelW");
+						const sunHours = n("sunHours");
+						const eff = n("eff");
+						const dailyLoadWh = n("dailyLoadWh");
+						const batteryV = n("batteryV");
+						if (!(panelW > 0) || !(sunHours > 0) || !(eff > 0) || !(dailyLoadWh > 0) || !(batteryV > 0)) return setResult("Tum alanlar pozitif olmali.");
+						const prodWh = panelW * sunHours * (eff / 100);
+						const netWh = prodWh - dailyLoadWh;
+						const netAh = netWh / batteryV;
+						return setResult(`Gunluk uretim ${fmt(prodWh, 1)} Wh | Net ${fmt(netWh, 1)} Wh (${fmt(netAh, 2)} Ah @ ${fmt(batteryV, 1)} V)`);
+					}
+					case "efficiency-loss": {
+						const loadW = n("loadW");
+						const eff = n("eff");
+						if (!(loadW > 0) || !(eff > 0 && eff <= 100)) return setResult("Yuk gucu pozitif, verim 0-100 arasinda olmali.");
+						const input = loadW / (eff / 100);
+						const loss = input - loadW;
+						return setResult(`Giris gucu: ${fmt(input, 2)} W | Verim kaybi: ${fmt(loss, 2)} W`);
+					}
+					case "talk-runtime": {
+						const ah = n("ah");
+						const usable = n("usable");
+						const txA = n("txA");
+						const rxA = n("rxA");
+						const talkPct = n("talkPct");
+						if (!(ah > 0) || !(usable > 0) || !(txA >= 0) || !(rxA >= 0) || !(talkPct >= 0 && talkPct <= 100)) return setResult("Tum alanlar gecerli olmali.");
+						const avgA = txA * talkPct / 100 + rxA * (1 - talkPct / 100);
+						if (!(avgA > 0)) return setResult("Ortalama akim 0 olamaz.");
+						const runtime = (ah * usable / 100) / avgA;
+						return setResult(`Ortalama akim ${fmt(avgA, 3)} A | Tahmini runtime ${fmt(runtime, 2)} saat`);
+					}
+					case "ht-range": {
+						const txW = n("txW");
+						const h1 = n("h1");
+						const h2 = n("h2");
+						const env = n("envFactor");
+						if (!(txW > 0) || !(h1 > 0) || !(h2 > 0) || !(env > 0)) return setResult("Tum alanlar pozitif olmali.");
+						const los = 3.57 * (Math.sqrt(h1) + Math.sqrt(h2));
+						const txDbm = wToDbm(txW);
+						const rxSens = -120;
+						const budgetLoss = 35;
+						const maxFspl = txDbm - rxSens - budgetLoss;
+						const powerLimited = Math.pow(10, (maxFspl - 32.44 - 20 * Math.log10(145)) / 20);
+						const estimate = Math.min(los * env, powerLimited);
+						return setResult(`LOS siniri ${fmt(los * env, 2)} km | Guc siniri ${fmt(powerLimited, 2)} km | Tahmini pratik menzil ${fmt(estimate, 2)} km`);
+					}
+					case "mobile-range": {
+						const txW = n("txW");
+						const h1 = n("h1");
+						const h2 = n("h2");
+						const env = n("envFactor");
+						if (!(txW > 0) || !(h1 > 0) || !(h2 > 0) || !(env > 0)) return setResult("Tum alanlar pozitif olmali.");
+						const los = 3.57 * (Math.sqrt(h1) + Math.sqrt(h2));
+						const txDbm = wToDbm(txW);
+						const rxSens = -118;
+						const budgetLoss = 25;
+						const maxFspl = txDbm - rxSens - budgetLoss;
+						const powerLimited = Math.pow(10, (maxFspl - 32.44 - 20 * Math.log10(145)) / 20);
+						const estimate = Math.min(los * env, powerLimited);
+						return setResult(`LOS siniri ${fmt(los * env, 2)} km | Guc siniri ${fmt(powerLimited, 2)} km | Tahmini pratik menzil ${fmt(estimate, 2)} km`);
+					}
+					case "repeater-access": {
+						const f = n("freqMHz");
+						const txW = n("txW");
+						const txGain = n("txGain");
+						const rxGain = n("rxGain");
+						const loss = n("loss");
+						const rxSens = n("rxSens");
+						const margin = n("margin");
+						if (!(f > 0) || !(txW > 0)) return setResult("Frekans ve TX gucu pozitif olmali.");
+						const txDbm = wToDbm(txW);
+						const allowedFspl = txDbm + txGain + rxGain - loss - rxSens - margin;
+						const km = Math.pow(10, (allowedFspl - 32.44 - 20 * Math.log10(f)) / 20);
+						return setResult(`Izin verilen FSPL ${fmt(allowedFspl, 2)} dB | Tahmini erisim mesafesi ${fmt(km, 2)} km`);
+					}
+					case "height-coverage": {
+						const oldH = n("oldH");
+						const newH = n("newH");
+						const otherH = n("otherH");
+						if (!(oldH > 0) || !(newH > 0) || !(otherH > 0)) return setResult("Yukseklikler pozitif olmali.");
+						const oldRange = 3.57 * (Math.sqrt(oldH) + Math.sqrt(otherH));
+						const newRange = 3.57 * (Math.sqrt(newH) + Math.sqrt(otherH));
+						const delta = newRange - oldRange;
+						const pct = (delta / oldRange) * 100;
+						return setResult(`Eski ${fmt(oldRange, 2)} km | Yeni ${fmt(newRange, 2)} km | Artis ${fmt(delta, 2)} km (%${fmt(pct, 1)})`);
+					}
+					case "qrp-vs-high": {
+						const lowW = n("lowW");
+						const highW = n("highW");
+						if (!(lowW > 0) || !(highW > 0)) return setResult("Guc degerleri pozitif olmali.");
+						const db = 10 * Math.log10(highW / lowW);
+						const sDiff = db / 6;
+						const fieldRatio = Math.pow(10, db / 20);
+						return setResult(`dB farki ${fmt(db, 2)} dB | Yaklasik S-unit farki ${fmt(sDiff, 2)} S | Alan siddeti katsayisi x${fmt(fieldRatio, 2)}`);
+					}
+					case "s-unit": {
+						const dbDiff = n("dbDiff");
+						if (!Number.isFinite(dbDiff)) return setResult("dB farki girin.");
+						const s = dbDiff / 6;
+						return setResult(`${fmt(dbDiff, 2)} dB ~= ${fmt(s, 2)} S-unit`);
+					}
+					case "db-effect": {
+						const db = n("db");
+						if (!Number.isFinite(db)) return setResult("dB degeri girin.");
+						const power = Math.pow(10, db / 10);
+						const voltage = Math.pow(10, db / 20);
+						const rangeFactor = voltage;
+						return setResult(`Guc katsayisi x${fmt(power, 3)} | Gerilim/alan katsayisi x${fmt(voltage, 3)} | Serbest uzayda menzil katsayisi yaklasik x${fmt(rangeFactor, 3)}`);
+					}
+					case "channel-spacing": {
+						const start = n("startMHz");
+						const end = n("endMHz");
+						const channels = n("channels");
+						if (!(end > start) || !(channels >= 2)) return setResult("Bitis frekansi baslangictan buyuk ve kanal sayisi en az 2 olmali.");
+						const spacingMHz = (end - start) / (channels - 1);
+						return setResult(`Kanal araligi: ${fmt(spacingMHz * 1000, 3)} kHz (${fmt(spacingMHz, 6)} MHz)`);
+					}
+					case "offset": {
+						const rx = n("rxMHz");
+						const preset = t("preset");
+						const customKHz = n("customKHz");
+						let dir = t("direction");
+						let offsetMHz = 0;
+						if (!(rx > 0)) return setResult("Role RX frekansi pozitif olmali.");
+						if (preset === "vhf-tr") {
+							offsetMHz = 0.6;
+							dir = "minus";
+						} else if (preset === "uhf-tr") {
+							offsetMHz = 7.6;
+							dir = "minus";
+						} else {
+							if (!(customKHz >= 0)) return setResult("Ozel offset (kHz) 0 veya daha buyuk olmali.");
+							offsetMHz = customKHz / 1000;
+						}
+						const tx = dir === "plus" ? rx + offsetMHz : rx - offsetMHz;
+						const sign = dir === "plus" ? "+" : "-";
+						return setResult(
+							`Role RX: ${fmt(rx, 3)} MHz | TX: ${fmt(tx, 3)} MHz | Offset: ${sign}${fmt(offsetMHz, 3)} MHz (${fmt(offsetMHz * 1000, 0)} kHz)
+TR pratik notu: Genelde role cikis frekansi RX olarak yazilir; sizin telsizinizin gonderecegi frekans TX'tir. VHF'de cogunlukla TX = RX - 0.600 MHz, UHF'de TX = RX - 7.600 MHz.`
+						);
+					}
+					case "duplex-split": {
+						const rx = n("rxMHz");
+						const splitKHz = n("splitKHz");
+						const direction = t("direction");
+						if (!(rx > 0) || !(splitKHz >= 0)) return setResult("RX ve split degerleri gecerli olmali.");
+						const delta = splitKHz / 1000;
+						const tx = direction === "plus" ? rx + delta : rx - delta;
+						return setResult(`RX: ${fmt(rx, 3)} MHz | TX: ${fmt(tx, 3)} MHz | Split: ${direction === "plus" ? "+" : "-"}${fmt(delta, 3)} MHz`);
+					}
+					case "ctcss-dcs": {
+						const mode = t("mode").toUpperCase();
+						const code = t("code");
+						const dir = t("direction");
+						if (!code) return setResult("Ton/kod degeri girin.");
+						const tx = `${mode} TX: ${code}`;
+						const rx = dir === "tx-rx" ? `${mode} RX: ${code}` : `${mode} RX: OFF`;
+						return setResult(`${tx} | ${rx} | SQL modu: ${dir === "tx-rx" ? "Tone Squelch" : "Carrier Squelch"}`);
+					}
+					case "aprs-interval": {
+						const speed = n("speed");
+						const profile = t("profile");
+						const mode = t("powerMode");
+						if (!(speed >= 0)) return setResult("Hiz 0 veya daha buyuk olmali.");
+						let base = 180;
+						if (profile === "static") base = 900;
+						if (profile === "portable") base = 300;
+						if (profile === "mobile") base = 120;
+						const speedFactor = speed > 0 ? clamp(60 / speed, 0.35, 2.5) : 3;
+						const modeFactor = mode === "max-saving" ? 1.7 : mode === "tracking" ? 0.65 : 1;
+						const sec = Math.round(clamp(base * speedFactor * modeFactor, 20, 1800));
+						return setResult(`Onerilen beacon araligi: ${sec} sn (${fmt(sec / 60, 1)} dk)`);
+					}
+					case "doppler": {
+						const f = n("freqMHz");
+						const v = n("speedKms") * 1000;
+						if (!(f > 0) || !(v > 0)) return setResult("Frekans ve bagil hiz pozitif olmali.");
+						const c = 299792458;
+						const shift = (f * 1e6) * (v / c);
+						return setResult(`Yaklasma/uzaklasmada tepe Doppler: +/-${fmt(shift, 0)} Hz (yaklasik +/-${fmt(shift / 1000, 2)} kHz)`);
+					}
+					case "grid-converter": {
+						const mode = t("mode");
+						const lat = n("lat");
+						const lon = n("lon");
+						const grid = t("grid");
+						if (mode === "latlon-to-grid") {
+							if (!Number.isFinite(lat) || !Number.isFinite(lon)) return setResult("Lat ve lon girin.");
+							const out = latLonToGrid(lat, lon);
+							if (!out) return setResult("Lat/Lon gecerli aralikta olmali.");
+							setField("grid", out);
+							return setResult(`Grid locator: ${out}`);
+						}
+						if (mode === "grid-to-latlon") {
+							if (!grid) return setResult("Grid degeri girin.");
+							const out = gridToLatLon(grid);
+							if (!out) return setResult("Grid formati gecersiz. Ornek: KN40 veya KN40aa");
+							setField("lat", fmt(out.lat, 5));
+							setField("lon", fmt(out.lon, 5));
+							return setResult(`Merkez koordinat: ${fmt(out.lat, 5)}, ${fmt(out.lon, 5)}`);
+						}
+						return setResult("Donusum modunu secin.");
+					}
+					case "bearing-distance": {
+						const lat1 = n("lat1");
+						const lon1 = n("lon1");
+						const lat2 = n("lat2");
+						const lon2 = n("lon2");
+						if (![lat1, lon1, lat2, lon2].every(Number.isFinite)) return setResult("Tum koordinat alanlari gecerli olmali.");
+						const R = 6371;
+						const phi1 = deg2rad(lat1);
+						const phi2 = deg2rad(lat2);
+						const dPhi = deg2rad(lat2 - lat1);
+						const dLambda = deg2rad(lon2 - lon1);
+						const a = Math.sin(dPhi / 2) ** 2 + Math.cos(phi1) * Math.cos(phi2) * Math.sin(dLambda / 2) ** 2;
+						const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+						const dist = R * c;
+						const y = Math.sin(dLambda) * Math.cos(phi2);
+						const x = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dLambda);
+						const bearing = norm360(rad2deg(Math.atan2(y, x)));
+						return setResult(`Mesafe: ${fmt(dist, 2)} km | Ilk bearing: ${fmt(bearing, 1)} deg`);
+					}
+					case "sat-visibility": {
+						const maxEl = n("maxEl");
+						const period = n("period");
+						if (!(maxEl > 0 && maxEl <= 90) || !(period > 0)) return setResult("Maks elevasyon 0-90, periyot pozitif olmali.");
+						const duration = estimatePassDuration(maxEl, period);
+						return setResult(`Tahmini gorunurluk suresi: ${fmt(duration, 1)} dakika (basit geometri modeli)`);
+					}
+					case "hf-solar-guide": {
+						const sfi = n("sfi");
+						const kp = n("kp");
+						const period = t("period");
+						if (!(sfi > 0) || !(kp >= 0)) return setResult("SFI ve Kp degerlerini kontrol edin.");
+						const bands = [
+							{ name: "80m", f: 3.6 },
+							{ name: "40m", f: 7.1 },
+							{ name: "30m", f: 10.1 },
+							{ name: "20m", f: 14.2 },
+							{ name: "17m", f: 18.1 },
+							{ name: "15m", f: 21.2 },
+							{ name: "12m", f: 24.9 },
+							{ name: "10m", f: 28.5 },
+						];
+						const baseMuf = period === "day" ? 10 + 0.12 * (sfi - 70) : 6 + 0.07 * (sfi - 70);
+						const kpPenalty = clamp(1 - 0.08 * kp, 0.55, 1);
+						const effectiveMuf = Math.max(4, baseMuf * kpPenalty);
+						const open = bands.filter((b) => b.f <= effectiveMuf * (period === "day" ? 0.95 : 0.85)).map((b) => b.name);
+						if (period === "night" && !open.includes("40m")) open.unshift("40m");
+						if (period === "night" && !open.includes("80m")) open.unshift("80m");
+						const note = kp >= 4 ? "Geomanyetik aktivite yuksek, uzun kutup rotalarinda zayiflama olabilir." : "Kp sakin, band davranisi daha stabil olabilir.";
+						return setResult(`Tahmini etkili MUF: ${fmt(effectiveMuf, 1)} MHz | Onerilen bantlar: ${open.join(", ") || "80m, 40m"} | ${note}`);
+					}
+					case "muf-luf": {
+						const fof2 = n("fof2");
+						const noise = n("noise");
+						const pathFactor = n("pathFactor");
+						if (!(fof2 > 0) || !(noise > 0) || !(pathFactor > 0)) return setResult("Tum alanlar pozitif olmali.");
+						const muf = fof2 * pathFactor;
+						const noiseNorm = clamp((noise - 1) / 4, 0, 1);
+						const luf = clamp(Math.max(1.8, muf * (0.15 + 0.30 * noiseNorm)), 1.8, muf * 0.9);
+						const ouf = muf * 0.85;
+						return setResult(`MUF: ${fmt(muf, 2)} MHz | OUF (onerilen ust sinir): ${fmt(ouf, 2)} MHz | LUF: ${fmt(luf, 2)} MHz | Tahmini pencere: ${fmt(luf, 2)} - ${fmt(ouf, 2)} MHz`);
+					}
+					case "greyline": {
+						const lat = n("lat");
+						const lon = n("lon");
+						const raw = t("datetime");
+						if (!Number.isFinite(lat) || !Number.isFinite(lon) || !raw) return setResult("Lat, lon ve tarih gerekli.");
+						const date = new Date(raw.endsWith("Z") ? raw : `${raw}Z`);
+						const elev = solarElevation(lat, lon, date);
+						const isGreyline = elev <= 0 && elev >= -6;
+						return setResult(`Gunes elevasyonu: ${fmt(elev, 2)} deg | Durum: ${isGreyline ? "Greyline penceresinde" : "Greyline disinda"}`);
+					}
+					case "sun-band": {
+						const lat = n("lat");
+						const lon = n("lon");
+						const raw = t("date");
+						if (!Number.isFinite(lat) || !Number.isFinite(lon) || !raw) return setResult("Lat, lon ve tarih gerekli.");
+						const date = new Date(`${raw}T12:00:00Z`);
+						const times = sunriseSunsetUTC(lat, lon, date);
+						if (!times) return setResult("Bu enlemde secili tarihte gunes dogumu/batimi yok (kutup kosullari).");
+						return setResult(`Gun dogumu ${times.sunrise} UTC | Gun batimi ${times.sunset} UTC | Oneri: Dogum/batim penceresi 20m-30m-40m, gun ortasi 15m-17m-20m, gece 40m-60m-80m`);
+					}
+					default:
+						return setResult("Bu hesaplama icin isleyici bulunamadi.");
+				}
+			} catch (err) {
+				setResult("Hesaplama sirasinda bir hata olustu. Degerleri kontrol edin.");
+				console.error(err);
+			}
+		};
+
+		document.getElementById("runCalc")?.addEventListener("click", compute);
+		document.querySelectorAll("[data-field]").forEach((el) => {
+			el.addEventListener("change", compute);
+		});
+		compute();
+	});
+</script>
+
+<style>
+	.crumb {
+		margin-bottom: 8px;
+		font: 600 13px/1.2 "Barlow", sans-serif;
+		color: #355b82;
+	}
+
+	.crumb a {
+		color: #2c6caf;
+		text-decoration: none;
+	}
+
+	.cat {
+		font: 600 13px/1.2 "Barlow", sans-serif;
+		color: #4f6f91;
+	}
+
+	.calc-box {
+		border: 1px solid #d7e2ee;
+		border-radius: 12px;
+		padding: 14px;
+		background: #fff;
+		display: grid;
+		gap: 12px;
+	}
+
+	.fields {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 10px;
+	}
+
+	.fields label {
+		display: grid;
+		gap: 5px;
+		font: 600 13px/1.2 "Barlow", sans-serif;
+		color: #355b82;
+	}
+
+	.fields input,
+	.fields select {
+		width: 100%;
+		border: 1px solid #c8d9ec;
+		border-radius: 9px;
+		padding: 10px;
+		font: 600 14px/1.2 "Barlow", sans-serif;
+	}
+
+	.actions {
+		display: flex;
+		gap: 10px;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+
+	.calc-btn {
+		border: 1px solid #2c6caf;
+		background: #2c6caf;
+		color: #fff;
+		border-radius: 10px;
+		padding: 10px 12px;
+		font: 700 13px/1 "Exo 2", sans-serif;
+		cursor: pointer;
+	}
+
+	.back-link {
+		color: #2c6caf;
+		font: 600 13px/1.1 "Barlow", sans-serif;
+		text-decoration: none;
+	}
+
+	.result {
+		margin: 0;
+		padding: 10px;
+		border-radius: 10px;
+		background: #f5faff;
+		border: 1px dashed #b9d6f3;
+		color: #184b81;
+		font: 600 14px/1.35 "Barlow", sans-serif;
+	}
+
+	.note {
+		margin: 0;
+		font: 500 13px/1.35 "Barlow", sans-serif;
+		color: #4f6f91;
+	}
+
+	@media (max-width: 760px) {
+		.fields {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
+
+

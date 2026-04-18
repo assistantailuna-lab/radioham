@@ -1,0 +1,824 @@
+﻿---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import "../styles/site.css";
+
+const modelModules = import.meta.glob("../data/*-models.json", { eager: true, import: "default" }) as Record<string, any[]>;
+const specModules = import.meta.glob("../data/*-model-specs.json", { eager: true, import: "default" }) as Record<string, any[]>;
+
+const getSlug = (filePath: string, suffix: string) => {
+	const m = filePath.match(new RegExp(`/([^/]+)${suffix.replace(".", "\\.")}$`));
+	return m?.[1] || "";
+};
+
+const prettyBrand = (slug: string) => {
+	const special: Record<string, string> = {
+		wln: "WLN",
+		qyt: "QYT",
+		tyt: "TYT",
+		tid: "Tidradio",
+	};
+	if (special[slug]) return special[slug];
+	return slug
+		.split("-")
+		.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+		.join(" ");
+};
+
+const brands = Object.entries(modelModules)
+	.map(([filePath, rawModels]) => {
+		const slug = getSlug(filePath, "-models.json");
+		const rawSpecs = specModules[`../data/${slug}-model-specs.json`] || [];
+		const specByModel = new Map(rawSpecs.map((item) => [String(item.model || "").toUpperCase(), item]));
+		const models = rawModels
+			.map((item) => ({
+				...item,
+				spec: specByModel.get(String(item.model || "").toUpperCase()),
+			}))
+			.sort((a, b) => String(a.model || "").localeCompare(String(b.model || ""), "tr"));
+
+		return {
+			slug,
+			label: prettyBrand(slug),
+			models,
+			specByModel,
+		};
+	})
+	.filter((brand) => brand.slug && brand.models.length > 0)
+	.sort((a, b) => {
+		const priority = ["baofeng", "radtel", "quansheng"];
+		const ai = priority.indexOf(a.slug);
+		const bi = priority.indexOf(b.slug);
+		if (ai !== -1 && bi !== -1) return ai - bi;
+		if (ai !== -1) return -1;
+		if (bi !== -1) return 1;
+		return a.label.localeCompare(b.label, "tr");
+	});
+
+const present = (value?: string) => (value && String(value).trim().length > 0 ? value : "");
+
+const compareRows = [
+	{ key: "bands", label: "Bant" },
+	{ key: "power", label: "Çıkış Gücü" },
+	{ key: "frequency", label: "Frekans Aralığı" },
+	{ key: "battery", label: "Batarya" },
+	{ key: "channels", label: "Kanal" },
+	{ key: "mode", label: "Mod" },
+	{ key: "waterproof", label: "IP Koruma" },
+	{ key: "bluetooth", label: "Bluetooth" },
+	{ key: "gps", label: "GPS" },
+	{ key: "aprs", label: "APRS" },
+	{ key: "sms", label: "SMS" },
+	{ key: "typeC", label: "Type-C" },
+	{ key: "dualPtt", label: "Çift PTT" },
+	{ key: "sideKeyProgrammable", label: "Tuşa Atanabilir Ek PTT" },
+	{ key: "screenSize", label: "Ekran Boyutu" },
+] as const;
+
+const allModelsFlat = brands.flatMap((brand) =>
+	brand.models.map((item) => ({
+		id: `${brand.slug}::${item.model}`,
+		brandSlug: brand.slug,
+		brandLabel: brand.label,
+		model: item.model,
+		title: item.title,
+		image: item.image,
+		spec: item.spec || {},
+	}))
+);
+
+---
+
+<Layout
+	lang="tr"
+	title="Telsiz Kıyaslama | RadioHam"
+	description="Telsizleri görselleriyle yan yana karşılaştırın: güç, batarya, bant ve kullanım profili."
+>
+	<SiteNav lang="tr" current="comparison" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>Telsiz Kıyaslama</h1>
+			<p>Model karşılaştırması ve tüm markaların görsel kataloğu.</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="outline-section compare-box">
+				<h2>Telsiz Karşılaştırma</h2>
+				<div class="compare-controls">
+					<div class="compare-control">
+						<label for="compareBrand">Marka</label>
+						<select id="compareBrand"></select>
+					</div>
+					<div class="compare-control">
+						<label for="compareModel">Model</label>
+						<select id="compareModel"></select>
+					</div>
+					<div class="compare-actions">
+						<button id="compareAddBtn" type="button">Karşılaştırmaya Ekle</button>
+						<button id="compareClearBtn" type="button" class="ghost">Temizle</button>
+					</div>
+				</div>
+				<div id="compareSelected" class="compare-selected"></div>
+				<label class="only-diff">
+					<input id="onlyDiffRows" type="checkbox" />
+					Sadece farklı özellikleri göster
+				</label>
+				<div class="table-wrap epey-wrap">
+					<table class="compare-table epey-table" id="compareTable">
+						<colgroup id="compareColGroup">
+							<col class="col-feature" />
+						</colgroup>
+						<thead>
+							<tr>
+								<th>Özellik</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr class="empty-row">
+								<td>Karşılaştırma için model seçip "Karşılaştırmaya Ekle" butonuna basın.</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			{
+				brands.map((brand) => {
+					const searchId = `${brand.slug}ModelSearch`;
+					const gridId = `${brand.slug}ModelGrid`;
+					return (
+						<details class="outline-section all-models brand-accordion">
+							<summary class="all-models-head">
+								<h2>{brand.label} Modelleri</h2>
+								<span>{brand.models.length} model</span>
+							</summary>
+							<div class="all-models-content">
+								<input
+									id={searchId}
+									class="model-search"
+									type="search"
+									placeholder={`Model ara (örnek: ${brand.models[0]?.model || "UV-5R"})`}
+									data-model-search="1"
+									data-target-grid={gridId}
+								/>
+								<div id={gridId} class="all-model-grid">
+								{
+									brand.models.map((item) => (
+										<article class="radio-card model-card" data-model={item.model} data-title={item.title}>
+											<img src={item.image} alt={item.model} loading="lazy" />
+											<h3>{item.model}</h3>
+											<p>{item.title}</p>
+											<ul class="model-spec-list">
+												{present(item.spec?.power) && <li><strong>Güç:</strong> {present(item.spec?.power)}</li>}
+												{present(item.spec?.frequency) && <li><strong>Frekans:</strong> {present(item.spec?.frequency)}</li>}
+												{present(item.spec?.battery) && <li><strong>Batarya:</strong> {present(item.spec?.battery)}</li>}
+												{present(item.spec?.channels) && <li><strong>Kanal:</strong> {present(item.spec?.channels)}</li>}
+												{present(item.spec?.waterproof) && <li><strong>Koruma:</strong> {present(item.spec?.waterproof)}</li>}
+												{present(item.spec?.mode) && <li><strong>Mod:</strong> {present(item.spec?.mode)}</li>}
+												{present(item.spec?.bluetooth) && <li><strong>Bluetooth:</strong> {present(item.spec?.bluetooth)}</li>}
+												{present(item.spec?.gps) && <li><strong>GPS:</strong> {present(item.spec?.gps)}</li>}
+												{present(item.spec?.aprs) && <li><strong>APRS:</strong> {present(item.spec?.aprs)}</li>}
+												{present(item.spec?.sms) && <li><strong>SMS:</strong> {present(item.spec?.sms)}</li>}
+												{present(item.spec?.typeC) && <li><strong>Type-C:</strong> {present(item.spec?.typeC)}</li>}
+												{present(item.spec?.dualPtt) && <li><strong>Çift PTT:</strong> {present(item.spec?.dualPtt)}</li>}
+												{present(item.spec?.screenSize) && <li><strong>Ekran:</strong> {present(item.spec?.screenSize)}</li>}
+											</ul>
+											<details class="model-more">
+												<summary>Detaylı Özellikler</summary>
+												<ul>
+													<li><strong>Model:</strong> {item.model}</li>
+													{present(item.spec?.bands) && <li><strong>Bant:</strong> {present(item.spec?.bands)}</li>}
+													{present(item.spec?.mode) && <li><strong>Çalışma Modu:</strong> {present(item.spec?.mode)}</li>}
+													{present(item.spec?.power) && <li><strong>Çıkış Gücü:</strong> {present(item.spec?.power)}</li>}
+													{present(item.spec?.frequency) && <li><strong>Frekans Aralığı:</strong> {present(item.spec?.frequency)}</li>}
+													{present(item.spec?.channels) && <li><strong>Kanal Kapasitesi:</strong> {present(item.spec?.channels)}</li>}
+													{present(item.spec?.battery) && <li><strong>Batarya:</strong> {present(item.spec?.battery)}</li>}
+													{present(item.spec?.waterproof) && <li><strong>Su/Koruma Sınıfı:</strong> {present(item.spec?.waterproof)}</li>}
+													{present(item.spec?.bluetooth) && <li><strong>Bluetooth:</strong> {present(item.spec?.bluetooth)}</li>}
+													{present(item.spec?.gps) && <li><strong>GPS:</strong> {present(item.spec?.gps)}</li>}
+													{present(item.spec?.aprs) && <li><strong>APRS:</strong> {present(item.spec?.aprs)}</li>}
+													{present(item.spec?.sms) && <li><strong>SMS:</strong> {present(item.spec?.sms)}</li>}
+													{present(item.spec?.typeC) && <li><strong>Type-C:</strong> {present(item.spec?.typeC)}</li>}
+													{present(item.spec?.dualPtt) && <li><strong>Çift PTT:</strong> {present(item.spec?.dualPtt)}</li>}
+													{present(item.spec?.sideKeyProgrammable) && <li><strong>Ek PTT Tuş Atama:</strong> {present(item.spec?.sideKeyProgrammable)}</li>}
+													{present(item.spec?.screenSize) && <li><strong>Ekran Boyutu:</strong> {present(item.spec?.screenSize)}</li>}
+												</ul>
+											</details>
+										</article>
+									))
+								}
+								</div>
+							</div>
+						</details>
+					);
+				})
+			}
+		</div>
+	</section>
+
+	<script id="allModelsJson" type="application/json" set:html={JSON.stringify(allModelsFlat)}></script>
+	<script id="compareRowsJson" type="application/json" set:html={JSON.stringify(compareRows)}></script>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<script>
+	document.addEventListener("DOMContentLoaded", () => {
+		const allModelsNode = document.getElementById("allModelsJson");
+		const compareRowsNode = document.getElementById("compareRowsJson");
+		const brandSelect = document.getElementById("compareBrand");
+		const modelSelect = document.getElementById("compareModel");
+		const addBtn = document.getElementById("compareAddBtn");
+		const clearBtn = document.getElementById("compareClearBtn");
+		const selectedBox = document.getElementById("compareSelected");
+		const compareTable = document.getElementById("compareTable");
+		const compareColGroup = document.getElementById("compareColGroup");
+		const onlyDiffRows = document.getElementById("onlyDiffRows");
+
+		let allModels = [];
+		let compareRows = [];
+		try {
+			allModels = allModelsNode ? JSON.parse(allModelsNode.textContent || "[]") : [];
+			compareRows = compareRowsNode ? JSON.parse(compareRowsNode.textContent || "[]") : [];
+		} catch (error) {
+			console.error("Comparison JSON parse error:", error);
+		}
+		const brands = Array.from(new Set(allModels.map((item) => item.brandSlug)));
+		const labelsBySlug = new Map(allModels.map((item) => [item.brandSlug, item.brandLabel]));
+		let selectedIds = [];
+
+		// Manuel genişlik ayarları:
+		// featureColWidth: sol "Özellik" sütunu
+		// modelColWidth: tüm model sütunları için varsayılan genişlik
+		// modelColWidthById: tek tek model bazlı genişlik (id: "marka::model")
+		const manualLayout = {
+			featureColWidth: "150px",
+			modelColWidth: "250px",
+			modelColWidthById: {
+				// Ornek:
+				// "baofeng::UV-5R": "220px",
+				// "radtel::P25": "280px",
+			},
+		};
+
+		const escapeHtml = (v) =>
+			String(v ?? "")
+				.replaceAll("&", "&amp;")
+				.replaceAll("<", "&lt;")
+				.replaceAll(">", "&gt;")
+				.replaceAll('"', "&quot;");
+
+		const norm = (v) => String(v || "").trim().toLowerCase();
+		const maxNumber = (text, rx) => {
+			const matches = Array.from(String(text || "").matchAll(rx))
+				.map((m) => Number(m[1]))
+				.filter((n) => Number.isFinite(n));
+			if (matches.length === 0) return null;
+			return Math.max(...matches);
+		};
+		const scoreValue = (key, value) => {
+			const t = String(value || "");
+			if (key === "power") return maxNumber(t, /(\d+(?:\.\d+)?)\s*W/gi);
+			if (key === "battery") return maxNumber(t, /(\d{3,5})\s*mAh/gi);
+			if (key === "channels") return maxNumber(t, /(\d{1,5})/g);
+			if (key === "waterproof") return maxNumber(t, /IP\s?(\d{2})/gi);
+			if (key === "screenSize") return maxNumber(t, /(\d(?:\.\d{1,2})?)\s*(?:inch|inç|in)/gi);
+			if (key === "dualPtt") {
+				if (/var|yes|true|supported/i.test(t)) return 2;
+				if (/duzenlenebilir|configurable|assignable/i.test(t)) return 1;
+				return 0;
+			}
+			if (["bluetooth", "gps", "aprs", "sms", "typeC", "dualPtt", "sideKeyProgrammable"].includes(key)) {
+				return /var|yes|true|supported/i.test(t) ? 1 : 0;
+			}
+			return null;
+		};
+
+		const fillBrandSelect = () => {
+			if (!(brandSelect instanceof HTMLSelectElement)) return;
+			brandSelect.innerHTML = brands
+				.map((slug) => `<option value="${escapeHtml(slug)}">${escapeHtml(labelsBySlug.get(slug) || slug)}</option>`)
+				.join("");
+		};
+
+		const fillModelSelect = () => {
+			if (!(brandSelect instanceof HTMLSelectElement) || !(modelSelect instanceof HTMLSelectElement)) return;
+			const slug = brandSelect.value;
+			const items = allModels.filter((item) => item.brandSlug === slug);
+			modelSelect.innerHTML = items
+				.map((item) => {
+					const cleanTitle = String(item.title || "").replace(/\s+/g, " ").trim();
+					const shortTitle = cleanTitle.length > 54 ? `${cleanTitle.slice(0, 54)}...` : cleanTitle;
+					const label = item.brandSlug === "radtel" ? item.model : `${item.model} - ${shortTitle}`;
+					return `<option value="${escapeHtml(item.id)}">${escapeHtml(label)}</option>`;
+				})
+				.join("");
+		};
+
+		const getSelectedItems = () => selectedIds.map((id) => allModels.find((item) => item.id === id)).filter(Boolean);
+		const getModelColWidth = (id) => manualLayout.modelColWidthById[id] || manualLayout.modelColWidth;
+
+		const renderSelectedPills = () => {
+			if (!(selectedBox instanceof HTMLElement)) return;
+			const items = getSelectedItems();
+			selectedBox.innerHTML = items
+				.map(
+					(item) =>
+						`<button type="button" class="selected-pill" data-remove-id="${escapeHtml(item.id)}">${escapeHtml(item.brandLabel)} ${escapeHtml(item.model)} <span>x</span></button>`
+				)
+				.join("");
+		};
+
+		const renderTable = () => {
+			if (!(compareTable instanceof HTMLTableElement)) return;
+			const items = getSelectedItems();
+			const thead = compareTable.querySelector("thead");
+			const tbody = compareTable.querySelector("tbody");
+			if (!thead || !tbody) return;
+			if (items.length === 0) {
+				if (compareColGroup instanceof HTMLElement) {
+					compareColGroup.innerHTML = `<col style="width:${escapeHtml(manualLayout.featureColWidth)}" />`;
+				}
+				thead.innerHTML = `<tr><th>Özellik</th></tr>`;
+				tbody.innerHTML = `<tr class="empty-row"><td colspan="1">Karşılaştırma için model seçip "Karşılaştırmaya Ekle" butonuna basın.</td></tr>`;
+				return;
+			}
+
+			if (compareColGroup instanceof HTMLElement) {
+				const modelCols = items
+					.map((item) => `<col style="width:${escapeHtml(getModelColWidth(item.id))}" data-col-id="${escapeHtml(item.id)}" />`)
+					.join("");
+				compareColGroup.innerHTML = `<col style="width:${escapeHtml(manualLayout.featureColWidth)}" />${modelCols}`;
+			}
+
+			const headCols = items
+				.map(
+					(item) =>
+						`<th data-col-id="${escapeHtml(item.id)}"><div class="th-card"><img src="${escapeHtml(item.image)}" alt="${escapeHtml(
+							item.brandLabel + " " + item.model
+						)}" loading="lazy" /><div><div class="th-brand">${escapeHtml(item.brandLabel)}</div><div class="th-model">${escapeHtml(
+							item.model
+						)}</div></div></div></th>`
+				)
+				.join("");
+			thead.innerHTML = `<tr><th>Özellik</th>${headCols}</tr>`;
+
+			const bodyRows = compareRows
+				.map((row) => {
+					const vals = items.map((item) => item.spec?.[row.key] || "-");
+					const scores = vals.map((v) => scoreValue(row.key, v));
+					const bestScore = Math.max(...scores.map((s) => (typeof s === "number" ? s : -Infinity)));
+					const unique = new Set(vals.map((v) => norm(v)));
+					const same = unique.size <= 1;
+					const cells = vals
+						.map((v, i) => {
+							const isBest = typeof scores[i] === "number" && scores[i] === bestScore && Number.isFinite(bestScore);
+							return `<td class="${isBest ? "best-cell" : ""}">${escapeHtml(v)}</td>`;
+						})
+						.join("");
+					return `<tr class="${same ? "same-row" : "diff-row"}" data-same="${same ? "1" : "0"}"><td>${escapeHtml(row.label)}</td>${cells}</tr>`;
+				})
+				.join("");
+			tbody.innerHTML = bodyRows;
+
+			if (onlyDiffRows instanceof HTMLInputElement && onlyDiffRows.checked) {
+				for (const row of Array.from(tbody.querySelectorAll("tr"))) {
+					if (!(row instanceof HTMLTableRowElement)) continue;
+					row.style.display = row.dataset.same === "1" ? "none" : "";
+				}
+			}
+		};
+
+		fillBrandSelect();
+		fillModelSelect();
+		renderSelectedPills();
+		renderTable();
+
+		brandSelect?.addEventListener("change", fillModelSelect);
+		addBtn?.addEventListener("click", () => {
+			if (!(modelSelect instanceof HTMLSelectElement)) return;
+			const id = modelSelect.value;
+			if (!id) return;
+			if (selectedIds.includes(id)) return;
+			if (selectedIds.length >= 4) selectedIds = selectedIds.slice(1);
+			selectedIds.push(id);
+			renderSelectedPills();
+			renderTable();
+		});
+		clearBtn?.addEventListener("click", () => {
+			selectedIds = [];
+			renderSelectedPills();
+			renderTable();
+		});
+		selectedBox?.addEventListener("click", (e) => {
+			const target = e.target;
+			if (!(target instanceof HTMLElement)) return;
+			const btn = target.closest("[data-remove-id]");
+			if (!(btn instanceof HTMLElement)) return;
+			const id = btn.dataset.removeId;
+			if (!id) return;
+			selectedIds = selectedIds.filter((x) => x !== id);
+			renderSelectedPills();
+			renderTable();
+		});
+		onlyDiffRows?.addEventListener("change", () => renderTable());
+
+		const bindSearch = (input, grid) => {
+			if (!(input instanceof HTMLInputElement) || !(grid instanceof HTMLElement)) return;
+			const cards = Array.from(grid.querySelectorAll(".model-card"));
+			const applyFilter = () => {
+				const q = input.value.trim().toLowerCase();
+				for (const card of cards) {
+					if (!(card instanceof HTMLElement)) continue;
+					const model = (card.dataset.model || "").toLowerCase();
+					const title = (card.dataset.title || "").toLowerCase();
+					const visible = q.length === 0 || model.includes(q) || title.includes(q);
+					card.style.display = visible ? "" : "none";
+				}
+			};
+			input.addEventListener("input", applyFilter);
+		};
+
+		const inputs = Array.from(document.querySelectorAll("input[data-model-search='1']"));
+		for (const input of inputs) {
+			if (!(input instanceof HTMLInputElement)) continue;
+			const gridId = input.dataset.targetGrid;
+			if (!gridId) continue;
+			const grid = document.getElementById(gridId);
+			bindSearch(input, grid);
+		}
+	});
+</script>
+
+<style>
+	.radio-grid {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 14px;
+		margin-bottom: 18px;
+	}
+
+	.radio-card {
+		background: #fff;
+		border: 1px solid #d7e2ee;
+		border-radius: 12px;
+		padding: 12px;
+	}
+
+	.radio-card img {
+		width: 100%;
+		aspect-ratio: 4 / 5;
+		object-fit: cover;
+		border-radius: 10px;
+		border: 1px solid #d7e2ee;
+		background: #f3f8ff;
+	}
+
+	.radio-card h3 {
+		margin: 10px 0 6px;
+		font: 700 18px/1.2 "Exo 2", sans-serif;
+		color: #123b6c;
+	}
+
+	.radio-card p {
+		margin: 0;
+		color: #4d617d;
+		font-size: 14px;
+	}
+
+	.compare-box h2 {
+		margin: 0 0 12px;
+		font: 700 24px/1.2 "Exo 2", sans-serif;
+		color: #123b6c;
+	}
+
+	.compare-controls {
+		display: grid;
+		grid-template-columns: minmax(180px, 0.9fr) minmax(300px, 2.1fr) auto;
+		gap: 12px;
+		margin-bottom: 12px;
+		align-items: end;
+	}
+
+	.compare-control {
+		display: grid;
+		gap: 6px;
+	}
+
+	.compare-control label {
+		font: 700 12px/1 "Exo 2", sans-serif;
+		color: #1b4b7e;
+	}
+
+	.compare-control select {
+		border: 1px solid #c8d9ec;
+		border-radius: 10px;
+		padding: 11px 12px;
+		font: 600 14px/1.2 "Barlow", sans-serif;
+	}
+
+	.compare-actions {
+		display: flex;
+		align-items: end;
+		gap: 8px;
+	}
+
+	.compare-actions button {
+		border: 1px solid #2c6caf;
+		background: #2c6caf;
+		color: #fff;
+		border-radius: 10px;
+		padding: 11px 13px;
+		font: 700 13px/1 "Exo 2", sans-serif;
+		cursor: pointer;
+		white-space: nowrap;
+	}
+
+	.compare-actions button.ghost {
+		background: #fff;
+		color: #2c6caf;
+	}
+
+	.compare-selected {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		margin: 8px 0 10px;
+	}
+
+	:global(.selected-pill) {
+		border: 1px solid #c8def4;
+		background: #eef6ff;
+		color: #0f4f93;
+		border-radius: 999px;
+		padding: 6px 10px;
+		font: 700 12px/1 "Exo 2", sans-serif;
+		cursor: pointer;
+	}
+
+	:global(.selected-pill span) {
+		opacity: 0.8;
+	}
+
+	.only-diff {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		font: 600 13px/1.2 "Barlow", sans-serif;
+		color: #334a66;
+		margin-bottom: 12px;
+	}
+
+	.table-wrap {
+		overflow-x: auto;
+	}
+
+	.compare-table {
+		width: max-content;
+		min-width: 0;
+		border-collapse: collapse;
+		table-layout: auto;
+		--cmp-cell-py: 3px;
+		--cmp-cell-px: 8px;
+		--cmp-line-height: 1.15;
+	}
+
+	.compare-table th,
+	.compare-table td {
+		border: 1px solid #d7e2ee;
+		padding: var(--cmp-cell-py) var(--cmp-cell-px);
+		text-align: left;
+		vertical-align: top;
+		word-break: break-word;
+		overflow-wrap: anywhere;
+	}
+
+	.compare-table tbody td {
+		line-height: var(--cmp-line-height);
+	}
+
+	.compare-table th {
+		background: #f2f7fd;
+		color: #0e3f73;
+		font-weight: 700;
+		text-align: center;
+		vertical-align: top;
+	}
+
+	.compare-table td:first-child,
+	.compare-table th:first-child {
+		font-weight: 700;
+		width: auto;
+		min-width: 0;
+		text-align: left;
+	}
+
+	.epey-wrap {
+		border: 1px solid #d7e2ee;
+		border-radius: 12px;
+	}
+
+	.epey-table th {
+		position: sticky;
+		top: 0;
+		z-index: 2;
+	}
+
+	.epey-table th:first-child,
+	.epey-table td:first-child {
+		position: sticky;
+		left: 0;
+		z-index: 1;
+		background: #f7fbff;
+	}
+
+	:global(.epey-table .same-row td) {
+		background: #fff;
+	}
+
+	:global(.epey-table .diff-row td) {
+		background: #fff;
+	}
+
+	:global(.th-card) {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: flex-start;
+		gap: 6px;
+		min-width: 0;
+	}
+
+	:global(.th-card img) {
+		width: 82px;
+		height: 82px;
+		object-fit: contain;
+		border-radius: 10px;
+		border: 1px solid #d7e2ee;
+		background: #fff;
+		padding: 4px;
+	}
+
+	:global(.th-brand) {
+		font: 700 12px/1.2 "Exo 2", sans-serif;
+		color: #4a6480;
+		margin-bottom: 2px;
+		text-align: center;
+	}
+
+	:global(.th-model) {
+		font: 700 16px/1.15 "Exo 2", sans-serif;
+		color: #123b6c;
+		text-align: center;
+	}
+
+	:global(.epey-table .empty-row td) {
+		text-align: center;
+		padding: 16px 12px;
+		color: #4b617d;
+		font: 600 14px/1.3 "Barlow", sans-serif;
+		background: #f8fbff;
+	}
+
+	:global(.epey-table td.best-cell) {
+		font-weight: 800;
+		color: #103f73;
+		background: #edf6ff;
+	}
+
+	:global(.epey-table tbody td:first-child) {
+		font-weight: 800;
+		color: #163f6a;
+		background: #f8fbff;
+	}
+
+	.all-models {
+		margin-top: 18px;
+	}
+
+	.brand-accordion summary {
+		list-style: none;
+		cursor: pointer;
+	}
+
+	.brand-accordion summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.all-models-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		margin-bottom: 0;
+	}
+
+	.all-models-content {
+		margin-top: 12px;
+	}
+
+	.all-models-head h2 {
+		margin: 0;
+		font: 700 24px/1.2 "Exo 2", sans-serif;
+		color: #123b6c;
+	}
+
+	.all-models-head span {
+		font: 700 13px/1 "Exo 2", sans-serif;
+		color: #0e5aa8;
+		background: #e4f2ff;
+		border: 1px solid #c8def4;
+		border-radius: 999px;
+		padding: 6px 10px;
+	}
+
+	.model-search {
+		width: 100%;
+		margin-bottom: 12px;
+		padding: 10px 12px;
+		border-radius: 10px;
+		border: 1px solid #c8d9ec;
+		font: 600 14px/1.2 "Barlow", sans-serif;
+		color: #223a58;
+		background: #fff;
+	}
+
+	.model-search:focus {
+		outline: 2px solid #8ec5ff;
+		outline-offset: 1px;
+	}
+
+	.all-model-grid {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 12px;
+	}
+
+	.model-card p {
+		min-height: 40px;
+	}
+
+	.model-spec-list {
+		margin: 10px 0 0;
+		padding-left: 16px;
+		color: #2f4866;
+		font-size: 13px;
+		display: grid;
+		gap: 4px;
+	}
+
+	.model-more {
+		margin-top: 10px;
+		border-top: 1px dashed #c7d9ec;
+		padding-top: 8px;
+	}
+
+	.model-more summary {
+		cursor: pointer;
+		font: 700 13px/1.2 "Exo 2", sans-serif;
+		color: #0f4f93;
+	}
+
+	.model-more ul {
+		margin: 8px 0 0;
+		padding-left: 16px;
+		display: grid;
+		gap: 4px;
+		font-size: 13px;
+		color: #2f4866;
+	}
+
+	@media (max-width: 1100px) {
+		.compare-controls {
+			grid-template-columns: 1fr;
+		}
+
+		.radio-grid,
+		.all-model-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	@media (max-width: 680px) {
+		.radio-grid,
+		.all-model-grid {
+			grid-template-columns: 1fr;
+		}
+		.compare-table {
+			min-width: 720px;
+		}
+		:global(.th-card img) {
+			width: 72px;
+			height: 72px;
+		}
+		:global(.th-model) {
+			font-size: 15px;
+		}
+	}
+</style>
+
+

@@ -1,0 +1,74 @@
+﻿---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import { getGuideData } from "../data/guide";
+import { getFaqItems } from "../data/reference-content";
+import "../styles/site.css";
+
+const data = getGuideData("tr");
+const rawFaqItems = getFaqItems("tr");
+
+const fixMojibake = (text: string): string => {
+	const replacements: Array<[string, string]> = [
+		["ü", "ü"],
+		["Ãœ", "Ü"],
+		["ö", "ö"],
+		["Ö", "Ö"],
+		["ç", "ç"],
+		["Ç", "Ç"],
+		["ı", "ı"],
+		["İ", "İ"],
+		["ş", "ş"],
+		["Åž", "Ş"],
+		["ğ", "ğ"],
+		["Äž", "Ğ"],
+		["’", "'"],
+		["“", "\""],
+		["”", "\""],
+		["–", "-"],
+		["—", "-"],
+		["â†—", "↗"],
+	];
+
+	return replacements.reduce((current, [bad, good]) => current.split(bad).join(good), text);
+};
+
+const faqItems = rawFaqItems
+	.filter((_, index) => index % 2 === 0)
+	.concat(rawFaqItems.filter((_, index) => index % 2 === 1).reverse())
+	.map((item) => ({
+		...item,
+		question: fixMojibake(item.question),
+		answer: fixMojibake(item.answer),
+	}));
+---
+
+<Layout lang="tr" title={data.faqTitle} description={data.faqDescription}>
+	<SiteNav lang="tr" current="faq" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>{data.faqHeroTitle}</h1>
+			<p>{data.faqHeroText}</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<h2>Sık Sorulan Sorular</h2>
+			<div class="cards">
+				{
+					faqItems.map((item) => (
+						<article class="card">
+							<h3>{item.question}</h3>
+							<p>{item.answer}</p>
+						</article>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>

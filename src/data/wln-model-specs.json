@@ -1,0 +1,23 @@
+[
+  {
+    "model": "TELSIZ-16",
+    "title": "WLN Telsiz 16 KANAL TÜRKÇE MENÜ PMR (ADET SEÇİNİZ)",
+    "handle": "urun/wln-telsiz-16-kanal-turkce-menu-pmr-adet-seciniz",
+    "bands": "PMR446",
+    "frequency": "446.00625-446.19375MHz (PMR446)",
+    "power": "0.5W",
+    "battery": "1500mAh",
+    "channels": "16",
+    "waterproof": "Standart (IP derecesi belirtilmemi?)",
+    "mode": "PMR",
+    "updatedAt": "2026-04-17",
+    "bluetooth": "Yok",
+    "gps": "Yok",
+    "aprs": "Yok",
+    "sms": "Yok",
+    "dualPtt": "Yok",
+    "sideKeyProgrammable": "Yok",
+    "screenSize": "Veri yok",
+    "typeC": "Yok"
+  }
+]

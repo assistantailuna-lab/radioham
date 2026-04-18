@@ -1,0 +1,146 @@
+﻿---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import "../styles/site.css";
+---
+
+<Layout
+	lang="tr"
+	title="Solar Aktivite | RadioHam"
+	description="Amatör telsizcilikte işe yarayan temel solar aktivite verileri ve ne anlama geldikleri."
+>
+	<SiteNav lang="tr" current="solarActivity" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>Solar Aktivite</h1>
+			<p>Telsiz için en faydalı 9 solar veri ve pratik yorum.</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="outline-section">
+				<div class="solar-live-panel">
+					<img src="https://www.hamqsl.com/solar101vhf.php" alt="Canlı solar panel" loading="lazy" />
+				</div>
+			</div>
+
+			<div class="outline-section">
+				<h2>En Faydalı 9 Veri</h2>
+				<div class="solar-grid">
+					<article class="solar-card" role="region" aria-label="SFI bilgi ekranı">
+						<h3>SFI</h3>
+						<p><strong>Ekrandaki ifade:</strong> <code>SFI</code></p>
+						<p><strong>Ne demek:</strong> İyonosferin HF sinyali yansıtma potansiyeli.</p>
+						<p><strong>Hızlı yorum:</strong> 70 altı zayıf, 90-120 orta, 120+ iyi açılım.</p>
+					</article>
+					<article class="solar-card" role="region" aria-label="K Index bilgi ekranı">
+						<h3>K Index</h3>
+						<p><strong>Ekrandaki ifade:</strong> <code>K</code> (K index)</p>
+						<p><strong>Ne demek:</strong> Son 3 saatte manyetik fırtına seviyesi.</p>
+						<p><strong>Hızlı yorum:</strong> 0-2 iyi, 3 idare eder, 4+ bozulma başlar.</p>
+					</article>
+					<article class="solar-card" role="region" aria-label="A Index bilgi ekranı">
+						<h3>A Index</h3>
+						<p><strong>Ekrandaki ifade:</strong> <code>A</code> (A index)</p>
+						<p><strong>Ne demek:</strong> Tüm günün manyetik sakinlik ortalaması.</p>
+						<p><strong>Hızlı yorum:</strong> 0-10 iyi, 10-20 orta, 20+ zor koşullar.</p>
+					</article>
+					<article class="solar-card" role="region" aria-label="X-Ray bilgi ekranı">
+						<h3>X-Ray (XRY)</h3>
+						<p><strong>Ekrandaki ifade:</strong> <code>X-Ray</code></p>
+						<p><strong>Ne demek:</strong> Güneş patlaması şiddeti (A-B-C-M-X sınıfı).</p>
+						<p><strong>Hızlı yorum:</strong> A-B sakin, C orta, M/X kısa süreli HF sönmesi yapabilir.</p>
+					</article>
+					<article class="solar-card" role="region" aria-label="Solar Wind Bz bilgi ekranı">
+						<h3>Solar Wind + Bz</h3>
+						<p><strong>Ekrandaki ifade:</strong> <code>SW</code> + <code>Bz</code></p>
+						<p><strong>Ne demek:</strong> Güneş rüzgarı hızı ve manyetik alan yönü.</p>
+						<p><strong>Hızlı yorum:</strong> Rüzgar yüksek + Bz negatif ise aurora/bozulma riski artar.</p>
+					</article>
+					<article class="solar-card" role="region" aria-label="MUF bilgi ekranı">
+						<h3>MUF</h3>
+						<p><strong>Ekrandaki ifade:</strong> <code>MUF</code> (US Boulder)</p>
+						<p><strong>Ne demek:</strong> Kullanılabilir en yüksek frekans sınırı.</p>
+						<p><strong>Hızlı yorum:</strong> MUF 20 MHz ise 14-18 MHz güvenli, 28 MHz zor olabilir.</p>
+					</article>
+					<article class="solar-card" role="region" aria-label="Aurora bilgi ekranı">
+						<h3>Aurora / Aur Lat</h3>
+						<p><strong>Ekrandaki ifade:</strong> <code>Aurora</code> + <code>Aur Lat</code></p>
+						<p><strong>Ne demek:</strong> Kutup kaynaklı iyonosfer etkisi ve enlem sınırı.</p>
+						<p><strong>Hızlı yorum:</strong> Aurora yüksekse kutup hatları bozulur, VHF'de farklı açılımlar olabilir.</p>
+					</article>
+					<article class="solar-card" role="region" aria-label="EsEU EsNA bilgi ekranı">
+						<h3>EsEU / EsNA</h3>
+						<p><strong>Ekrandaki ifade:</strong> <code>6m EsEU</code>, <code>4m EsEU</code>, <code>2m EsNA</code> benzeri satırlar</p>
+						<p><strong>Ne demek:</strong> Avrupa ve Kuzey Amerika Sporadic-E olasılığı.</p>
+						<p><strong>Hızlı yorum:</strong> "Good/Open" görürsen 6m (bazen 2m) için DX şansı artar.</p>
+					</article>
+					<article class="solar-card" role="region" aria-label="Noise CME bilgi ekranı">
+						<h3>Sig Noise Lvl + CME</h3>
+						<p><strong>Ekrandaki ifade:</strong> <code>Sig Noise Lvl</code> + <code>Solar Flare Prb</code> (CME/flare riski)</p>
+						<p><strong>Ne demek:</strong> Bant gürültü seviyesi ve olası CME etkisi.</p>
+						<p><strong>Hızlı yorum:</strong> Gürültü yüksekse zayıf istasyonlar kaybolur, CME varsa 12-48 saatte bozulum gelebilir.</p>
+					</article>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<style>
+	.solar-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+		gap: 12px;
+	}
+
+	.solar-live-panel {
+		margin-top: 10px;
+		border: 1px solid #d7e2ee;
+		border-radius: 10px;
+		background: #f8fbff;
+		padding: 16px;
+		min-height: 340px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.solar-live-panel img {
+		display: block;
+		width: min(100%, 1040px);
+		height: auto;
+		border: 0;
+		image-rendering: crisp-edges;
+	}
+
+	.solar-card {
+		border: 2px solid #c8d9ea;
+		border-radius: 10px;
+		padding: 14px;
+		background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+		box-shadow: 0 8px 18px rgba(16, 59, 108, 0.08);
+	}
+
+	.solar-card h3 {
+		margin: 0 0 8px;
+		font: 800 18px/1.2 "Exo 2", sans-serif;
+		color: #0f3f72;
+	}
+
+	.solar-card p {
+		margin: 0 0 7px;
+		color: #355b82;
+		font-size: 15px;
+		line-height: 1.45;
+	}
+
+	.solar-card p:last-child {
+		margin-bottom: 0;
+	}
+</style>

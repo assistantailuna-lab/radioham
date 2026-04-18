@@ -1,0 +1,44 @@
+﻿---
+import Layout from "../../layouts/Layout.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import { buildSubtopicArticle } from "../../data/subtopic-content";
+import { listSubtopics } from "../../data/guide";
+import "../../styles/site.css";
+
+export async function getStaticPaths() {
+	return listSubtopics("tr").map((subtopic) => ({
+		params: { slug: subtopic.slug },
+		props: { subtopic },
+	}));
+}
+
+const { subtopic } = Astro.props;
+const article = buildSubtopicArticle("tr", subtopic);
+const answerHeading = subtopic.code === "1.1" ? "Amatör Telsizcilik" : "Açıklama";
+---
+
+<Layout lang="tr" title={`${article.title} | RadioHam`} description={article.plainExplanation}>
+	<SiteNav lang="tr" current="guide" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>{article.title}</h1>
+			<p>Kısa ve net cevap aşağıdadır.</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="outline">
+				<article class="outline-section">
+					<h3>{answerHeading}</h3>
+					<p>{article.plainExplanation}</p>
+				</article>
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+

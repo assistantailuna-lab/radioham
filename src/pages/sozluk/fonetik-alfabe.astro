@@ -1,0 +1,130 @@
+﻿---
+import Layout from "../../layouts/Layout.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import "../../styles/site.css";
+
+const phoneticRows = [
+	{ letter: "A", tr: "Ankara", intl: "Alpha" },
+	{ letter: "B", tr: "Bursa", intl: "Bravo" },
+	{ letter: "C", tr: "Ceyhan", intl: "Charlie" },
+	{ letter: "Ç", tr: "Çankırı", intl: "-" },
+	{ letter: "D", tr: "Denizli", intl: "Delta" },
+	{ letter: "E", tr: "Edirne", intl: "Echo" },
+	{ letter: "F", tr: "Fatsa", intl: "Foxtrot" },
+	{ letter: "G", tr: "Giresun", intl: "Golf" },
+	{ letter: "H", tr: "Hopa", intl: "Hotel" },
+	{ letter: "I", tr: "Isparta", intl: "India" },
+	{ letter: "İ", tr: "İzmir", intl: "-" },
+	{ letter: "J", tr: "Jale", intl: "Juliet" },
+	{ letter: "K", tr: "Kayseri", intl: "Kilo" },
+	{ letter: "L", tr: "Lüleburgaz", intl: "Lima" },
+	{ letter: "M", tr: "Manisa", intl: "Mike" },
+	{ letter: "N", tr: "Nazilli", intl: "November" },
+	{ letter: "O", tr: "Ordu", intl: "Oscar" },
+	{ letter: "Ö", tr: "Ödemiş", intl: "-" },
+	{ letter: "P", tr: "Pazar", intl: "Papa" },
+	{ letter: "Q", tr: "-", intl: "Quebec" },
+	{ letter: "R", tr: "Rize", intl: "Romeo" },
+	{ letter: "S", tr: "Samsun", intl: "Sierra" },
+	{ letter: "Ş", tr: "Şarköy", intl: "-" },
+	{ letter: "T", tr: "Trabzon", intl: "Tango" },
+	{ letter: "U", tr: "Urfa", intl: "Uniform" },
+	{ letter: "Ü", tr: "Ünye", intl: "-" },
+	{ letter: "V", tr: "Van", intl: "Victor" },
+	{ letter: "W", tr: "-", intl: "Whiskey" },
+	{ letter: "X", tr: "-", intl: "X-Ray" },
+	{ letter: "Y", tr: "Yalova", intl: "Yankee" },
+	{ letter: "Z", tr: "Zonguldak", intl: "Zulu" },
+];
+---
+
+<Layout lang="tr" title="Fonetik Alfabe | RadioHam" description="Milli ve uluslararası fonetik alfabe tablosu.">
+	<SiteNav lang="tr" current="glossary" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>Fonetik Alfabe</h1>
+			<p>Ulusal ve uluslararası haberleşmede kullanılan fonetik karşılıklar.</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="outline-section phonetic-section">
+				<div class="back-row">
+					<a href="/sozluk">Sözlüğe Dön</a>
+				</div>
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr>
+								<th>Harf</th>
+								<th>Milli Fonetik</th>
+								<th>Uluslararası Fonetik</th>
+							</tr>
+						</thead>
+						<tbody>
+							{
+								phoneticRows.map((row) => (
+									<tr>
+										<td>{row.letter}</td>
+										<td>{row.tr}</td>
+										<td>{row.intl}</td>
+									</tr>
+								))
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<style>
+	.phonetic-section {
+		margin-top: 22px;
+	}
+
+	.back-row {
+		margin-bottom: 10px;
+	}
+
+	.back-row a {
+		color: #165da8;
+		font: 700 13px/1 "Exo 2", sans-serif;
+		text-decoration: none;
+	}
+
+	.back-row a:hover {
+		text-decoration: underline;
+	}
+
+	.table-wrap {
+		overflow-x: auto;
+	}
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 14px;
+	}
+
+	th,
+	td {
+		border: 1px solid #d7e2ee;
+		padding: 10px 12px;
+		text-align: left;
+		vertical-align: top;
+	}
+
+	th {
+		background: #f2f7fd;
+		color: #0e3f73;
+		font-weight: 700;
+	}
+</style>
+

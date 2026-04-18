@@ -1,0 +1,225 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import "../../styles/site.css";
+---
+
+<Layout lang="tr" title="Genel Frekans Bilgileri | RadioHam" description="Amatör VHF/UHF bandı, simplex ve röle frekans tabloları.">
+	<SiteNav lang="tr" current="categories" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>Genel Frekans Bilgileri</h1>
+			<p>Amatör VHF/UHF band kullanımı, simplex çağrı noktaları ve röle frekansları aşağıda tablo halinde verilmiştir.</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="outline-section">
+				<h3>Amatör VHF Frekans Bandı</h3>
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr>
+								<th>FREKANS BANDI (MHz)</th>
+								<th>KULLANIM DURUMU</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr><td>144.000 - 144.015</td><td>Yer Ay Yer (Earth Moon Earth)</td></tr>
+							<tr><td>144.000 - 144.150</td><td>CW</td></tr>
+							<tr><td>144.150 - 144.500</td><td>CW, SSB</td></tr>
+							<tr><td>144.500 - 144.845</td><td>Bütün Modülasyonlar</td></tr>
+							<tr><td>144.650 - 144.675</td><td>Data Haberleşmesi</td></tr>
+							<tr><td>144.845 - 144.990</td><td>Yalnız Beacon İstasyonları</td></tr>
+							<tr><td>145.000 - 145.175</td><td>Röle Alma (RX)</td></tr>
+							<tr><td>145.250 - 145.575</td><td>Bütün Modülasyonlar, FM Simplex</td></tr>
+							<tr><td>145.600 - 145.775</td><td>Röle Gönderme (TX)</td></tr>
+							<tr><td>145.000 - 146.000</td><td>Uydu Bandı</td></tr>
+						</tbody>
+					</table>
+				</div>
+
+				<h3>VHF Simplex Frekanslar</h3>
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr>
+								<th>SIMPLEX FREKANSLAR</th>
+								<th>KULLANIM DURUMU</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr><td>144.050</td><td>CW Çağrı</td></tr>
+							<tr><td>144.100</td><td>CW, MS Rastgele Çağrı</td></tr>
+							<tr><td>144.125</td><td>CW, MS</td></tr>
+							<tr><td>144.200</td><td>SSB MS Rastgele Çağrı</td></tr>
+							<tr><td>144.300</td><td>SSB Çağrı</td></tr>
+							<tr><td>144.400</td><td>SSB MS Rastgele Çağrı</td></tr>
+							<tr><td>144.500</td><td>SSTV</td></tr>
+							<tr><td>144.600</td><td>RTTY</td></tr>
+							<tr><td>144.640</td><td>RTTY Röle Alma (RX)</td></tr>
+							<tr><td>144.675</td><td>Data Çağrı</td></tr>
+							<tr><td>144.700</td><td>Fax Çağrı</td></tr>
+							<tr><td>145.500</td><td>FM Çağrı</td></tr>
+							<tr><td>145.550</td><td>FM Mobil Çağrı</td></tr>
+							<tr><td>145.975</td><td>RTTY Röle Gönderme (TX)</td></tr>
+						</tbody>
+					</table>
+				</div>
+
+				<h3>Amatör UHF Frekans Bandı</h3>
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr>
+								<th>FREKANS BANDI (MHz)</th>
+								<th>KULLANIM DURUMU</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr><td>430.200 - 430.700</td><td>Bütün Modülasyonlar</td></tr>
+							<tr><td>431.550 - 431.825</td><td>Röle Alma (RX)</td></tr>
+							<tr><td>432.000 - 432.015</td><td>Yer Ay Yer (Earth Moon Earth)</td></tr>
+							<tr><td>432.000 - 432.150</td><td>CW</td></tr>
+							<tr><td>432.150 - 432.500</td><td>CW, SSB</td></tr>
+							<tr><td>432.500 - 432.800</td><td>Bütün Modülasyonlar</td></tr>
+							<tr><td>432.525 - 432.575</td><td>Linear Transponder</td></tr>
+							<tr><td>432.800 - 432.975</td><td>Yalnız Amatör Beacon İstasyonları</td></tr>
+							<tr><td>433.400 - 433.575</td><td>FM, Simplex Bütün Modülasyonlar</td></tr>
+							<tr><td>435.000 - 437.975</td><td>Uydu (SSB,CW,FSK,PSK)</td></tr>
+							<tr><td>439.150 - 439.425</td><td>Röle Gönderme (TX)</td></tr>
+						</tbody>
+					</table>
+				</div>
+
+				<h3>UHF Simplex Frekanslar</h3>
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr>
+								<th>NO</th>
+								<th>SIMPLEX FREKANSLAR</th>
+								<th>KULLANIM DURUMU</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr><td>1</td><td>432.050</td><td>CW Çağrı</td></tr>
+							<tr><td>2</td><td>432.100</td><td>CW, MS Rastgele Çağrı</td></tr>
+							<tr><td>3</td><td>432.200</td><td>CW, MS</td></tr>
+							<tr><td>4</td><td>432.300</td><td>SSB Çağrı</td></tr>
+							<tr><td>5</td><td>432.500</td><td>SSTV</td></tr>
+							<tr><td>6</td><td>432.600</td><td>RTTY Çağrı</td></tr>
+							<tr><td>7</td><td>432.675</td><td>Data Çağrı</td></tr>
+							<tr><td>8</td><td>432.700</td><td>Fax Çağrı</td></tr>
+							<tr><td>SU16</td><td>433.400</td><td></td></tr>
+							<tr><td>SU17</td><td>433.425</td><td></td></tr>
+							<tr><td>SU18</td><td>433.450</td><td>SSTV (FM/AFSK)</td></tr>
+							<tr><td>SU19</td><td>433.475</td><td></td></tr>
+							<tr><td>SU20</td><td>433.500</td><td>Mobil Çağrı</td></tr>
+							<tr><td>SU21</td><td>433.525</td><td></td></tr>
+							<tr><td>SU22</td><td>433.550</td><td></td></tr>
+							<tr><td>SU23</td><td>433.575</td><td></td></tr>
+						</tbody>
+					</table>
+				</div>
+
+				<h3>VHF Röle Frekansları</h3>
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr>
+								<th>NO</th>
+								<th>TX (MHz)</th>
+								<th>RX (MHz)</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr><td>R0</td><td>145.000</td><td>145.600</td></tr>
+							<tr><td>R1</td><td>145.025</td><td>145.625</td></tr>
+							<tr><td>R2</td><td>145.050</td><td>145.650</td></tr>
+							<tr><td>R3</td><td>145.075</td><td>145.675</td></tr>
+							<tr><td>R4</td><td>145.100</td><td>145.700</td></tr>
+							<tr><td>R5</td><td>145.125</td><td>145.725</td></tr>
+							<tr><td>R6</td><td>145.150</td><td>145.750</td></tr>
+							<tr><td>R7</td><td>145.175</td><td>145.775</td></tr>
+						</tbody>
+					</table>
+				</div>
+
+				<h3>UHF Röle Frekansları</h3>
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr>
+								<th>NO</th>
+								<th>RX (MHz)</th>
+								<th>TX (MHz)</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr><td>RU732</td><td>439.150,00</td><td>431.550,00</td></tr>
+							<tr><td>RU733</td><td>439.162,50</td><td>431.562,50</td></tr>
+							<tr><td>RU734</td><td>439.175,00</td><td>431.575,00</td></tr>
+							<tr><td>RU735</td><td>439.187,50</td><td>431.587,50</td></tr>
+							<tr><td>RU736</td><td>439.200,00</td><td>431.600,00</td></tr>
+							<tr><td>RU737</td><td>439.212,50</td><td>431.612,50</td></tr>
+							<tr><td>RU738</td><td>439.225,00</td><td>431.625,00</td></tr>
+							<tr><td>RU739</td><td>439.237,50</td><td>431.637,50</td></tr>
+							<tr><td>RU740</td><td>439.250,00</td><td>431.650,00</td></tr>
+							<tr><td>RU741</td><td>439.262,50</td><td>431.662,50</td></tr>
+							<tr><td>RU742</td><td>439.275,00</td><td>431.675,00</td></tr>
+							<tr><td>RU743</td><td>439.287,50</td><td>431.687,50</td></tr>
+							<tr><td>RU744</td><td>439.300,00</td><td>431.700,00</td></tr>
+							<tr><td>RU745</td><td>439.312,50</td><td>431.712,50</td></tr>
+							<tr><td>RU746</td><td>439.325,00</td><td>431.725,00</td></tr>
+							<tr><td>RU747</td><td>439.337,50</td><td>431.737,50</td></tr>
+							<tr><td>RU748</td><td>439.350,00</td><td>431.750,00</td></tr>
+							<tr><td>RU749</td><td>439.362,50</td><td>431.762,50</td></tr>
+							<tr><td>RU750</td><td>439.375,00</td><td>431.775,00</td></tr>
+							<tr><td>RU751</td><td>439.387,50</td><td>431.787,50</td></tr>
+							<tr><td>RU752</td><td>439.400,00</td><td>431.800,00</td></tr>
+							<tr><td>RU753</td><td>439.412,50</td><td>431.812,50</td></tr>
+							<tr><td>RU754</td><td>439.425,00</td><td>431.825,00</td></tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<style>
+	.table-wrap {
+		overflow-x: auto;
+		margin-bottom: 20px;
+	}
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 14px;
+	}
+
+	th,
+	td {
+		border: 1px solid #d7e2ee;
+		padding: 10px 12px;
+		text-align: left;
+		vertical-align: top;
+	}
+
+	th {
+		background: #f2f7fd;
+		color: #0e3f73;
+		font-weight: 700;
+	}
+
+	h3 {
+		margin-top: 28px;
+	}
+</style>

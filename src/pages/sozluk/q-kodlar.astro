@@ -1,0 +1,266 @@
+﻿---
+import Layout from "../../layouts/Layout.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import "../../styles/site.css";
+
+const popularQCodes = [
+	{ code: "QRA", meaning: "İstasyonunuzun adi veya çağrısı nedir?" },
+	{ code: "QRK", meaning: "Okunabilirligim nasil?" },
+	{ code: "QRL", meaning: "Frekans meşgul mu?" },
+	{ code: "QRM", meaning: "Diğer istasyon paraziti var." },
+	{ code: "QRN", meaning: "Atmosferik gürültü var." },
+	{ code: "QRO", meaning: "Çıkış gücünu artıriyorum / artır." },
+	{ code: "QRP", meaning: "Çıkış gücünu azalt." },
+	{ code: "QRS", meaning: "Daha yavas gonderin." },
+	{ code: "QRT", meaning: "Yayini kesiyorum / kesin." },
+	{ code: "QRV", meaning: "Hazirim." },
+	{ code: "QRX", meaning: "Biraz bekleyin, tekrar cagirin." },
+	{ code: "QRZ", meaning: "Beni kim cagirdi?" },
+	{ code: "QSA", meaning: "Sinyal seviyeniz nedir?" },
+	{ code: "QSB", meaning: "Sinyalde fading var." },
+	{ code: "QSL", meaning: "Mesaji aldim / teyit ederim." },
+	{ code: "QSO", meaning: "İki istasyon arasında görüşme." },
+	{ code: "QSY", meaning: "Frekans değiştirelim." },
+	{ code: "QTH", meaning: "Konumum / istasyon yerim." },
+	{ code: "QTR", meaning: "Kesin saat nedir?" },
+	{ code: "QSX", meaning: "Şu frekansta dinliyorum." },
+];
+
+const allQCodes = [
+	{ code: "QRA", meaning: "İstasyonunuzun adi veya çağrısı nedir?" },
+	{ code: "QRB", meaning: "Istasyonlarimiz arasındaki mesafe yaklasik nedir?" },
+	{ code: "QRC", meaning: "Hangi kurum veya isletmeye ait?" },
+	{ code: "QRD", meaning: "Nereye gidiyorsunuz / nereden geliyorsunuz?" },
+	{ code: "QRE", meaning: "Tahmini varis saatiniz nedir?" },
+	{ code: "QRF", meaning: "Bulundugunuz noktaya donecek misiniz?" },
+	{ code: "QRG", meaning: "Benim kesin frekansim nedir?" },
+	{ code: "QRH", meaning: "Frekansim degisiyor mu?" },
+	{ code: "QRI", meaning: "Ton kalitem nasil?" },
+	{ code: "QRJ", meaning: "Birim zamanda kac telefon/radyotelefon görüşmesi?" },
+	{ code: "QRK", meaning: "Okunabilirlik nasil?" },
+	{ code: "QRL", meaning: "Frekans meşgul mu?" },
+	{ code: "QRM", meaning: "Diğer istasyonlardan parazit var." },
+	{ code: "QRN", meaning: "Atmosferik gürültü var." },
+	{ code: "QRO", meaning: "Gucu artır." },
+	{ code: "QRP", meaning: "Gucu azalt." },
+	{ code: "QRQ", meaning: "Daha hizli gonderin." },
+	{ code: "QRR", meaning: "Otomatik calisma icin hazir misiniz?" },
+	{ code: "QRS", meaning: "Daha yavas gonderin." },
+	{ code: "QRT", meaning: "Yayini kes / kapat." },
+	{ code: "QRU", meaning: "Benim icin mesaj var mi?" },
+	{ code: "QRV", meaning: "Hazirim." },
+	{ code: "QRW", meaning: "X istasyonuna cagrida oldugumu bildirir misiniz?" },
+	{ code: "QRX", meaning: "Ne zaman tekrar cagirmaliyim?" },
+	{ code: "QRY", meaning: "Siram nedir?" },
+	{ code: "QRZ", meaning: "Beni kim cagiriyor?" },
+	{ code: "QSA", meaning: "Sinyal gücüm kac?" },
+	{ code: "QSB", meaning: "Sinyal gücü dalgalaniyor (fading)." },
+	{ code: "QSC", meaning: "Yuk geminizin numarasi nedir?" },
+	{ code: "QSD", meaning: "Anahtarlamam (keying) hatali mi?" },
+	{ code: "QSE", meaning: "Can kurtarma aracinin tahmini suruklenmesi nedir?" },
+	{ code: "QSF", meaning: "Kurtarma operasyonu tamamlandi mi?" },
+	{ code: "QSG", meaning: "Ayni anda kac mesaj gonderebilirim?" },
+	{ code: "QSH", meaning: "DF ile yon bulmaya geciyor musunuz?" },
+	{ code: "QSI", meaning: "Araya girip yayin kesemiyorum." },
+	{ code: "QSJ", meaning: "Ucret/koleksiyon bedeli nedir?" },
+	{ code: "QSK", meaning: "Yayin sirasinda araya girebilir misiniz?" },
+	{ code: "QSL", meaning: "Mesaji aldim, teyit." },
+	{ code: "QSM", meaning: "Son mesaji tekrar gonderin." },
+	{ code: "QSN", meaning: "Beni ... frekansta duydunuz mu?" },
+	{ code: "QSO", meaning: "Su istasyonla dogrudan veya relay gorusebilir misiniz?" },
+	{ code: "QSP", meaning: "Mesaji ... istasyonuna aktarir misiniz?" },
+	{ code: "QSQ", meaning: "Gemide doktor var mi?" },
+	{ code: "QSR", meaning: "Cagri frekansinda tekrarlayin." },
+	{ code: "QSS", meaning: "Hangi calisma frekansini kullanacaksiniz?" },
+	{ code: "QSU", meaning: "Bu frekansta gonderelim mi/cevaplayalim mi?" },
+	{ code: "QSV", meaning: "V serisini gonderebilir misiniz?" },
+	{ code: "QSW", meaning: "Bu frekansta iletim yapar misiniz?" },
+	{ code: "QSX", meaning: "... frekansta dinleyin / dinliyorum." },
+	{ code: "QSY", meaning: "Baska frekansa gecin / geciyorum." },
+	{ code: "QSZ", meaning: "Her kelimeyi birden fazla kez gonderin." },
+	{ code: "QTA", meaning: "... numarali telgrafi iptal edin." },
+	{ code: "QTB", meaning: "Kelime sayimimla mutabik misiniz?" },
+	{ code: "QTC", meaning: "Bende sizin icin kac mesaj var?" },
+	{ code: "QTD", meaning: "Kurtarma birimi ne topladi?" },
+	{ code: "QTE", meaning: "Benden size gercek kerteriz nedir?" },
+	{ code: "QTF", meaning: "Kerterizlerle konumumu verebilir misiniz?" },
+	{ code: "QTG", meaning: "Cagri isaretinizi gonderin (yon bulma icin)." },
+	{ code: "QTH", meaning: "Konumunuz/istasyon yeriniz nedir?" },
+	{ code: "QTI", meaning: "Gercek rotam nedir?" },
+	{ code: "QTJ", meaning: "Suratim (hizim) nedir?" },
+	{ code: "QTK", meaning: "Ucagin yer hizini verin." },
+	{ code: "QTL", meaning: "Gercek bas acim nedir?" },
+	{ code: "QTM", meaning: "Manyetik bas acim nedir?" },
+	{ code: "QTN", meaning: "Kalkis saati nedir?" },
+	{ code: "QTO", meaning: "Liman/doktan ayriliyor musunuz?" },
+	{ code: "QTP", meaning: "Limana/doka giriyor musunuz?" },
+	{ code: "QTQ", meaning: "Uluslararasi isaret koduyla haberlesebilir miyiz?" },
+	{ code: "QTR", meaning: "Kesin saat nedir?" },
+	{ code: "QTS", meaning: "Cagri isaretinizi ayar/olcum icin gonderin." },
+	{ code: "QTT", meaning: "Tanitim baska bir iletimin ustune bindi mi?" },
+	{ code: "QTU", meaning: "İstasyonunuzun calisma saatleri nedir?" },
+	{ code: "QTV", meaning: "Bu frekansta nobette kalin." },
+	{ code: "QTW", meaning: "Kurtarilanlarin durumu nedir?" },
+	{ code: "QTX", meaning: "Istasyonu ikinci emre kadar acik tutun." },
+	{ code: "QTY", meaning: "Arama bolgesine gidiyor musunuz? ETA?" },
+	{ code: "QTZ", meaning: "Aramaya devam ediyor musunuz?" },
+	{ code: "QUA", meaning: "... hakkinda haber var mi?" },
+	{ code: "QUB", meaning: "Bulundugunuz yerde hava durumu/ruzgar bulut bilgisi?" },
+	{ code: "QUC", meaning: "Son aldiginiz mesaj numarasi nedir?" },
+	{ code: "QUD", meaning: "Acil (urgency) sinyali alindi mi?" },
+	{ code: "QUE", meaning: "... dilinde telefonla haberlesebilir miyiz?" },
+	{ code: "QUF", meaning: "Tehlike (distress) sinyali alindi mi?" },
+	{ code: "QUG", meaning: "Mecburi inis yapiyor musunuz?" },
+	{ code: "QUH", meaning: "Deniz seviyesi basinci nedir?" },
+	{ code: "QUI", meaning: "Seyir isiklariniz calisiyor mu?" },
+	{ code: "QUJ", meaning: "Bana gelmek icin gercek rota nedir?" },
+	{ code: "QUK", meaning: "Bulundugunuz yerde deniz durumu nasildir?" },
+	{ code: "QUL", meaning: "Bulundugunuz yerde dalga/swell durumu?" },
+	{ code: "QUM", meaning: "Normal calismaya geri donelim mi?" },
+	{ code: "QUN", meaning: "Yakin gemiler konum/rota/hiz bilgilerini verir mi?" },
+	{ code: "QUO", meaning: "Ucak/gemi/kurtarma araci aramasi yapilmali mi?" },
+	{ code: "QUP", meaning: "Konumunuzu isik/duman/isaret fisegi ile belirtin." },
+	{ code: "QUQ", meaning: "Bulut ustune projektor tutup yonlendirme yapin." },
+	{ code: "QUR", meaning: "Hayatta kalanlarin durumunu/ulasilma bilgisini bildirin." },
+	{ code: "QUS", meaning: "Kazazede/enkaz gordunuz mu?" },
+	{ code: "QUT", meaning: "Olay yeri isaretlendi mi?" },
+	{ code: "QUU", meaning: "Ana gemi/ucagi benim konumuma yonlendirin." },
+	{ code: "QUW", meaning: "Belirlenen arama bolgesinde misiniz?" },
+	{ code: "QUX", meaning: "Seyir veya firtina uyari mesaji var mi?" },
+	{ code: "QUY", meaning: "Kurtarma aracinin konumu isaretlendi mi?" },
+	{ code: "QUZ", meaning: "Kisitli calismayi sonlandirip normale donun." },
+];
+
+const popularCodeSet = new Set(popularQCodes.map((item) => item.code));
+const remainingQCodes = allQCodes.filter((item) => !popularCodeSet.has(item.code));
+---
+
+<Layout lang="tr" title="Q Kodlar | RadioHam" description="En çok kullanılanlar başta olmak üzere Q kodlar ve anlamları.">
+	<SiteNav lang="tr" current="glossary" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>Q Kodlar</h1>
+			<p>En çok kullanılan Q kodlar başta olacak şekilde tüm listeyi inceleyebilirsin.</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="outline-section q-section">
+				<div class="back-row">
+					<a href="/sozluk">Sözlüğe Dön</a>
+				</div>
+
+				<h2>En Çok Kullanılan Q Kodlar</h2>
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr>
+								<th>Kod</th>
+								<th>Anlamı</th>
+							</tr>
+						</thead>
+						<tbody>
+							{
+								popularQCodes.map((row) => (
+									<tr>
+										<td>{row.code}</td>
+										<td>{row.meaning}</td>
+									</tr>
+								))
+							}
+						</tbody>
+					</table>
+				</div>
+
+				<h2 class="rest-title">Q Kodların Tam Listesi</h2>
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr>
+								<th>Kod</th>
+								<th>Anlamı</th>
+							</tr>
+						</thead>
+						<tbody>
+							{
+								remainingQCodes.map((row) => (
+									<tr>
+										<td>{row.code}</td>
+										<td>{row.meaning}</td>
+									</tr>
+								))
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<style>
+	.q-section {
+		margin-top: 22px;
+	}
+
+	.back-row {
+		margin-bottom: 10px;
+	}
+
+	.back-row a {
+		color: #165da8;
+		font: 700 13px/1 "Exo 2", sans-serif;
+		text-decoration: none;
+	}
+
+	.back-row a:hover {
+		text-decoration: underline;
+	}
+
+	h2 {
+		margin: 8px 0 10px;
+		font: 700 24px/1.2 "Exo 2", sans-serif;
+		color: #123b6c;
+	}
+
+	.rest-title {
+		margin-top: 18px;
+	}
+
+	.table-wrap {
+		overflow-x: auto;
+	}
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 14px;
+	}
+
+	th,
+	td {
+		border: 1px solid #d7e2ee;
+		padding: 10px 12px;
+		text-align: left;
+		vertical-align: top;
+	}
+
+	th {
+		background: #f2f7fd;
+		color: #0e3f73;
+		font-weight: 700;
+	}
+
+	td:first-child {
+		font-weight: 700;
+		color: #184b81;
+		white-space: nowrap;
+	}
+</style>
+
+

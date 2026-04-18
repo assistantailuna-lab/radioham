@@ -1,0 +1,313 @@
+﻿---
+import Layout from "../../layouts/Layout.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import "../../styles/site.css";
+
+const callSignSamples = [
+	{
+		call: "TA1ABC",
+		type: "Bireysel amatör",
+		breakdown: "TA + 1 + ABC",
+		detail: "TA: Türkiye ön eki, 1: çağrı bölgesi, ABC: operatöre tahsis edilen harf grubu.",
+	},
+	{
+		call: "TB2XYZ",
+		type: "Bireysel amatör",
+		breakdown: "TB + 2 + XYZ",
+		detail: "Ön ek (TA/TB/TC) sınıf ve tahsis politikasına göre değişebilir; bölge numarası 2. bölgeyi gösterir.",
+	},
+	{
+		call: "TC6AA",
+		type: "Bireysel veya özel tahsis",
+		breakdown: "TC + 6 + AA",
+		detail: "Son ek 2 veya 3 harf olabilir. Kısa son ekler genelde özel/erken tahsislerde görülebilir.",
+	},
+	{
+		call: "YM3KTR",
+		type: "Kulüp / röle / özel etkinlik",
+		breakdown: "YM + 3 + KTR",
+		detail: "YM ön eki Türkiye’de kulüp, röle veya özel etkinlik çağrılarında sık görülür.",
+	},
+	{
+		call: "TC100YIL",
+		type: "Özel etkinlik çağrı işareti",
+		breakdown: "TC + özel sayı/yıl + kelime",
+		detail: "Yarışma, yıldönümü ve anma etkinlikleri için dönemsel olarak özel formatlar tahsis edilebilir.",
+	},
+];
+
+const regions = [
+	{
+		no: "0",
+		note: "TA0, Türk adaları için kullanılan çağrı bölgesidir (All Turkish Islands).",
+		provinces:
+			"Adalar: Gökçeada, Bozcaada, Marmara Adası/Avşa, İmralı, Cunda (Alibey), Prens Adaları (Büyükada, Heybeliada, Burgazada, Kınalıada) vb.",
+	},
+	{
+		no: "1",
+		note: "Avrupa yakası ağırlıklı bölge.",
+		provinces: "Edirne, Kırklareli, Tekirdağ, İstanbul (Avrupa yakası)",
+	},
+	{
+		no: "2",
+		note: "Kuzeybatı Anadolu ağırlıklı bölge.",
+		provinces: "İstanbul (Anadolu yakası), Kocaeli, Sakarya, Bilecik, Bolu, Ankara, Eskişehir, Zonguldak, Kırıkkale",
+	},
+	{
+		no: "3",
+		note: "Batı Anadolu ağırlıklı bölge.",
+		provinces: "İzmir, Manisa, Balıkesir, Bursa, Çanakkale",
+	},
+	{
+		no: "4",
+		note: "Güneybatı Anadolu ağırlıklı bölge.",
+		provinces: "Aydın, Uşak, Kütahya, Afyonkarahisar, Isparta, Burdur, Antalya, Muğla, Denizli",
+	},
+	{
+		no: "5",
+		note: "İç-güney Anadolu ağırlıklı bölge.",
+		provinces: "Konya, Niğde, Mersin, Karaman, Adana, Hatay, Nevşehir, Aksaray",
+	},
+	{
+		no: "6",
+		note: "İç-kuzey Anadolu ağırlıklı bölge.",
+		provinces: "Kastamonu, Çankırı, Kırşehir, Yozgat, Tokat, Amasya, Çorum, Samsun, Sinop",
+	},
+	{
+		no: "7",
+		note: "Kuzeydoğu geçiş bölgesi.",
+		provinces: "Kayseri, Sivas, Ordu, Giresun, Trabzon, Gümüşhane, Erzincan, Tunceli, Bayburt",
+	},
+	{
+		no: "8",
+		note: "Güneydoğu Anadolu ağırlıklı bölge.",
+		provinces: "Gaziantep, Kahramanmaraş, Malatya, Elazığ, Bingöl, Diyarbakır, Mardin, Şanlıurfa, Adıyaman",
+	},
+	{
+		no: "9",
+		note: "Doğu Anadolu ağırlıklı bölge.",
+		provinces: "Erzurum, Rize, Artvin, Kars, Ağrı, Muş, Van, Bitlis, Siirt, Hakkâri, Batman, Şırnak, (bazı listelerde Ardahan)",
+	},
+];
+---
+
+<Layout lang="tr" title="Çağrı İşareti Örnekleri | RadioHam" description="Türkiye'de kullanılan amatör telsiz çağrı işaretlerinin yapısı, örnekleri ve kullanım notları.">
+	<SiteNav lang="tr" current="glossary" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>Çağrı İşareti Örnekleri</h1>
+			<p>Türkiye’de amatör telsiz çağrı işaretleri nasıl okunur, kaç parçadan oluşur ve neyi ifade eder?</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="outline-section callsign-section">
+				<div class="back-row">
+					<a href="/sozluk">Sözlüğe Dön</a>
+				</div>
+
+				<h2>Temel Yapı</h2>
+				<p class="lead">
+					Türkiye’de tipik bir amatör çağrı işareti çoğunlukla <strong>3 parçadan</strong> oluşur:
+					<strong>ön ek + bölge numarası + son ek harfler</strong>.
+				</p>
+				<ul class="bullet-list">
+					<li><strong>Ön ek:</strong> Genellikle <code>TA</code>, <code>TB</code>, <code>TC</code>, kulüp/özel çağrılarda sıkça <code>YM</code>.</li>
+					<li><strong>Bölge numarası:</strong> Çağrı bölgesini gösteren tek rakam (çoğunlukla 1-9).</li>
+					<li><strong>Son ek:</strong> Operatöre veya istasyona tahsis edilen 2 veya 3 harf.</li>
+				</ul>
+
+				<h2>Örnekler</h2>
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr>
+								<th>Çağrı İşareti</th>
+								<th>Tür</th>
+								<th>Parçalanmış Hali</th>
+								<th>Açıklama</th>
+							</tr>
+						</thead>
+						<tbody>
+							{
+								callSignSamples.map((row) => (
+									<tr>
+										<td><strong>{row.call}</strong></td>
+										<td>{row.type}</td>
+										<td><code>{row.breakdown}</code></td>
+										<td>{row.detail}</td>
+									</tr>
+								))
+							}
+						</tbody>
+					</table>
+				</div>
+
+				<h2>Bölge Numarası Ne Anlatır?</h2>
+				<p class="lead">
+					Numara, çağrı işaretinin tahsis edildiği çağrı bölgesini ifade eder. Taşınma, özel izin, yeni il düzenlemeleri ve etkinlik çağrılarında farklılık görülebilir.
+				</p>
+				<div class="region-grid">
+					{
+						regions.map((region) => (
+							<article class="region-card">
+								<h3>{region.no}. Bölge</h3>
+								<p>{region.note}</p>
+								<p class="region-provinces"><strong>Klasik il dağılımı:</strong> {region.provinces}</p>
+							</article>
+						))
+					}
+				</div>
+
+				<h2>Pratik Okuma Kuralı</h2>
+				<ol class="numbered">
+					<li>Ön eki oku: Ülke/sınıf türü hakkında fikir verir (<code>TA/TB/TC/YM</code> gibi).</li>
+					<li>Rakamı oku: Çağrı bölgesini hızlıca anlarsın.</li>
+					<li>Son harf grubunu oku: O istasyona özel benzersiz bölümdür.</li>
+				</ol>
+
+				<div class="notice">
+					<strong>Not:</strong> Çağrı işareti tahsisi, sınıflar ve özel etkinlik formatları zaman içinde güncellenebilir.
+					En güncel doğrulama için BTK/Telsiz ve Radyo Amatör Cemiyeti duyurularını esas almak gerekir.
+				</div>
+
+				<div class="source-note">
+					<strong>Kaynak notu:</strong> Bölge mantığı ve TA0 adalar bilgisi için yaygın amatör telsiz prefix listeleri esas alınmıştır.
+					Farklı listelerde bazı il sınırı farkları görülebilir; resmi tahsis esastır.
+					<br />
+					<a href="https://www.qsl.net/co8tw/prefixes" target="_blank" rel="noreferrer">qsl.net/co8tw/prefixes</a>
+					{" | "}
+					<a href="https://www.qsl.net/oh2mcn/ta_areas.pdf" target="_blank" rel="noreferrer">qsl.net/oh2mcn/ta_areas.pdf</a>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<style>
+	.callsign-section {
+		margin-top: 22px;
+	}
+
+	.back-row {
+		margin-bottom: 10px;
+	}
+
+	.back-row a {
+		color: #165da8;
+		font: 700 13px/1 "Exo 2", sans-serif;
+		text-decoration: none;
+	}
+
+	.back-row a:hover {
+		text-decoration: underline;
+	}
+
+	h2 {
+		margin: 10px 0 10px;
+		font: 700 24px/1.2 "Exo 2", sans-serif;
+		color: #123b6c;
+	}
+
+	.lead {
+		margin: 0 0 10px;
+		color: #355b82;
+	}
+
+	.bullet-list,
+	.numbered {
+		margin: 0 0 14px;
+		padding-left: 20px;
+		color: #355b82;
+		display: grid;
+		gap: 6px;
+	}
+
+	.table-wrap {
+		overflow-x: auto;
+		margin-bottom: 14px;
+	}
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 14px;
+	}
+
+	th,
+	td {
+		border: 1px solid #d7e2ee;
+		padding: 10px 12px;
+		text-align: left;
+		vertical-align: top;
+	}
+
+	th {
+		background: #f2f7fd;
+		color: #0e3f73;
+		font-weight: 700;
+	}
+
+	.region-grid {
+		display: grid;
+		grid-template-columns: repeat(5, minmax(0, 1fr));
+		gap: 10px;
+		margin-bottom: 14px;
+	}
+
+	.region-card {
+		border: 1px solid #d7e2ee;
+		border-radius: 10px;
+		padding: 12px;
+		background: #f9fcff;
+	}
+
+	.region-card h3 {
+		margin: 0 0 6px;
+		font: 700 16px/1.2 "Exo 2", sans-serif;
+		color: #123b6c;
+	}
+
+	.region-card p {
+		margin: 0;
+		font-size: 13px;
+		color: #45698f;
+	}
+
+	.region-provinces {
+		margin-top: 8px !important;
+		line-height: 1.4;
+	}
+
+	.notice {
+		border: 1px dashed #9fc3e9;
+		border-radius: 10px;
+		padding: 12px;
+		background: #f4f9ff;
+		color: #2f557e;
+		font-size: 14px;
+	}
+
+	.source-note {
+		margin-top: 10px;
+		color: #4b688b;
+		font-size: 13px;
+	}
+
+	@media (max-width: 1100px) {
+		.region-grid {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+	}
+
+	@media (max-width: 720px) {
+		.region-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+</style>

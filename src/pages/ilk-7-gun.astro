@@ -1,0 +1,41 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import { getGuideData, getSubtopicsBySection } from "../data/guide";
+import "../styles/site.css";
+
+const data = getGuideData("tr");
+const plan = data.sections.find((section) => section.number === 19);
+const planItems = getSubtopicsBySection("tr", "first-7-days");
+---
+
+<Layout lang="tr" title={data.first7Title} description={data.first7Description}>
+	<SiteNav lang="tr" current="first7" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>{data.first7HeroTitle}</h1>
+			<p>{data.first7HeroText}</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<h2>{plan?.number}. {plan?.title}</h2>
+			<div class="cards">
+				{
+					planItems.map((item) => (
+						<article class="card">
+							<h3>{item.code}</h3>
+							<p>{item.title}</p>
+							<a href={`/konu/${item.slug}`}>Detaylı Anlatım</a>
+						</article>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>

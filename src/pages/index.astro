@@ -1,0 +1,191 @@
+﻿---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import "../styles/site.css";
+
+const siteUrl = (import.meta.env.SITE_URL || "https://radioham.site").replace(/\/$/, "");
+const schema = [
+	{
+		"@context": "https://schema.org",
+		"@type": "Organization",
+		name: "RadioHam",
+		url: siteUrl,
+		logo: `${siteUrl}/logo2.png`,
+	},
+	{
+		"@context": "https://schema.org",
+		"@type": "WebSite",
+		name: "RadioHam",
+		url: siteUrl,
+		inLanguage: "tr-TR",
+	},
+];
+---
+
+<Layout
+	lang="tr"
+	title="RadioHam | Amatör Telsiz Bilgi Merkezi"
+	description="Amatör telsizcilik için rehberler, frekans listeleri, haritalar, hesaplayıcılar ve cihaz karşılaştırmalarını tek merkezde toplayan yayın hazır platform."
+	jsonLd={schema}
+>
+	<SiteNav lang="tr" current="home" />
+
+	<section class="home-hero">
+		<div class="container">
+			<div class="home-hero-grid">
+				<div class="home-hero-copy">
+					<p class="home-kicker">Amatör Telsiz Bilgi Merkezi</p>
+					<h1>Tek bir merkezden öğren, planla ve sahada daha güvenli haberleş.</h1>
+					<p class="home-lead">
+						RadioHam; yeni başlayanlardan aktif operatörlere kadar herkes için rehber içerikler, frekans
+						listeleri, canlı haritalar, teknik hesaplayıcılar ve cihaz karşılaştırmaları sunar.
+					</p>
+					<div class="home-hero-actions">
+						<a class="btn-primary" href="/ilk-kurulum">Hemen Başla</a>
+						<a class="btn-ghost" href="/rehber">Rehberi Aç</a>
+					</div>
+					<ul class="home-trust-list">
+						<li>Kısa teorinin yanında sahada uygulanabilir pratik akışlar</li>
+						<li>Frekans, güç, anten ve enerji planlaması için hazır araçlar</li>
+						<li>Türkiye odaklı içeriklerle küresel kaynakları aynı yapıda sunum</li>
+					</ul>
+				</div>
+				<aside class="home-hero-panel" aria-label="Hızlı Operasyon Paneli">
+					<h2>Bugün Ne Yapabilirsin?</h2>
+					<div class="home-panel-links">
+						<a href="/frekanslar/turkiye-role-frekanslari">
+							<strong>TR Röle Frekansları</strong>
+							<span>Bölgesel röle bilgilerini hızlıca kontrol et</span>
+						</a>
+						<a href="/hesaplamalar">
+							<strong>Hesaplamalar</strong>
+							<span>SWR, menzil, link budget ve anten ölçülerini hesapla</span>
+						</a>
+						<a href="/dunya-haritasi">
+							<strong>Dünya Haritası</strong>
+							<span>ISS, Güneş ve röle dağılımını tek ekranda izle</span>
+						</a>
+						<a href="/telsiz-kiyaslama">
+							<strong>Telsiz Kıyaslama</strong>
+							<span>Model bazlı farkları tablo üzerinden değerlendir</span>
+						</a>
+					</div>
+				</aside>
+			</div>
+		</div>
+	</section>
+
+	<section class="section home-metrics-band">
+		<div class="container">
+			<div class="home-metrics-grid">
+				<article>
+					<strong>70+</strong>
+					<span>Teknik hesaplama aracı</span>
+				</article>
+				<article>
+					<strong>Canlı</strong>
+					<span>Harita ve solar aktivite verileri</span>
+				</article>
+				<article>
+					<strong>Başlangıçtan ileriye</strong>
+					<span>İlk kurulumdan operasyonel pratiklere uzanan içerik akışı</span>
+				</article>
+				<article>
+					<strong>Anlık Operasyon Avantajı</strong>
+					<span>Tek ekranda doğru frekans, doğru ayar ve doğru zamanlama</span>
+				</article>
+			</div>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<h2>Öne Çıkan Modüller</h2>
+			<p class="section-intro">İhtiyacına göre direkt geçebileceğin en kritik alanlar.</p>
+			<div class="home-feature-grid">
+				<article class="home-feature-card">
+					<p class="feature-label">Frekans Merkezi</p>
+					<h3>Türkiye ve genel frekans bilgileri</h3>
+					<p>Türkiye röle listeleri ve genel frekans referanslarını tek akışta eriş.</p>
+					<a href="/frekanslar">Frekanslara Git</a>
+				</article>
+				<article class="home-feature-card">
+					<p class="feature-label">Canlı İzleme</p>
+					<h3>Dünya haritası ve APRS görünürlüğü</h3>
+					<p>Konum, geçiş ve koşulları daha iyi yorumlamak için haritaları birlikte kullan.</p>
+					<a href="/dunya-haritasi">Haritayı Aç</a>
+				</article>
+				<article class="home-feature-card">
+					<p class="feature-label">Teknik Araçlar</p>
+					<h3>Hesaplayıcılar ile sahaya hazırlık</h3>
+					<p>SWR, ERP/EIRP, dalga boyu, besleme hattı ve enerji planlarını dakikalar içinde çıkar.</p>
+					<a href="/hesaplamalar">Araçları Aç</a>
+				</article>
+				<article class="home-feature-card">
+					<p class="feature-label">Ekipman Kararı</p>
+					<h3>Model karşılaştırma tabloları</h3>
+					<p>El ve mobil telsiz modellerini güç, bant, batarya ve özellikler bazında kıyasla.</p>
+					<a href="/telsiz-kiyaslama">Karşılaştır</a>
+				</article>
+				<article class="home-feature-card">
+					<p class="feature-label">Band Koşulları</p>
+					<h3>Solar aktivite ve HF karar desteği</h3>
+					<p>Güneş aktivitesinin etkisini takip et, doğru bandı doğru zamanda seç.</p>
+					<a href="/solar-aktivite">Solar Sayfayı Aç</a>
+				</article>
+				<article class="home-feature-card">
+					<p class="feature-label">Hızlı Referans</p>
+					<h3>Sözlük, Q kodlar ve fonetik alfabe</h3>
+					<p>Operasyon sırasında ihtiyaç duyulan temel referansları tek bölümde bul.</p>
+					<a href="/sozluk">Sözlüğe Git</a>
+				</article>
+			</div>
+		</div>
+	</section>
+
+	<section class="section home-journey">
+		<div class="container">
+			<h2>Sahaya Hazırlık Akışı</h2>
+			<p class="section-intro">Platformu ilk kez kullanıyorsan bu sırayla ilerlemek en hızlı sonuç verir.</p>
+			<div class="home-journey-grid">
+				<article>
+					<span>1</span>
+					<h3>Kurulum ve temel yapı</h3>
+					<p>Cihaz ayarlarını, simplex/röle mantığını ve başlangıç kontrol listesini tamamla.</p>
+					<a href="/ilk-kurulum">İlk Kurulum</a>
+				</article>
+				<article>
+					<span>2</span>
+					<h3>İlk hafta pratik plan</h3>
+					<p>Günlük görevlerle dinleme, çağrı disiplini ve raporlama alışkanlığı geliştir.</p>
+					<a href="/ilk-7-gun">İlk 7 Gün</a>
+				</article>
+				<article>
+					<span>3</span>
+					<h3>İleri araçlar ve optimizasyon</h3>
+					<p>Hesaplamalar, solar veriler ve cihaz kıyaslarıyla kendi istasyonunu optimize et.</p>
+					<a href="/hesaplamalar">Hesaplamalara Geç</a>
+				</article>
+			</div>
+		</div>
+	</section>
+
+	<section class="section soft-panel">
+		<div class="container home-cta-wrap">
+			<div>
+				<h2>İçeriği birlikte güçlendirelim</h2>
+				<p class="section-intro">
+					Eksik gördüğün frekans, model veya teknik notları iletebilir; platformun daha güçlü hale gelmesine
+					doğrudan katkı sağlayabilirsin.
+				</p>
+			</div>
+			<div class="home-cta-actions">
+				<a class="btn-primary" href="/contact-us">Geri Bildirim Gönder</a>
+				<a class="btn-ghost btn-ghost-dark" href="/kaynakca">Kaynakçayı İncele</a>
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>

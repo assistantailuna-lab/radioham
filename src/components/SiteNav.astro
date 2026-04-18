@@ -1,0 +1,128 @@
+﻿---
+interface Props {
+	lang?: "tr" | "en";
+	current:
+		| "home"
+		| "guide"
+		| "categories"
+		| "aprs"
+		| "worldMap"
+		| "solarActivity"
+		| "calculators"
+		| "comparison"
+		| "firstSetup"
+		| "first7"
+		| "faq"
+		| "glossary"
+		| "contact";
+}
+
+const { current } = Astro.props;
+
+const routes = {
+	home: "/",
+	guide: "/rehber",
+	categories: "/frekanslar",
+	aprs: "/aprs",
+	worldMap: "/dunya-haritasi",
+	solarActivity: "/solar-aktivite",
+	calculators: "/hesaplamalar",
+	comparison: "/telsiz-kiyaslama",
+	firstSetup: "/ilk-kurulum",
+	first7: "/ilk-7-gun",
+	faq: "/sss",
+	glossary: "/sozluk",
+	contact: "/contact-us",
+} as const;
+
+const labels = {
+	home: "Anasayfa",
+	amateur: "Amatör Telsizcilik",
+	guide: "Rehber",
+	categories: "Frekanslar",
+	aprs: "APRS",
+	worldMap: "Dünya Haritası",
+	solarActivity: "Solar Aktivite",
+	calculators: "Hesaplamalar",
+	comparison: "Telsiz Kıyaslama",
+	firstSetup: "İlk Kurulum",
+	faq: "SSS",
+	glossary: "Sözlük",
+	contact: "İletişim",
+	brand: "RadioHam",
+};
+
+const navItems = [{ key: "home", href: routes.home, label: labels.home }] as const;
+
+const amateurItems = [
+	{ key: "guide", href: routes.guide, label: labels.guide },
+	{ key: "categories", href: routes.categories, label: labels.categories },
+	{ key: "aprs", href: routes.aprs, label: labels.aprs },
+	{ key: "worldMap", href: routes.worldMap, label: labels.worldMap },
+	{ key: "solarActivity", href: routes.solarActivity, label: labels.solarActivity },
+	{ key: "calculators", href: routes.calculators, label: labels.calculators },
+	{ key: "comparison", href: routes.comparison, label: labels.comparison },
+	{ key: "firstSetup", href: routes.firstSetup, label: labels.firstSetup },
+	{ key: "faq", href: routes.faq, label: labels.faq },
+	{ key: "glossary", href: routes.glossary, label: labels.glossary },
+] as const;
+
+const amateurActive = amateurItems.some((item) => item.key === current);
+---
+
+<header class="page-header">
+	<div class="container header-row">
+		<a class="brand" href={routes.home}>
+			<img class="brand-logo" src="/logo2.png" alt={labels.brand} />
+			<span class="brand-text">{labels.brand}</span>
+		</a>
+		<nav class="links">
+			{
+				navItems.map((item) => (
+					<a href={item.href} class={current === item.key ? "active" : ""}>
+						{item.label}
+					</a>
+				))
+			}
+			<details class={`nav-dropdown ${amateurActive ? "active" : ""}`}>
+				<summary>{labels.amateur}</summary>
+				<div class="dropdown-menu">
+					{
+						amateurItems.map((item) => (
+							<a href={item.href} class={current === item.key ? "active" : ""}>
+								{item.label}
+							</a>
+						))
+					}
+				</div>
+			</details>
+			<a href={routes.contact} class={current === "contact" ? "active" : ""}>
+				{labels.contact}
+			</a>
+		</nav>
+	</div>
+</header>
+
+<script>
+	document.addEventListener("DOMContentLoaded", () => {
+		const dropdowns = Array.from(document.querySelectorAll(".nav-dropdown"));
+		if (!dropdowns.length) return;
+
+		document.addEventListener("click", (event) => {
+			const target = event.target;
+			if (!(target instanceof Node)) return;
+
+			dropdowns.forEach((dropdown) => {
+				if (!dropdown.contains(target)) {
+					dropdown.removeAttribute("open");
+				}
+			});
+		});
+
+		document.addEventListener("keydown", (event) => {
+			if (event.key !== "Escape") return;
+			dropdowns.forEach((dropdown) => dropdown.removeAttribute("open"));
+		});
+	});
+</script>
+

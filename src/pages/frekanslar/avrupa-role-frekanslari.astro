@@ -1,0 +1,33 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import "../../styles/site.css";
+---
+
+<Layout lang="tr" title="Avrupa Röle Frekansları | RadioHam" description="Avrupa amatör röle frekansları için çalışma sayfası.">
+	<SiteNav lang="tr" current="categories" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>Avrupa Röle Frekansları</h1>
+			<p>Bu sayfada Avrupa ülkeleri için röle frekans düzenini, Region 1 band plan yaklaşımıyla toplu halde sunacağız.</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="outline-section">
+				<h3>Yakında Eklenecek İçerik Düzeni</h3>
+				<ul>
+					<li>Ülke bazlı röle listesi</li>
+					<li>Bölgesel ton/offset farklılıkları</li>
+					<li>Seyahat edenler için temel kontrol listesi</li>
+					<li>Güncelleme ve doğrulama tarihi</li>
+				</ul>
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
