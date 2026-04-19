@@ -48,6 +48,10 @@ body > *:not(.global-bg-logo) {
 	z-index: 1;
 }
 
+body > .page-header {
+	z-index: 2000;
+}
+
 a {
 	color: inherit;
 }
@@ -60,7 +64,9 @@ a {
 .page-header {
 	position: sticky;
 	top: 0;
-	z-index: 30;
+	z-index: 2000;
+	overflow: visible;
+	isolation: isolate;
 	background: rgba(4, 24, 52, 0.94);
 	border-bottom: 1px solid rgba(165, 205, 255, 0.22);
 	backdrop-filter: blur(8px);
@@ -128,6 +134,11 @@ a {
 
 .nav-dropdown {
 	position: relative;
+	z-index: 1;
+}
+
+.nav-dropdown[open] {
+	z-index: 2;
 }
 
 .nav-dropdown summary {
@@ -165,6 +176,7 @@ a {
 	border-radius: 10px;
 	padding: 8px;
 	display: none;
+	z-index: 2100;
 	box-shadow: 0 12px 26px -16px rgba(0, 0, 0, 0.65);
 }
 

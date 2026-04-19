@@ -35,7 +35,7 @@ const rows = trRepeaters.map((item) => ({
 				<button class="wm-btn" type="button" data-filter="ISS">ISS</button>
 				<button class="wm-btn" type="button" data-filter="SUN">Güneş</button>
 				<button class="wm-btn" type="button" data-filter="REP">Röleler</button>
-				<span id="wmStatus" class="wm-status">Harita hazirlaniyor...</span>
+				<span id="wmStatus" class="wm-status">Harita hazırlanıyor...</span>
 			</div>
 			<div id="worldMap" class="world-map-canvas" aria-label="Dünya haritası"></div>
 		</div>
@@ -540,7 +540,7 @@ const rows = trRepeaters.map((item) => ({
 		upsertNightLayer(sun);
 
 		applyFilter();
-		setStatus(`ISS guncellendi: ${new Date().toLocaleTimeString("tr-TR")}`);
+		setStatus(`ISS güncellendi: ${new Date().toLocaleTimeString("tr-TR")}`);
 	};
 
 	const parseTlePayload = (text) => {
