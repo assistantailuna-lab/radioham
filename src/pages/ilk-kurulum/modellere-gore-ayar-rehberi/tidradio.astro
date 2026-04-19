@@ -1,0 +1,451 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import SiteNav from "../../../components/SiteNav.astro";
+import SiteFooter from "../../../components/SiteFooter.astro";
+import "../../../styles/site.css";
+
+const radioSettingItems = [
+	{
+		name: "Squelch LV",
+		desc: "Sinyal yokken hoparlördeki paraziti keser. Seviye yükseldikçe yalnızca daha güçlü sinyaller açılır.",
+		tips: ["Şehirde 3-4", "Gürültülü ortamda 5", "Zayıf sinyal avında 2-3"],
+	},
+	{
+		name: "Step Freq",
+		desc: "VFO modunda frekans adım miktarını belirler. Kanal modunda değişmez.",
+		tips: ["Genel kullanımda 12.5 kHz", "Bilmiyorsan 12.5 kHz ile başla"],
+	},
+	{
+		name: "VOX Level",
+		desc: "PTT basmadan sesle otomatik yayına geçiş hassasiyetini ayarlar.",
+		tips: ["El telsizinde çoğu kullanıcı için Off", "Eller serbest kullanımda 1-2 ile test et"],
+	},
+	{
+		name: "VOX Delay",
+		desc: "Konuşma bittikten sonra yayının kapanma gecikmesini belirler.",
+		tips: ["Normalde 1 sn", "Duraklamalı konuşmada 2 sn"],
+	},
+	{
+		name: "TOT",
+		desc: "Uzun basışta yayın kilitlenmesini önlemek için maksimum TX süresi koyar.",
+		tips: ["Genel kullanımda 60 veya 90 sn", "Repeater için 60 sn iyi seçim", "Acemilerde açık kalsın"],
+	},
+	{ name: "Roger Beep", desc: "PTT bırakınca karşıya bitiş tonu gönderir.", tips: ["Amatör kullanımda Off"] },
+	{ name: "Keypad Beep", desc: "Tuş sesini açar/kapatır.", tips: ["Sessiz kullanımda Off", "Öğrenme döneminde On"] },
+	{
+		name: "Power Save",
+		desc: "Beklemede pil tüketimini düşürür; agresif tasarrufta ilk heceler kaçabilir.",
+		tips: ["Günlük kullanımda Level 2", "Uzun pil ömründe Level 3", "Kritik dinlemede Off veya Level 1"],
+	},
+	{ name: "Keypad Lock", desc: "Otomatik tuş kilidi.", tips: ["Genelde On"] },
+	{ name: "Dual Watch", desc: "A ve B satırını birlikte izler.", tips: ["Tek frekansta Off", "İki frekansta On"] },
+	{ name: "Voice", desc: "Menüleri sesli söyler.", tips: ["Yeni başlayan için On", "Sonradan rahatsız ederse Off"] },
+	{ name: "Backlight", desc: "Ekran ışığının açık kalma süresi.", tips: ["5 veya 10 sn dengelidir"] },
+	{ name: "Brightness", desc: "Ekran parlaklığı ayarı.", tips: ["İç mekanda 3", "Dış mekanda 4-5"] },
+	{ name: "Power On Display", desc: "Açılış ekranı: Voltage, Message veya Picture.", tips: ["En kullanışlı seçim Voltage"] },
+	{
+		name: "SYNC",
+		desc: "Çift ekran/tek ekran görünüm mantığını belirler.",
+		tips: ["Basit kullanımda OFF", "İki frekansla çalışıyorsan ON"],
+	},
+	{ name: "ANI-Edit", desc: "Seçici çağrı için kimlik kodu.", tips: ["Bu sistemi kullanmıyorsan dokunma"] },
+	{
+		name: "Display Type A/B",
+		desc: "A veya B satırında isim/numara ya da frekans/numara görünümünü seçer.",
+		tips: ["Kanal kullanıcıları için Name + Number", "VFO ağırlıklı kullanımda Frequency + Number"],
+	},
+	{ name: "DTMFST", desc: "DTMF yan ton duyum ayarı.", tips: ["Genelde Off"] },
+	{
+		name: "PTT-Delay",
+		desc: "PTT sonrası yayın başlangıç gecikmesi.",
+		tips: ["Normalde 100-300 ms", "Yavaş açılan repeater için 300-500 ms"],
+	},
+	{ name: "Language", desc: "LCD ve uyarı dili.", tips: ["English"] },
+	{
+		name: "Alarm Mode",
+		desc: "Alarm tipi: On Site veya TX Alarm.",
+		tips: ["Ekip içi gerçek acil durum harici On Site"],
+	},
+	{ name: "Side Tone (Tail)", desc: "PTT bırakınca gelen klik/tail sesini azaltma.", tips: ["On"] },
+	{
+		name: "Tone Burst",
+		desc: "Repeater açma için burst tone frekansı seçimi.",
+		tips: ["Avrupa'da çoğu yerde 1750 Hz", "Yerel repeater bilgisine göre ayarla"],
+	},
+	{
+		name: "Talk Around",
+		desc: "TX'i RX frekansına eşitleyip repeater olmadan simplex konuşma sağlar.",
+		tips: ["Normalde Off", "İhtiyaç olunca aç"],
+	},
+	{ name: "FM Interrupt", desc: "FM radyo dinlerken çağrı gelince radyoyu keser.", tips: ["On"] },
+	{
+		name: "PF1 / PF2 Kısa-Uzun Basış",
+		desc: "Yan tuşlara işlev ataması yapar.",
+		tips: ["PF1 kısa: Lamp veya Weather", "PF1 uzun: Cancel Sq", "PF2 kısa: Tone veya FM Radio", "PF2 uzun: Alarm"],
+	},
+	{
+		name: "Factory Reset",
+		desc: "VFO, CHL veya FULL sıfırlama seçenekleri.",
+		tips: ["Gerekmedikçe kullanma", "FULL seçeneğinde dikkatli ol"],
+	},
+	{ name: "Breath Led", desc: "Beklemede LED yanıp sönme davranışı.", tips: ["Pil için düşük veya kapalı mantıklı"] },
+	{
+		name: "MIC GAIN",
+		desc: "Mikrofon kazancı.",
+		tips: ["Normal konuşmada 4-6", "Ses kısık gidiyorsa 6-7", "Distorsiyonda düşür"],
+	},
+	{ name: "DTMF Speed", desc: "DTMF gönderim hızı.", tips: ["Varsayılan 110 ms bırak"] },
+	{ name: "DCD", desc: "DTMF sinyallemeyi aç/kapat.", tips: ["Kullanmayacaksan Off"] },
+	{ name: "D-HOLD", desc: "DTMF otomatik sıfırlama süresi.", tips: ["10-15 sn"] },
+	{ name: "D-RSP", desc: "DTMF çözümleme sonrası tepki tipi.", tips: ["DTMF kullanmıyorsan NULL"] },
+	{
+		name: "AM_BAND",
+		desc: "108-136 MHz aralığında AM alımı açar.",
+		tips: ["Hava bandı dinleyeceksen On", "Diğer durumda Off"],
+	},
+	{
+		name: "200TX / 350TX / 500TX",
+		desc: "VFO'da ilgili bantlara giriş izni.",
+		tips: ["Yasal gereksinim yoksa Off", "Yetkisiz frekansta yayın yasadışıdır"],
+	},
+];
+
+const programChannelItems = [
+	{ name: "RX Sub-audio", desc: "Alım tarafında CTCSS/DCS/R-DCS filtresi.", tips: ["Herkesi duymak için Off", "Filtre gerekiyorsa ilgili ton/kodu gir"] },
+	{ name: "TX Sub-audio", desc: "Yayında gönderilecek CTCSS/DCS tonu.", tips: ["Repeater veya grubun istediği değeri gir"] },
+	{ name: "Bandwidth", desc: "Wide 25 kHz veya Narrow 12.5 kHz.", tips: ["Karşı tarafla aynı olmalı"] },
+	{ name: "TX Power", desc: "Low/Middle/High yayın gücü.", tips: ["Yakın mesafe Low", "Şehir içi Middle", "Uzak-repeater High"] },
+	{ name: "Busy Lock", desc: "Kanal meşgulse yayını engeller.", tips: ["On"] },
+	{ name: "Call Code", desc: "Çağrı/sinyal kod grupları.", tips: ["Bu sistemi kullanmıyorsan dokunma"] },
+	{ name: "PTT-ID", desc: "ANI-ID gönderim zamanı.", tips: ["Genel amatör kullanımda Off"] },
+	{ name: "Scan Add", desc: "Kanalı tarama listesine ekler/çıkarır.", tips: ["Önemli kanallar On", "Kalabalık yapanlar Off"] },
+	{
+		name: "Scramble",
+		desc: "Aynı scramble ayarında anlaşılır ses sağlar.",
+		tips: ["Kullanacaksan iki tarafta da aynı ayar", "Yerel mevzuatı kontrol et"],
+	},
+	{ name: "OFFSET", desc: "TX ve RX frekans farkı.", tips: ["Yerel repeater shift değerine göre ayarla"] },
+	{ name: "SET-D", desc: "Offset yönü: Off/Positive/Negative.", tips: ["Repeater'a göre artı veya eksi"] },
+	{ name: "Memory CHL", desc: "Frekans ve ayarları hafıza kanalına kaydeder.", tips: ["Kanal oluştururken son adım"] },
+	{ name: "Delete CHL", desc: "Kanal siler." },
+	{
+		name: "Hopping",
+		desc: "Frequency hopping ile ilişkili gelişmiş ayar.",
+		tips: ["Gelişmiş kullanım yoksa kapalı bırakmak daha güvenli"],
+	},
+];
+
+const scanItems = [
+	{
+		name: "Scan Mode",
+		desc: "Tarama davranışı: TO, CO, SE.",
+		tips: ["Kanal taraması için CO", "Bulduğu yerde kalsın istiyorsan SE", "Dinleyip geçsin istiyorsan TO"],
+	},
+	{ name: "SEEK DCS", desc: "CTCSS/DCS/R-DCS tonlarını bulmaya yardım eder.", tips: ["Sadece ton bulmak istediğinde kullan"] },
+	{ name: "Hang Time", desc: "Tarama durduktan sonra tekrar başlamadan önce bekleme süresi.", tips: ["1-2 sn"] },
+	{ name: "Scan Freq", desc: "Tek tuşla frekans arama ve bulduğu kanalı kaydetme akışı.", tips: ["Aktif frekans avında çok faydalı"] },
+];
+
+const bluetoothItems = [
+	{ name: "BT ON/OFF", desc: "Bluetooth aç/kapat.", tips: ["Kullanmayacaksan Off"] },
+	{ name: "BT Mode", desc: "Receiver veya Emitter çalışma modu.", tips: ["Telefon için Receiver", "BT aksesuar için Emitter"] },
+	{ name: "BT Name", desc: "Cihazın Bluetooth adını gösterir." },
+	{ name: "BT Pairing", desc: "Eşleşmiş cihazlar ve eşleştirme listesi." },
+	{ name: "OD PTT", desc: "OD veya OD + Analog yayın davranışı.", tips: ["Sadece uygulama grubu için OD", "Hem telsiz hem uygulama için OD + Analog"] },
+	{ name: "OD Mode", desc: "Local, Forward veya Full çalışma modu.", tips: ["Çoğu kullanıcı için Local Mode"] },
+	{ name: "BT Int MIC / BT Int Spk / BT MIC Gain / BT Spk Gain", desc: "Bluetooth ses giriş-çıkış ve kazanç ayarları.", tips: ["Başlangıçta Gain 3", "Kısıkta artır", "Boğukta düşür"] },
+	{ name: "BT Pin Code", desc: "Bluetooth eşleşme PIN kodu." },
+];
+
+const aprsItems = [
+	{ name: "Bluetooth / KISS TNC", desc: "Bluetooth üzerinden APRS verisi taşıma.", tips: ["APRS uygulama bağlantısı kullanıyorsan açık"] },
+	{ name: "APRS Relay (DIGI)", desc: "Dijital relay işlevi.", tips: ["Yeni başlayan için kapalı"] },
+	{ name: "MIC-E", desc: "Sıkıştırılmış beacon formatı ile paket süresini düşürür." },
+	{ name: "PTT Delay", desc: "APRS paketi öncesi PTT bekleme süresi.", tips: ["Paket başı kesiliyorsa biraz artır"] },
+	{
+		name: "Digi Relay Adı",
+		desc: "Relay adları ve hop count davranışı.",
+		tips: ["Yerel APRS ağ kuralını bilmiyorsan varsayılanlarla oynama"],
+	},
+	{ name: "Remote Password", desc: "Uzaktan erişim parolası.", tips: ["Kullanıyorsan varsayılanı değiştir"] },
+	{ name: "Fixed-Station Settings", desc: "Sabit koordinatla mesafe/yön hesapları." },
+	{ name: "APRS Track / Harita", desc: "Odmaster web ve aprs.fi üzerinden takip." },
+];
+---
+
+<Layout
+	lang="tr"
+	title="Tidradio Premium Ayar Rehberi | RadioHam"
+	description="Tidradio TD-H9 başta olmak üzere Tidradio menülerinin ne işe yaradığını numarasız ve anlaşılır premium rehberde öğren."
+>
+	<SiteNav lang="tr" current="firstSetup" />
+
+	<section class="page-hero tidradio-hero">
+		<div class="container">
+			<h1>Tidradio Ayar Rehberi</h1>
+			<p>Genel ayarları yap.</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="premium-head">
+				<h2>RADIO SETTING</h2>
+				<p>Genel cihaz davranışını belirleyen temel ayarlar.</p>
+			</div>
+			<div class="menu-grid">
+				{
+					radioSettingItems.map((item) => (
+						<article class="menu-card">
+							<h3>{item.name}</h3>
+							<p>{item.desc}</p>
+							{
+								item.tips && (
+									<ul>
+										{item.tips.map((line) => <li>{line}</li>)}
+									</ul>
+								)
+							}
+						</article>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<section class="section premium-band">
+		<div class="container">
+			<div class="premium-head">
+				<h2>PROGRAM CHANNEL</h2>
+				<p>Kanal bazında yayın, alım ve tarama ayarları.</p>
+			</div>
+			<div class="menu-grid">
+				{
+					programChannelItems.map((item) => (
+						<article class="menu-card">
+							<h3>{item.name}</h3>
+							<p>{item.desc}</p>
+							{
+								item.tips && (
+									<ul>
+										{item.tips.map((line) => <li>{line}</li>)}
+									</ul>
+								)
+							}
+						</article>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="cards info-cards">
+				<article class="card info-card">
+					<h3>ANALOG SET</h3>
+					<p>Bu bölüm analog çağrı/sinyalleme ayarlarıyla ilgilidir. DTMF, selektif çağrı veya ANI gibi özel işlevleri kullanmıyorsan dokunmamak en güvenli yaklaşımdır.</p>
+				</article>
+				<article class="card info-card">
+					<h3>RADIO INFORMATION</h3>
+					<ul class="plain-list">
+						<li><strong>Versions Info:</strong> Radio ID, Alias, firmware ve hardware sürümü.</li>
+						<li><strong>APRS Info:</strong> APRS çağrı bilgileri ve ilgili modül sürüm detayları.</li>
+						<li>Bu menü ayar için değil, kontrol ve doğrulama içindir.</li>
+					</ul>
+				</article>
+				<article class="card info-card">
+					<h3>FIRMWARE UPGRADE</h3>
+					<ul class="plain-list">
+						<li>Güncelleme, üreticinin Odmaster akışı veya doğru dosya ile masaüstü yöntemleriyle yapılır.</li>
+						<li>Sadece doğru firmware ile güncelle.</li>
+						<li>Pil dolu olsun, güncelleme sırasında bağlantıyı kesme.</li>
+					</ul>
+				</article>
+				<article class="card info-card">
+					<h3>GNSS</h3>
+					<ul class="plain-list">
+						<li><strong>GPS ON/OFF:</strong> Konum kullanmıyorsan Off.</li>
+						<li><strong>GPS Information:</strong> Boylam, enlem, tarih, saat, hız, uydu sayısı gibi veriler.</li>
+						<li><strong>Position:</strong> Koordinat gösterim formatı seçimi.</li>
+					</ul>
+				</article>
+				<article class="card info-card">
+					<h3>SITE TYPE</h3>
+					<ul class="plain-list">
+						<li>İstasyon tipi mobil/taşınabilir veya sabit koordinat mantığında seçilir.</li>
+						<li>Ev/istasyon noktasında sabitse Fixed Coordinates yaklaşımı kullanılır.</li>
+					</ul>
+				</article>
+			</div>
+		</div>
+	</section>
+
+	<section class="section premium-band">
+		<div class="container">
+			<div class="premium-head">
+				<h2>SCAN</h2>
+				<p>Tarama davranışı ve otomatik bulma yardımcıları.</p>
+			</div>
+			<div class="menu-grid compact">
+				{
+					scanItems.map((item) => (
+						<article class="menu-card">
+							<h3>{item.name}</h3>
+							<p>{item.desc}</p>
+							{
+								item.tips && (
+									<ul>
+										{item.tips.map((line) => <li>{line}</li>)}
+									</ul>
+								)
+							}
+						</article>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="premium-head">
+				<h2>BLUETOOTH</h2>
+				<p>Telefon ve aksesuar bağlantıları, Odmaster ve OD PTT iş akışları.</p>
+			</div>
+			<div class="menu-grid compact">
+				{
+					bluetoothItems.map((item) => (
+						<article class="menu-card">
+							<h3>{item.name}</h3>
+							<p>{item.desc}</p>
+							{
+								item.tips && (
+									<ul>
+										{item.tips.map((line) => <li>{line}</li>)}
+									</ul>
+								)
+							}
+						</article>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<section class="section premium-band">
+		<div class="container">
+			<div class="premium-head">
+				<h2>APRS</h2>
+				<p>KISS TNC, DIGI, MIC-E ve takip/harita tarafı için temel açıklamalar.</p>
+			</div>
+			<div class="menu-grid compact">
+				{
+					aprsItems.map((item) => (
+						<article class="menu-card">
+							<h3>{item.name}</h3>
+							<p>{item.desc}</p>
+							{
+								item.tips && (
+									<ul>
+										{item.tips.map((line) => <li>{line}</li>)}
+									</ul>
+								)
+							}
+						</article>
+					))
+				}
+			</div>
+			<p style="margin-top: 16px;"><a class="btn-primary" href="/ilk-kurulum/modellere-gore-ayar-rehberi">Marka Listesine Dön</a></p>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<style>
+	.tidradio-hero {
+		background:
+			radial-gradient(circle at 82% 14%, rgba(135, 220, 255, 0.24), transparent 36%),
+			linear-gradient(115deg, rgba(10, 29, 57, 0.95), rgba(10, 72, 122, 0.9));
+	}
+
+	.premium-head h2 {
+		margin: 0;
+		font: 800 clamp(28px, 4.8vw, 42px) / 1.06 "Exo 2", sans-serif;
+		color: #0f3f70;
+	}
+
+	.premium-head p {
+		margin: 12px 0 0;
+		color: #526d90;
+		font-size: 17px;
+		line-height: 1.68;
+	}
+
+	.menu-grid {
+		margin-top: 20px;
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 12px;
+	}
+
+	.menu-grid.compact {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	.menu-card {
+		background: #fff;
+		border: 1px solid #d7e6f5;
+		border-radius: 14px;
+		padding: 16px;
+		box-shadow: 0 16px 28px -24px rgba(7, 30, 59, 0.78);
+	}
+
+	.menu-card h3 {
+		margin: 0;
+		font: 700 20px/1.2 "Exo 2", sans-serif;
+		color: #123969;
+	}
+
+	.menu-card p {
+		margin: 8px 0 0;
+		color: #4c6383;
+		line-height: 1.62;
+	}
+
+	.menu-card ul {
+		margin: 10px 0 0;
+		padding-left: 18px;
+		display: grid;
+		gap: 6px;
+		color: #45607f;
+	}
+
+	.premium-band {
+		background: linear-gradient(180deg, #eef6ff, #f8fbff);
+	}
+
+	.info-cards {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.info-card {
+		border: 1px solid #d7e6f5;
+	}
+
+	.plain-list {
+		margin: 0;
+		padding-left: 18px;
+		display: grid;
+		gap: 6px;
+	}
+
+	@media (max-width: 980px) {
+		.menu-grid,
+		.menu-grid.compact,
+		.info-cards {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

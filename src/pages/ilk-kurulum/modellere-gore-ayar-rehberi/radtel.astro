@@ -1,0 +1,318 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import SiteNav from "../../../components/SiteNav.astro";
+import SiteFooter from "../../../components/SiteFooter.astro";
+import "../../../styles/site.css";
+
+const menuItems = [
+	{
+		name: "SQL",
+		desc: "Squelch seviyesini ayarlar.",
+		details: [
+			"Aralık: 0-9.",
+			"0 neredeyse tamamen açık kalır ve cızırtı duyabilirsin.",
+			"Düşük değer daha hassas ama parazite açık, yüksek değer daha sessiz ama zayıf sinyali kaçırabilir.",
+			"Öneri: şehir içi 3-5, kırsal zayıf sinyal avında 1-3, yeni başlayan için 3.",
+			"Yanlış ayar: çok düşükte gereksiz cızırtı, çok yüksekte zayıf sinyali kaçırma.",
+		],
+	},
+	{
+		name: "STEP",
+		desc: "Frekans adım boyunu belirler.",
+		details: [
+			"Seçenekler: 2.5k, 5k, 6.25k, 10k, 12.5k, 20k, 25k, 50k.",
+			"Örnek: 12.5k adımda 145.500 -> 145.5125 -> 145.525.",
+			"Öneri: amatör pratikte 12.5k veya 25k; hassas aramada küçük adım, hızlı gezmede büyük adım.",
+			"Yanlış ayar: doğru frekansı yakalamayı zorlaştırır.",
+		],
+	},
+	{
+		name: "TXP",
+		desc: "Verici gücünü seçer.",
+		details: [
+			"Seçenekler: High / Middle / Low.",
+			"High daha güçlü gönderir ama pili hızlı tüketir, Low yakın mesafe için idealdir.",
+			"Öneri: röle ilk erişim High, yakın simplex Low, günlük Middle.",
+			"Yanlış ayar: gereksiz High pil israfı, gereksiz Low çekmiyor hissi.",
+		],
+	},
+	{
+		name: "SAVE",
+		desc: "Güç tasarrufu modudur.",
+		details: [
+			"Seçenekler: OFF, Normal, Super, Deep (modele göre isim değişebilir).",
+			"Seviye arttıkça pil uzar; agresif tasarrufta RX açılışında ilk heceler kaçabilir.",
+			"Öneri: kritik dinlemede OFF, günlükte Normal, pil önceliğinde Super/Deep.",
+		],
+	},
+	{
+		name: "VOX",
+		desc: "Sese duyarlı otomatik yayın açar.",
+		details: [
+			"Seçenekler: OFF, 1-9 (1 en hassas).",
+			"Eller serbest kullanımda faydalı, normal elde kullanımda çoğu zaman OFF daha güvenli.",
+			"Gürültülü ortamda istemeden yayına geçebilir.",
+		],
+	},
+	{
+		name: "W/N",
+		desc: "Kanal genişliğini seçer.",
+		details: [
+			"Wide = 25 kHz, Narrow = 12.5 kHz.",
+			"Karşı tarafla uyumsuz olursa ses boğuk veya düşük gelebilir.",
+		],
+	},
+	{ name: "ABR", desc: "Arka ışık süresi ayarıdır.", details: ["Pil tüketimini etkiler, RF performansını etkilemez."] },
+	{ name: "TDR", desc: "Dual standby (A/B izleme) aç/kapat.", details: ["Tek frekansa odaklanacaksan OFF, iki hattı izleyeceksen ON."] },
+	{ name: "BEEP", desc: "Tuş bip sesini açar/kapatır." },
+	{
+		name: "R-CTCSS",
+		desc: "Alıcı için analog alt ton filtresi.",
+		details: ["Doğru ton gelmeden hoparlör açılmaz.", "Yeni başlayan için çoğunlukla OFF önerilir."],
+	},
+	{
+		name: "T-CTCSS",
+		desc: "Vericide gönderilen analog alt tondur.",
+		details: ["Röle açmada kritik olabilir (örnek: 88.5).", "Yanlış ton röleyi açmaz."],
+	},
+	{ name: "R-DCS", desc: "Alıcı için dijital ton kodu.", details: ["Sistem DCS kullanmıyorsa genelde OFF."] },
+	{ name: "T-DCS", desc: "Vericide gönderilen dijital kod.", details: ["Sistem DCS istiyorsa kullanılır."] },
+	{ name: "VOICE", desc: "Sesli yönlendirme (voice prompt) aç/kapat." },
+	{ name: "LANGUAGE", desc: "Sesli yönlendirme dili.", details: ["English / Chinese."] },
+	{
+		name: "BCL",
+		desc: "Busy Channel Lockout.",
+		details: ["Kanal doluyken yayın yapmayı engeller.", "Yeni başlayan için genelde OFF."],
+	},
+	{
+		name: "SC-REV",
+		desc: "Tarama davranışını belirler.",
+		details: [
+			"TO: sinyal bulunca kısa bekleyip taramaya döner.",
+			"CO: taşıyıcı bitene kadar bekler, sonra devam eder.",
+			"SE: sinyal bulunca taramayı bırakıp orada kalır.",
+			"Öneri: genel tarama için CO.",
+		],
+	},
+	{
+		name: "VOICEPRI",
+		desc: "Kılavuzda belirsiz geçen ton tabanlı özel/filtreli iletişim ayarı.",
+		details: ["Gerçek şifreleme gibi düşünülmemeli. Genel amatör kullanımda kapalı bırakmak güvenli yaklaşım."],
+	},
+	{ name: "CH-NAME", desc: "Kanala isim verir.", details: ["Örnek: SIMP1, ATAY, RPT1."] },
+	{ name: "ROGER", desc: "Yayın bitiş tonu.", details: ["OFF / BEEP / TONE1200. Genel amatör kullanımda çoğunlukla OFF."] },
+	{
+		name: "SC / Encryption",
+		desc: "Kılavuzda Encryption 1/2/3 olarak geçer.",
+		details: ["Gerçek kripto yerine scramble sınıfı bir işlev olarak düşünülmeli.", "Genel kullanımda OFF önerilir."],
+	},
+	{ name: "PF2 Short Press", desc: "PF2 kısa basışa kısayol atar.", details: ["Öneri: SCAN veya NOAA."] },
+	{ name: "PF2 Long Press", desc: "PF2 uzun basış işlevi.", details: ["Öneri: TXPOWER veya SEARCH."] },
+	{ name: "PF3 Short Press", desc: "PF3 kısa basış işlevi.", details: ["Öneri: SEARCH veya NOAA."] },
+	{ name: "PF3 Long Press", desc: "PF3 uzun basış işlevi.", details: ["Öneri: SCAN veya SEARCH."] },
+	{
+		name: "OFFSET",
+		desc: "TX ve RX arasındaki frekans farkı.",
+		details: [
+			"Rölede kullanılır.",
+			"Örnek: RX 145.750, OFFSET 0.600 ve shift '-' ise TX 145.150.",
+			"Simplex için 0.0000.",
+		],
+	},
+	{
+		name: "SFT-D",
+		desc: "Shift yönü seçimi.",
+		details: ["OFF / + / -", "OFF = simplex, + = RX+offset, - = RX-offset."],
+	},
+	{ name: "POWER-ON MSG", desc: "Açılış ekranı seçimi.", details: ["LOGO / VOLTAGE (genelde VOLTAGE daha faydalı)."] },
+	{ name: "S-CODE", desc: "DTMF sinyal kod grubu seçimi (1-15).", details: ["Çoğu amatör kullanıcı için varsayılan kalabilir."] },
+	{
+		name: "DTMF CODE",
+		desc: "PTT ile DTMF otomatik gönderim davranışı.",
+		details: ["OFF / BOT / EOT / BOTH.", "Genel kullanımda çoğunlukla OFF."],
+	},
+	{ name: "DTMFST", desc: "DTMF yan ton duyum davranışı.", details: ["OFF / DT-ST / ANI-ST / DT+ANI.", "Genel kullanımda OFF önerilir."] },
+	{ name: "AUTOLOCK", desc: "Tuş takımını otomatik kilitler.", details: ["OFF / 5s / 10s / 15s."] },
+	{ name: "SCAN ADD/DELETE", desc: "Kanalı tarama listesine ekler/çıkarır." },
+	{ name: "TONE", desc: "Burst tone seçimi.", details: ["1000 / 1450 / 1750 / 2100 Hz."] },
+	{ name: "PTT-LT", desc: "DTMF gönderiminden önce gecikme.", details: ["0-1000 ms. DTMF kullanmıyorsan önemsiz."] },
+	{ name: "MENU EXIT TIME", desc: "Menüde işlem yapılmazsa otomatik çıkış süresi.", details: ["5-60 sn, pratik denge 10-15 sn."] },
+	{ name: "VOX DELAY", desc: "VOX kapanma gecikmesi.", details: ["0.5-2.0 sn. VOX kullanmıyorsan önemsiz."] },
+	{ name: "RP-STE", desc: "Röle kuyruk sesini azaltma davranışı.", details: ["OFF / 1-10 s."] },
+	{ name: "RPT-RL", desc: "Röle tail delay zamanlaması.", details: ["OFF / 1-10 s."] },
+	{ name: "MDF-A", desc: "A bandı görüntü tipi.", details: ["FREQ / CH / NAME."] },
+	{ name: "MDF-B", desc: "B bandı görüntü tipi.", details: ["FREQ / CH / NAME."] },
+	{
+		name: "TX-A/B",
+		desc: "Dual standby modunda PTT'nin hangi banda gideceğini belirler.",
+		details: ["A / B / Main band mantığı."],
+	},
+	{ name: "AL-MOD", desc: "Alarm modu.", details: ["ON SITE / SEND SOUND / SEND CODE."] },
+	{ name: "NOISE REDUCTION", desc: "Gürültü azaltma.", details: ["ON/OFF, ortamına göre dene."] },
+	{ name: "BLUETOOTH", desc: "Bluetooth aç/kapat.", details: ["RT-900 Bluetooth versiyonda geçerlidir."] },
+	{ name: "SCRAMBLE", desc: "Ses karıştırma.", details: ["Gerçek güvenlik sağlamaz; amatör kullanımda çoğunlukla OFF."] },
+	{ name: "RESET", desc: "Sıfırlama.", details: ["VFO / ALL. ALL hafızaları silebilir."] },
+	{ name: "VERSION / Firmware", desc: "Firmware sürüm bilgisini gösterir." },
+	{ name: "VERSION / Hardware", desc: "Hardware revizyon bilgisini gösterir." },
+];
+
+const suggestedSettings = [
+	"SQL = 3",
+	"TXP = HIGH",
+	"SAVE = Normal",
+	"VOX = OFF",
+	"W/N = WIDE",
+	"TDR = ON",
+	"BEEP = OFF",
+	"R-CTCSS = OFF",
+	"T-CTCSS = sadece rölede gerektiğinde",
+	"R/T-DCS = OFF",
+	"VOICE = OFF",
+	"BCL = OFF",
+	"SC-REV = CO",
+	"ROGER = OFF",
+	"AUTOLOCK = OFF",
+	"SCRAMBLE = OFF",
+	"NOISE REDUCTION = isteğe bağlı",
+	"BLUETOOTH = kullanırken ON, yoksa OFF",
+	"MDF-A = FREQ",
+	"MDF-B = NAME",
+	"TX-A/B = main band mantığında",
+	"RESET = elleme",
+	"VERSION menüleri = bilgi amaçlı",
+];
+---
+
+<Layout
+	lang="tr"
+	title="Radtel Premium Ayar Rehberi | RadioHam"
+	description="Radtel menülerini numarasız ve premium görünümde, anlaşılır notlarla öğren."
+>
+	<SiteNav lang="tr" current="firstSetup" />
+
+	<section class="page-hero radtel-hero">
+		<div class="container">
+			<h1>Radtel Ayar Rehberi</h1>
+			<p>Ayarların ne anlama geldiğini öğren.</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="premium-head">
+				<h2>Menü Rehberi</h2>
+				<p>Ayarlarını bilerek yap.</p>
+			</div>
+
+			<div class="menu-grid">
+				{
+					menuItems.map((item) => (
+						<article class="menu-card">
+							<h3>{item.name}</h3>
+							<p>{item.desc}</p>
+							{
+								item.details && (
+									<ul>
+										{item.details.map((line) => (
+											<li>{line}</li>
+										))}
+									</ul>
+								)
+							}
+						</article>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<section class="section premium-band">
+		<div class="container">
+			<div class="cards">
+				<article class="card">
+					<h3>Genel Ayar Önerisi</h3>
+					<ul class="plain-list">
+						{suggestedSettings.map((line) => <li><code>{line}</code></li>)}
+					</ul>
+				</article>
+			</div>
+			<p style="margin-top: 16px;"><a class="btn-primary" href="/ilk-kurulum/modellere-gore-ayar-rehberi">Marka Listesine Dön</a></p>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<style>
+	.radtel-hero {
+		background:
+			radial-gradient(circle at 80% 12%, rgba(145, 215, 255, 0.26), transparent 36%),
+			linear-gradient(118deg, rgba(6, 27, 56, 0.95), rgba(12, 62, 118, 0.9));
+	}
+
+	.premium-head h2 {
+		margin: 0;
+		font: 800 clamp(28px, 4.6vw, 42px) / 1.06 "Exo 2", sans-serif;
+		color: #0f3f70;
+	}
+
+	.premium-head p {
+		margin: 12px 0 0;
+		color: #526d90;
+		font-size: 17px;
+		line-height: 1.7;
+	}
+
+	.menu-grid {
+		margin-top: 20px;
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 12px;
+	}
+
+	.menu-card {
+		background: #fff;
+		border: 1px solid #d7e6f5;
+		border-radius: 14px;
+		padding: 16px;
+		box-shadow: 0 16px 28px -24px rgba(7, 30, 59, 0.78);
+	}
+
+	.menu-card h3 {
+		margin: 0;
+		font: 700 20px/1.2 "Exo 2", sans-serif;
+		color: #123969;
+	}
+
+	.menu-card p {
+		margin: 8px 0 0;
+		color: #4c6383;
+		line-height: 1.62;
+	}
+
+	.menu-card ul {
+		margin: 10px 0 0;
+		padding-left: 18px;
+		display: grid;
+		gap: 6px;
+		color: #45607f;
+	}
+
+	.premium-band {
+		background: linear-gradient(180deg, #eef6ff, #f8fbff);
+	}
+
+	.plain-list {
+		margin: 0;
+		padding-left: 18px;
+		display: grid;
+		gap: 8px;
+	}
+
+	@media (max-width: 1024px) {
+		.menu-grid,
+		.cards {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

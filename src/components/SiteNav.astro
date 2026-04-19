@@ -10,6 +10,7 @@ interface Props {
 		| "solarActivity"
 		| "calculators"
 		| "comparison"
+		| "licenseQuestions"
 		| "firstSetup"
 		| "first7"
 		| "faq"
@@ -28,6 +29,7 @@ const routes = {
 	solarActivity: "/solar-aktivite",
 	calculators: "/hesaplamalar",
 	comparison: "/telsiz-kiyaslama",
+	licenseQuestions: "/lisans-sorulari",
 	firstSetup: "/ilk-kurulum",
 	first7: "/ilk-7-gun",
 	faq: "/sss",
@@ -45,6 +47,7 @@ const labels = {
 	solarActivity: "Solar Aktivite",
 	calculators: "Hesaplamalar",
 	comparison: "Telsiz Kıyaslama",
+	licenseQuestions: "Lisans Soruları",
 	firstSetup: "İlk Kurulum",
 	faq: "SSS",
 	glossary: "Sözlük",
@@ -62,6 +65,7 @@ const amateurItems = [
 	{ key: "solarActivity", href: routes.solarActivity, label: labels.solarActivity },
 	{ key: "calculators", href: routes.calculators, label: labels.calculators },
 	{ key: "comparison", href: routes.comparison, label: labels.comparison },
+	{ key: "licenseQuestions", href: routes.licenseQuestions, label: labels.licenseQuestions },
 	{ key: "firstSetup", href: routes.firstSetup, label: labels.firstSetup },
 	{ key: "faq", href: routes.faq, label: labels.faq },
 	{ key: "glossary", href: routes.glossary, label: labels.glossary },

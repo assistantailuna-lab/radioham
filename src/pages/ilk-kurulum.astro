@@ -26,60 +26,100 @@ const setupItems = [
 
 	<section class="section">
 		<div class="container">
+			<a
+				class="card setup-link-card"
+				style="margin-bottom: 16px;"
+				href="/ilk-kurulum/modellere-gore-ayar-rehberi"
+				aria-label="Modellere Göre Ayar Rehberi sayfasını aç"
+			>
+				<h3>Modellere Göre Ayar Rehberi</h3>
+				<p>Baofeng, Quansheng, TYT ve benzeri cihazlarda menü adları farklı olduğu için hazırlanan hızlı eşleştirme sayfasını kullanabilirsin.</p>
+				<span class="setup-link-cta">Rehbere Git</span>
+			</a>
 			<div class="outline">
-				<article class="outline-section">
-					<h3>Simplex Ayarı</h3>
-					<p><strong>Amaç:</strong> iki telsiz doğrudan konuşsun.</p>
-					<ul>
-						<li><strong>VFO/MR</strong> - frekans moduna geç</li>
-						<li><strong>Frekansı yaz</strong> - örnek: <code>145.500</code></li>
-						<li><strong>T-CTCSS</strong> = <code>OFF</code></li>
-						<li><strong>R-CTCSS</strong> = <code>OFF</code></li>
-						<li><strong>T-DCS</strong> = <code>OFF</code></li>
-						<li><strong>R-DCS</strong> = <code>OFF</code></li>
-						<li><strong>SFT-D / Shift Direction</strong> = <code>OFF</code></li>
-						<li><strong>OFFSET</strong> = <code>0.0000</code></li>
-						<li><strong>W/N (Wide-Narrow)</strong> = karşı cihazla aynı (genelde FM konuşma için <code>Wide</code>)</li>
-						<li><strong>TX Power</strong> = ilk testte <code>Low</code>, gerekirse yükselt</li>
-						<li><strong>Duplex</strong> menüsü varsa <code>OFF</code> veya <code>Simplex</code></li>
-						<li><strong>İstersen hafızaya kaydet</strong> - bazı modellerde <code>2</code> tuşuna uzun basma veya <code>MEM-CH</code></li>
-					</ul>
-					<p><strong>Mantık:</strong> simplex'te dinleme frekansı = gönderme frekansı. Ton kapalı kurulum, başlangıçta en az hata veren yöntemdir.</p>
-				</article>
+				<details class="outline-section premium-glossary accordion-card">
+					<summary class="accordion-summary"><h3>Temel Terimler Sözlüğü</h3></summary>
+					<div class="accordion-body">
+						<div class="glossary-grid">
+						<section class="glossary-item"><h4>VFO mode</h4><p>Elle frekans yazıp geçici kullanım yaptığın mod.</p></section>
+						<section class="glossary-item"><h4>MR / Channel mode</h4><p>Hafızaya kayıtlı kanalları seçtiğin mod.</p></section>
+						<section class="glossary-item"><h4>Bank / Zone</h4><p>Kanalların klasör gibi gruplanmış hali.</p></section>
+						<section class="glossary-item"><h4>Scan</h4><p>Tarama.</p></section>
+						<section class="glossary-item"><h4>Freq Ranger</h4><p>Belirli iki frekans arasında tarama sınırı.</p></section>
+						<section class="glossary-item"><h4>Scan Mode</h4><p>Taramanın sinyal bulunca nasıl davranacağı.</p></section>
+						<section class="glossary-item"><h4>CTCSS</h4><p>Sürekli gönderilen analog alt ton. Röle veya grup filtresi için kullanılır.</p></section>
+						<section class="glossary-item"><h4>DCS</h4><p>Dijital kodlu sessiz açma sistemi.</p></section>
+						<section class="glossary-item"><h4>RX CTCSS / RX DCS</h4><p>Karşı taraf doğru tonu/kodu gönderirse sesi aç.</p></section>
+						<section class="glossary-item"><h4>TX CTCSS / TX DCS</h4><p>Sen yayın yaparken karşı tarafa veya röleye bu tonu/kodu gönder.</p></section>
+						<section class="glossary-item"><h4>Offset</h4><p>Röle kullanımında alma ve gönderme frekansı arasındaki fark.</p></section>
+						<section class="glossary-item"><h4>Offset Direction</h4><p>Bu farkın artı mı eksi mi olduğu.</p></section>
+						<section class="glossary-item"><h4>Reverse</h4><p>Alma ve gönderme frekansını ters çevir.</p></section>
+						<section class="glossary-item"><h4>Talkaround</h4><p>Röleyi devre dışı bırakıp doğrudan karşı istasyon frekansında konuş.</p></section>
+						<section class="glossary-item"><h4>Dual Watch</h4><p>İki hattı sırayla dinleme.</p></section>
+						<section class="glossary-item"><h4>VOX</h4><p>Konuşunca otomatik yayına geçme.</p></section>
+						<section class="glossary-item"><h4>Squelch</h4><p>Boşta gelen hışırtıyı susturma eşiği.</p></section>
+						<section class="glossary-item"><h4>TOT</h4><p>Bir seferde en uzun yayın süresi sınırı.</p></section>
+						<section class="glossary-item"><h4>TOA</h4><p>Yayın bitince taşıyıcıyı kısa süre daha açık tutma gecikmesi olarak düşünülür; kılavuzda çok net açıklanmamış.</p></section>
+						<section class="glossary-item"><h4>Roger</h4><p>Yayın bitti tonu.</p></section>
+						<section class="glossary-item"><h4>Beep</h4><p>Tuş basma bip sesi.</p></section>
+						<section class="glossary-item"><h4>ANI / PTT-ID</h4><p>Yayın başında/sonunda kimlik kodu gönderme.</p></section>
+						<section class="glossary-item"><h4>DTMF</h4><p>Telefon tuş sesi benzeri çoklu tonlu sinyal sistemi.</p></section>
+						<section class="glossary-item"><h4>Tail Elimination</h4><p>Squelch kapanırken gelen kuyruk sesini azaltma.</p></section>
+						<section class="glossary-item"><h4>Bandwidth Wide/Narrow</h4><p>Geniş bant 25 kHz, dar bant 12.5 kHz.</p></section>
+						<section class="glossary-item"><h4>Busy Lock</h4><p>Kanal doluyken yayın yapmayı engelleme.</p></section>
+						<section class="glossary-item"><h4>CH-MDF</h4><p>Kanalın ekranda isimle mi frekansla mı kanal numarasıyla mı görüneceği.</p></section>
+						<section class="glossary-item"><h4>SP-Mute</h4><p>Hangi şartta hoparlörün açılacağı.</p></section>
+						<section class="glossary-item"><h4>Encryption / Scramble / Confidential</h4><p>Sesin anlaşılır çıkmaması için karıştırma; karşı tarafta da aynı ayar gerekli.</p></section>
+					</div>
+					</div>
+				</details>
 
-				<article class="outline-section">
-					<h3>Röle Ayarı</h3>
-					<p><strong>Amaç:</strong> röle üzerinden konuşmak.</p>
-					<p><strong>Gerekli bilgi:</strong> röle çıkış frekansı, ton, shift yönü, offset.</p>
-					<p><strong>Örnek:</strong> <code>145.750 / ton 88.5 / - / 0.600</code></p>
-					<ul>
-						<li><strong>VFO/MR</strong> - frekans moduna geç</li>
-						<li><strong>Frekansı yaz</strong> - <code>145.750</code> (röle çıkışı)</li>
-						<li><strong>T-CTCSS</strong> = <code>88.5</code></li>
-						<li><strong>R-CTCSS</strong> = başlangıçta <code>OFF</code> bırakabilirsin</li>
-						<li><strong>T-DCS / R-DCS</strong> = <code>OFF</code> (röle CTCSS istiyorsa)</li>
-						<li><strong>SFT-D / Shift Direction</strong> = <code>-</code></li>
-						<li><strong>OFFSET</strong> = <code>0.6000</code></li>
-						<li><strong>W/N (Wide-Narrow)</strong> = rölenin istediği bant genişliğiyle aynı</li>
-						<li><strong>TX Power</strong> = ilk testte <code>Low/Med</code>, erişim zayıfsa artır</li>
-						<li><strong>Reverse</strong> menüsü varsa test dışında <code>OFF</code> tut</li>
-						<li><strong>Hafızaya kaydet</strong> - kanal adıyla birlikte (ör. <code>R145750</code>)</li>
-					</ul>
-					<p><strong>Kontrol:</strong> röleyi duyup açamıyorsan önce <code>Shift + Offset + TX Tone</code> üçlüsünü tekrar kontrol et.</p>
-				</article>
+				<details class="outline-section accordion-card">
+					<summary class="accordion-summary"><h3>Simplex Ayarı</h3></summary>
+					<div class="accordion-body">
+						<p><strong>Amaç:</strong> iki telsiz doğrudan konuşsun.</p>
+						<ul>
+							<li><strong>VFO/MR</strong> - frekans moduna geç</li>
+							<li><strong>Frekansı yaz</strong> - örnek: <code>145.500</code></li>
+							<li><strong>T-CTCSS</strong> = <code>OFF</code></li>
+							<li><strong>R-CTCSS</strong> = <code>OFF</code></li>
+							<li><strong>T-DCS</strong> = <code>OFF</code></li>
+							<li><strong>R-DCS</strong> = <code>OFF</code></li>
+							<li><strong>SFT-D / Shift Direction</strong> = <code>OFF</code></li>
+							<li><strong>OFFSET</strong> = <code>0.0000</code></li>
+							<li><strong>W/N (Wide-Narrow)</strong> = karşı cihazla aynı (genelde FM konuşma için <code>Wide</code>)</li>
+							<li><strong>TX Power</strong> = ilk testte <code>Low</code>, gerekirse yükselt</li>
+							<li><strong>Duplex</strong> menüsü varsa <code>OFF</code> veya <code>Simplex</code></li>
+							<li><strong>İstersen hafızaya kaydet</strong> - bazı modellerde <code>2</code> tuşuna uzun basma veya <code>MEM-CH</code></li>
+						</ul>
+						<p><strong>Mantık:</strong> simplex'te dinleme frekansı = gönderme frekansı. Ton kapalı kurulum, başlangıçta en az hata veren yöntemdir.</p>
+					</div>
+				</details>
 
-				<article class="outline-section">
-					<h3>Marka/Model Farkı İçin Menü Karşılıkları</h3>
-					<ul>
-						<li><strong>SFT-D</strong> bazı cihazlarda: <code>Shift</code>, <code>Duplex</code>, <code>Direction</code></li>
-						<li><strong>OFFSET</strong> bazı cihazlarda: <code>Offset Freq</code>, <code>RPT Offset</code>, <code>Delta</code></li>
-						<li><strong>T-CTCSS</strong> bazı cihazlarda: <code>Tone</code>, <code>TX Tone</code>, <code>Encode</code></li>
-						<li><strong>R-CTCSS</strong> bazı cihazlarda: <code>TSQL</code>, <code>RX Tone</code>, <code>Decode</code></li>
-						<li><strong>T-DCS / R-DCS</strong> bazı cihazlarda: <code>DCS Encode/Decode</code>, <code>DTCS</code></li>
-						<li><strong>W/N</strong> bazı cihazlarda: <code>Bandwidth</code>, <code>Channel Width</code></li>
-						<li><strong>VFO/MR</strong> bazı cihazlarda: <code>Frequency/Channel Mode</code></li>
-					</ul>
-				</article>
+				<details class="outline-section accordion-card">
+					<summary class="accordion-summary"><h3>Röle Ayarı</h3></summary>
+					<div class="accordion-body">
+						<p><strong>Amaç:</strong> röle üzerinden konuşmak.</p>
+						<p><strong>Gerekli bilgi:</strong> röle çıkış frekansı, ton, shift yönü, offset.</p>
+						<p><strong>Örnek:</strong> <code>145.750 / ton 88.5 / - / 0.600</code></p>
+						<p><strong>UHF notu:</strong> Röle UHF ise offset çoğu senaryoda <code>7.600</code> olur. Yön <code>-</code> ise pratikte <code>-7.600</code> olarak girilir.</p>
+						<ul>
+							<li><strong>VFO/MR</strong> - frekans moduna geç</li>
+							<li><strong>Frekansı yaz</strong> - <code>145.750</code> (röle çıkışı)</li>
+							<li><strong>T-CTCSS</strong> = <code>88.5</code></li>
+							<li><strong>R-CTCSS</strong> = başlangıçta <code>OFF</code> bırakabilirsin</li>
+							<li><strong>T-DCS / R-DCS</strong> = <code>OFF</code> (röle CTCSS istiyorsa)</li>
+							<li><strong>SFT-D / Shift Direction</strong> = <code>-</code></li>
+							<li><strong>OFFSET</strong> = VHF için genelde <code>0.6000</code>, UHF için çoğunlukla <code>7.6000</code></li>
+							<li><strong>W/N (Wide-Narrow)</strong> = rölenin istediği bant genişliğiyle aynı</li>
+							<li><strong>TX Power</strong> = ilk testte <code>Low/Med</code>, erişim zayıfsa artır</li>
+							<li><strong>Reverse</strong> menüsü varsa test dışında <code>OFF</code> tut</li>
+							<li><strong>Hafızaya kaydet</strong> - kanal adıyla birlikte (ör. <code>R145750</code>)</li>
+						</ul>
+						<p><strong>Kontrol:</strong> röleyi duyup açamıyorsan önce <code>Shift + Offset + TX Tone</code> üçlüsünü tekrar kontrol et. UHF rölede özellikle <code>-7.600</code> değerini yeniden doğrula.</p>
+					</div>
+				</details>
+
 			</div>
 		</div>
 	</section>
@@ -103,4 +143,150 @@ const setupItems = [
 
 	<SiteFooter lang="tr" />
 </Layout>
+
+<style>
+	.setup-link-card {
+		display: block;
+		text-decoration: none;
+		color: inherit;
+		cursor: pointer;
+		transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+	}
+
+	.setup-link-card:hover,
+	.setup-link-card:focus-visible {
+		transform: translateY(-3px);
+		border-color: #b8d8f5;
+		box-shadow: 0 16px 26px -20px rgba(6, 24, 50, 0.9);
+	}
+
+	.setup-link-card h3 {
+		transition: color 0.18s ease;
+	}
+
+	.setup-link-card:hover h3,
+	.setup-link-card:focus-visible h3 {
+		color: #0f5fb0;
+	}
+
+	.setup-link-cta {
+		display: inline-block;
+		margin-top: 14px;
+		font-size: 13px;
+		font-weight: 700;
+		letter-spacing: 0.4px;
+		text-transform: uppercase;
+		color: #1464be;
+	}
+
+	.accordion-card {
+		padding: 0;
+		overflow: hidden;
+		border: 1px solid #cfe2f6;
+		background:
+			radial-gradient(circle at 100% 0%, rgba(125, 198, 255, 0.18), transparent 34%),
+			linear-gradient(180deg, #ffffff, #f9fcff);
+		box-shadow: 0 16px 30px -24px rgba(4, 33, 67, 0.85);
+	}
+
+	.accordion-summary {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		list-style: none;
+		cursor: pointer;
+		padding: 20px;
+		user-select: none;
+		transition: background-color 0.18s ease;
+	}
+
+	.accordion-summary:hover {
+		background: rgba(210, 232, 252, 0.34);
+	}
+
+	.accordion-summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.accordion-summary h3 {
+		margin: 0;
+	}
+
+	.accordion-summary::after {
+		content: "+";
+		width: 28px;
+		height: 28px;
+		border-radius: 999px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		background: #e9f4ff;
+		border: 1px solid #bfd9f5;
+		color: #0c4f90;
+		font: 700 18px/1 "Exo 2", sans-serif;
+		flex: 0 0 auto;
+		transition: transform 0.18s ease, background-color 0.18s ease;
+	}
+
+	.accordion-card[open] .accordion-summary::after {
+		content: "-";
+		transform: rotate(180deg);
+		background: #d9ecff;
+	}
+
+	.accordion-body {
+		padding: 0 20px 20px;
+	}
+
+	.premium-glossary {
+		background:
+			radial-gradient(circle at 92% 12%, rgba(126, 198, 255, 0.25), transparent 36%),
+			linear-gradient(180deg, #ffffff, #f6fbff);
+		border-color: #c8def4;
+	}
+
+	.premium-glossary h3 {
+		margin-bottom: 14px;
+	}
+
+	.glossary-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 10px;
+	}
+
+	.glossary-item {
+		background: rgba(255, 255, 255, 0.86);
+		border: 1px solid #d7e7f7;
+		border-radius: 12px;
+		padding: 12px;
+		box-shadow: 0 14px 24px -24px rgba(7, 34, 66, 0.9);
+	}
+
+	.glossary-item h4 {
+		margin: 0;
+		font: 700 15px/1.3 "Exo 2", sans-serif;
+		color: #0f4479;
+	}
+
+	.glossary-item p {
+		margin-top: 7px;
+		line-height: 1.58;
+	}
+
+	@media (max-width: 760px) {
+		.glossary-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.accordion-summary {
+			padding: 16px;
+		}
+
+		.accordion-body {
+			padding: 0 16px 16px;
+		}
+	}
+</style>
 

@@ -1,0 +1,50 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import PdfInlineViewer from "../../components/PdfInlineViewer.astro";
+import "../../styles/site.css";
+
+const pdfPath = "/lisans-sorulari/pdf/isletme";
+---
+
+<Layout lang="tr" title="İşletme Soru Bankası | RadioHam" description="A/B sınıfı işletme soru bankası PDF görüntüleme ve cevap anahtarı erişimi.">
+	<SiteNav lang="tr" current="licenseQuestions" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>İşletme Soru Bankası</h1>
+			<p>Soruları çöz, istersen aşağıdaki cevap anahtarı bölümünden son sayfayı anında aç.</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="outline-section">
+				<div class="back-row">
+					<a href="/lisans-sorulari">Lisans Soru Bankasına Dön</a>
+				</div>
+				<PdfInlineViewer title="İşletme Soru Bankası" pdfPath={pdfPath} />
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<style>
+	.back-row {
+		margin-bottom: 10px;
+	}
+
+	.back-row a {
+		color: #165da8;
+		font: 700 13px/1 "Exo 2", sans-serif;
+		text-decoration: none;
+	}
+
+	.back-row a:hover {
+		text-decoration: underline;
+	}
+
+</style>

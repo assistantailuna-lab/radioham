@@ -1,0 +1,73 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import "../styles/site.css";
+---
+
+<Layout
+	lang="tr"
+	title="Lisans Soru Bankasi | RadioHam"
+	description="A/B sinifi lisans hazirligi icin soru bankalari: Isletme, Teknik ve Duzenlemeler."
+>
+	<SiteNav lang="tr" current="licenseQuestions" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>Lisans Soru Bankası</h1>
+			<p>Çıkmış soruları 3 başlıkta çözebilir, istersen her sayfada cevap anahtarını hızlıca görebilirsin.</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="cards">
+				<a class="card exam-card" href="/lisans-sorulari/isletme">
+					<h3>İşletme Soru Bankası</h3>
+					<p>İşletme tarafındaki lisans sorularını çözmek için aç.</p>
+					<span>Sayfaya Git</span>
+				</a>
+				<a class="card exam-card" href="/lisans-sorulari/teknik">
+					<h3>Teknik Soru Bankası</h3>
+					<p>Teknik bölüm sorularını ve cevap anahtarını tek sayfada incele.</p>
+					<span>Sayfaya Git</span>
+				</a>
+				<a class="card exam-card" href="/lisans-sorulari/duzenlemeler">
+					<h3>Ulusal/Uluslararası Düzenlemeler</h3>
+					<p>Mevzuat ve düzenlemeler soruları için ilgili PDF sayfasına git.</p>
+					<span>Sayfaya Git</span>
+				</a>
+				<a class="card exam-card" href="/lisans-nasil-alinir">
+					<h3>Lisans Nasıl Alınır?</h3>
+					<p>Başvuru, sınav, belge ve çağrı işareti adımlarını resmi kaynaklarla incele.</p>
+					<span>Detayı Gör</span>
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<style>
+	.exam-card {
+		display: block;
+		text-decoration: none;
+		color: inherit;
+		transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+	}
+
+	.exam-card span {
+		display: inline-block;
+		margin-top: 12px;
+		font: 700 13px/1 "Exo 2", sans-serif;
+		color: #165da8;
+	}
+
+	.exam-card:hover,
+	.exam-card:focus-visible {
+		transform: translateY(-2px);
+		box-shadow: 0 12px 22px rgba(12, 76, 144, 0.16);
+		border-color: #bfd9f5;
+	}
+</style>

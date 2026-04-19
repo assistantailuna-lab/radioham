@@ -26,6 +26,26 @@ body {
 	font-family: "Barlow", sans-serif;
 	color: var(--ink-900);
 	background: var(--bg-100);
+	position: relative;
+	isolation: isolate;
+}
+
+.global-bg-logo {
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	z-index: 0;
+	background-image: url("/logo2.png");
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: min(74vmin, 860px);
+	opacity: 0.045;
+	filter: grayscale(100%) contrast(1.06);
+}
+
+body > *:not(.global-bg-logo) {
+	position: relative;
+	z-index: 1;
 }
 
 a {
@@ -921,6 +941,11 @@ a {
 
 	.home-hero {
 		padding: 74px 0 58px;
+	}
+
+	.global-bg-logo {
+		background-size: min(92vmin, 620px);
+		opacity: 0.055;
 	}
 
 	.home-hero-copy h1 {

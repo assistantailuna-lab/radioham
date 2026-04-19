@@ -1,0 +1,482 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import SiteNav from "../../../components/SiteNav.astro";
+import SiteFooter from "../../../components/SiteFooter.astro";
+import "../../../styles/site.css";
+
+const symbols = [
+	{ label: "Pil simgesi", desc: "Kalan pil seviyesini gösterir." },
+	{
+		label: "DTMF yan ton simgesi",
+		desc: "Tuşla gönderilen DTMF tonlarının hoparlörden duyulacağını gösterir. Bunun çalışması için menüde DTMF yan ton ayarlarının açık olması gerekir.",
+	},
+	{ label: "D simgesi", desc: "Dual Watch açık." },
+	{ label: "V simgesi", desc: "VOX açık." },
+	{ label: "Bluetooth simgesi", desc: "Bluetooth üzerinden frekans yazma özelliği açık." },
+	{ label: "GNSS/GPS simgesi", desc: "Konum sistemi aktif." },
+	{ label: "Kilit simgesi", desc: "Tuş kilidi açık." },
+	{ label: "ZONE işareti", desc: "Cihaz kanal hafıza/bank düzeninde çalışıyor." },
+	{ label: "VFO işareti", desc: "Frekans girişine açık, elle frekans yazılabilen modda." },
+	{ label: "A işareti", desc: "Üst satır ana veya ilgili çalışan hat." },
+	{ label: "B işareti", desc: "Alt satır ikinci hat." },
+	{ label: "SQL", desc: "Squelch durumu açık/kapalı göstergesi." },
+	{ label: "H / M / L", desc: "Sırasıyla yüksek, orta, düşük yayın gücü." },
+	{ label: "DCS", desc: "Dijital susturma kodu aktif." },
+	{ label: "CTCSS", desc: "Analog alt ton aktif." },
+	{
+		label: "+ ofset simgesi",
+		desc: "Röleye çıkış için gönderme frekansı alma frekansından yukarı kaydırılmış.",
+	},
+	{
+		label: "- ofset simgesi",
+		desc: "Röleye çıkış için gönderme frekansı alma frekansından aşağı kaydırılmış.",
+	},
+	{ label: "R", desc: "Reverse aktif, yani alma ve gönderme frekansları ters çevrilmiş." },
+	{
+		label: "Talkaround işareti",
+		desc: "Röle ofsetini bypass edip alma ve gönderme frekansını aynı yapar.",
+	},
+	{
+		label: "Confidential/encryption işareti",
+		desc: "Gizli konuşma/ses karıştırma işlevi aktif.",
+	},
+	{ label: "Narrowband işareti", desc: "Dar bant çalışıyor." },
+];
+
+const scanItems = [
+	{
+		name: "Freq Ranger",
+		desc: "VFO modunda alt ve üst tarama sınırını belirler. Gereksiz bantları taramazsın.",
+	},
+	{
+		name: "Scan Mode",
+		desc: "Tarama sinyal yakaladığında ne yapacağını belirler.",
+		extra: ["Time", "Carrier", "Search"],
+	},
+	{
+		name: "Scan SubCode",
+		desc: "CTCSS veya DCS taraması yapar. Bilinen frekansta kullanılan alt tonu bulur.",
+	},
+	{
+		name: "Scan Memory",
+		desc: "Bulunan tonu RX/TX nereye kaydedeceğini seçer.",
+		extra: ["ALL", "DECODER", "ENCODER"],
+	},
+];
+
+const radioSettingItems = [
+	{
+		name: "Step",
+		desc: "Frekans modu veya taramada her adımda kaç kHz ilerleyeceğini belirler. 2.5K'dan 100K'ye kadar seçenek vardır. Küçük adım hassas, büyük adım hızlı dolaşım sağlar.",
+	},
+	{
+		name: "Squelch",
+		desc: "Boşta gelen hışırtının ne kadar güçlü sinyalde açılacağını ayarlar. OFF/0 olursa squelch tamamen açılır. Seviye yükseldikçe zayıf sinyaller daha zor duyulur ama parazit de azalır.",
+	},
+	{
+		name: "Power Save",
+		desc: "Güç tasarrufu modudur. Açıkken pil daha uzun gider ama cihaz uykuya girdiği için gelen konuşmanın ilk heceleri kaçabilir.",
+	},
+	{ name: "VOX Switch", desc: "VOX'u açar veya kapatır. Açıkken PTT'ye basmadan konuşunca otomatik yayın yapar." },
+	{
+		name: "VOX Level",
+		desc: "VOX hassasiyetidir. Çok düşük ayarda sesin geç algılanabilir; çok yüksek ayarda ortam sesiyle yanlışlıkla yayına geçebilir.",
+	},
+	{
+		name: "VOX Delay",
+		desc: "VOX açıkken konuşmayı bitirdikten sonra yayın ne kadar daha açık kalsın sorusunun cevabıdır. 0.5-2.0 saniye arasıdır. Çok kısa olursa kelime sonlarını kesebilir.",
+	},
+	{
+		name: "TOT",
+		desc: "Time-Out Timer. PTT'ye basılı kalsan bile tek yayının maksimum süresini sınırlar. OFF olursa sınırsız, diğer değerler 15-180 saniye arasıdır.",
+	},
+	{
+		name: "TOA",
+		desc: "Kılavuz bu alanı net açmıyor. 1-10 saniye arası ayarlanabilen bir zamanlama işlevi olarak geçiyor. En güvenli yorum, yayın sonu ya da otomatik zamanlama davranışıyla ilgili yardımcı gecikme ayarı olmasıdır.",
+	},
+	{ name: "Voice", desc: "Sesli menü anonslarını açar veya kapatır. Açıkken mod ve kanal değişimlerinde sesli bilgilendirme gelir." },
+	{ name: "Language", desc: "Menü ve sesli uyarı dilini seçer. Kılavuz İngilizce ve Çinceyi listeliyor." },
+	{ name: "Roger", desc: "Yayın sonunda 'bitti' anlamında bir ton gönderir. Karşı taraf yayın bittiğini daha rahat anlar." },
+	{ name: "Beep", desc: "Tuş basınca bip sesi verir. Tamamen kullanıcı konfor ayarıdır." },
+	{
+		name: "BackLight",
+		desc: "Ekran ışığının hep açık mı olacağı, yoksa 5-20 saniye sonra mı kapanacağı ayarlanır. Hep açık pil tüketimini artırır.",
+	},
+	{ name: "Power on Display", desc: "Açılışta resim mi, voltaj mı gösterileceğini belirler." },
+	{ name: "Dual Watch", desc: "İki hattı izleme özelliğini açar veya kapatır." },
+	{
+		name: "AutoLock",
+		desc: "Tuş kilidinin belirli süre sonra otomatik devreye girmesini sağlar. Açıkken birkaç saniye işlem yapılmazsa kilitlenir.",
+	},
+	{
+		name: "Alarm Mode",
+		desc: "Acil alarmın nasıl çalışacağını belirler.",
+		extra: ["On Site: Sadece kendi hoparlöründe alarm sesi", "Send Sound: Havadan alarm tonu yollar", "Send Code: ANI ile birlikte kod yollar"],
+	},
+	{ name: "Alarm Tone", desc: "Alarm sesini cihaz hoparlöründen duyup duymayacağını ayarlar." },
+	{ name: "ANI-Edit", desc: "ANI kimlik numarasını görme/değiştirme. ANI, seçmeli çağrı veya kimlik iletiminde kullanılır." },
+	{
+		name: "DTMF-ST",
+		desc: "DTMF yan tonunun ne zaman hoparlörden duyulacağını belirler.",
+		extra: ["OFF", "DT-ST", "ANI-ST", "DT+ANI"],
+	},
+	{
+		name: "PTT-ID",
+		desc: "Kimlik kodunun ne zaman gönderileceğini belirler.",
+		extra: ["OFF: Göndermez", "BOT: Başta gönderir", "EOT: Sonda gönderir", "BOTH: Başta ve sonda gönderir"],
+	},
+	{ name: "PTT-DLY", desc: "PTT-ID veya sinyal kodu gönderim gecikmesi. Milisaniye cinsinden ayarlanır." },
+	{
+		name: "ALERT",
+		desc: "PTT + SK2 ile gönderilecek tone burst frekansını seçer.",
+		extra: ["1000 Hz", "1450 Hz", "1750 Hz", "2100 Hz"],
+	},
+	{ name: "TAIL", desc: "Squelch tail elimination. Yayın biterken oluşan kuyruk sesini azaltır." },
+	{
+		name: "Press SK2",
+		desc: "SK2 kısa yol tuşuna hangi görevin atanacağını belirler.",
+		extra: ["FM Radio", "Scan", "Search", "VOX"],
+	},
+	{
+		name: "Reset",
+		desc: "Sıfırlama seçenekleri.",
+		extra: ["VFO: Sadece VFO ayarlarını sıfırlar", "ALL: Cihazı büyük ölçüde fabrika ayarına döndürür"],
+	},
+];
+
+const gpsItems = [
+	{ name: "GPS On/Off", desc: "GPS/GNSS modülünü açar veya kapatır. Kapalıysa GPS'ye uzun basarak giriş yapılamaz." },
+	{ name: "Time Zone", desc: "Saat dilimini ayarlar." },
+	{ name: "GPS Mode", desc: "Konum sistemi olarak hangi uydu altyapısının kullanılacağını seçer.", extra: ["GPS", "BDS", "GPS+BDS"] },
+];
+
+const programChannelItems = [
+	{ name: "CH.NAME", desc: "Kanal adını değiştirir. Harf, rakam, sembol girilebilir." },
+	{ name: "RX Frequency", desc: "Kanalın alma frekansını belirler." },
+	{ name: "TX Frequency", desc: "Kanalın gönderme frekansını belirler." },
+	{ name: "Trans Power", desc: "Kanal bazında High / Middle / Low güç seçimi." },
+	{ name: "Bandwidth", desc: "Wide 25 kHz, Narrow 12.5 kHz." },
+	{ name: "RX CTCSS", desc: "Sadece belirli analog alt ton gelirse sesi açar." },
+	{ name: "RX DCS", desc: "Sadece belirli dijital kod gelirse sesi açar." },
+	{ name: "TX CTCSS", desc: "Sen yayın yaparken analog alt ton gönderir." },
+	{ name: "TX DCS", desc: "Sen yayın yaparken dijital kod gönderir." },
+	{
+		name: "Encryption",
+		desc: "Karşı tarafta da aynı şekilde aktif olursa konuşmalar anlaşılır olur; değilse ses bozuk/anlaşılmaz olur.",
+	},
+	{ name: "Signaling", desc: "Yazılımla tanımlanmış DTMF sinyal grubunu seçer." },
+	{ name: "CH-MDF", desc: "Kanalın ekranda nasıl gösterileceğini seçer.", extra: ["NAME", "FREQ", "CH"] },
+	{
+		name: "SP-Mute",
+		desc: "Hoparlörün hangi şartta açılacağını belirler.",
+		extra: ["QT: Doğru CTCSS/DCS alınca aç", "QT+DTMF: Doğru ton/kod ve doğru DTMF gelince aç"],
+	},
+	{ name: "SCAN ADD", desc: "Mevcut kanal taramaya dahil edilsin mi edilmesin mi seçilir. OFF ise tarama bu kanalı atlar." },
+];
+---
+
+<Layout
+	lang="tr"
+	title="Baofeng Premium Ayar Rehberi | RadioHam"
+	description="Baofeng ekran simgeleri ve menü yapısını numarasız, premium tasarımda tek sayfada öğren."
+>
+	<SiteNav lang="tr" current="firstSetup" />
+
+	<section class="page-hero baofeng-hero">
+		<div class="container">
+			<h1>Baofeng Premium Ayar Rehberi</h1>
+			<p>UV serisi cihazlarda simgeleri ve tüm kritik menüleri tek bakışta görebileceğin, numarasız ve sadeleştirilmiş bir saha rehberi.</p>
+		</div>
+	</section>
+
+	<section class="section premium-band">
+		<div class="container">
+			<div class="premium-head">
+				<h2>Ekrandaki Simgeler ve İşaretler</h2>
+				<p>Ekrandaki her ikonun ne anlama geldiğini hızlıca görüp sahada yanlış modu anında yakalayabilirsin.</p>
+			</div>
+			<div class="symbol-grid">
+				{
+					symbols.map((item) => (
+						<article class="symbol-card">
+							<h3>{item.label}</h3>
+							<p>{item.desc}</p>
+						</article>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="premium-head">
+				<h2>Menü Yapısı</h2>
+				<p>Menü isimleri numarasız sunuldu. Ayarların saha karşılığını doğrudan uygulama odaklı bulabilirsin.</p>
+			</div>
+
+			<div class="menu-stack">
+				<article class="menu-card">
+					<h3>BANK</h3>
+					<p>Kanalları gruplara ayırır. Toplam 10 bank, her bankta en fazla 100 kanal olabilir. Aynı şehir, aynı kullanım türü veya aynı ekip için ayrı bank yapmak mantıklıdır.</p>
+				</article>
+
+				<article class="menu-card">
+					<h3>SCAN</h3>
+					<div class="setting-grid">
+						{
+							scanItems.map((item) => (
+								<section class="setting-card">
+									<h4>{item.name}</h4>
+									<p>{item.desc}</p>
+									{
+										item.extra && (
+											<div class="chip-row">
+												{item.extra.map((value) => (
+													<span class="chip">{value}</span>
+												))}
+											</div>
+										)
+									}
+								</section>
+							))
+						}
+					</div>
+				</article>
+
+				<article class="menu-card">
+					<h3>Bluetooth</h3>
+					<p>Bluetooth üzerinden frekans okuma/yazmayı açar veya kapatır. APP ile eşleştirme için açık olması gerekir.</p>
+				</article>
+
+				<article class="menu-card">
+					<h3>Radio Setting</h3>
+					<div class="setting-grid">
+						{
+							radioSettingItems.map((item) => (
+								<section class="setting-card">
+									<h4>{item.name}</h4>
+									<p>{item.desc}</p>
+									{
+										item.extra && (
+											<ul>
+												{item.extra.map((value) => (
+													<li>{value}</li>
+												))}
+											</ul>
+										)
+									}
+								</section>
+							))
+						}
+					</div>
+				</article>
+
+				<article class="menu-card">
+					<h3>GPS</h3>
+					<div class="setting-grid">
+						{
+							gpsItems.map((item) => (
+								<section class="setting-card">
+									<h4>{item.name}</h4>
+									<p>{item.desc}</p>
+									{
+										item.extra && (
+											<div class="chip-row">
+												{item.extra.map((value) => (
+													<span class="chip">{value}</span>
+												))}
+											</div>
+										)
+									}
+								</section>
+							))
+						}
+					</div>
+				</article>
+
+				<article class="menu-card">
+					<h3>Program Channel</h3>
+					<p>Kanal profil ayarları kanal bazında saklanır. Kanal adı, RX/TX frekansı, güç, bant genişliği, CTCSS/DCS, encryption, signaling, ekran gösterimi ve tarama dahil etme buradan yönetilir.</p>
+					<div class="setting-grid">
+						{
+							programChannelItems.map((item) => (
+								<section class="setting-card">
+									<h4>{item.name}</h4>
+									<p>{item.desc}</p>
+									{
+										item.extra && (
+											<ul>
+												{item.extra.map((value) => (
+													<li>{value}</li>
+												))}
+											</ul>
+										)
+									}
+								</section>
+							))
+						}
+					</div>
+				</article>
+
+				<article class="menu-card">
+					<h3>Radio Information</h3>
+					<p>Bu bölümde Radio ID, firmware sürümü ve hardware sürümü görüntülenir. Ayar menüsü değil, sorgulama/bilgi menüsüdür.</p>
+				</article>
+			</div>
+
+			<div class="back-wrap">
+				<a class="btn-primary" href="/ilk-kurulum/modellere-gore-ayar-rehberi">Marka Listesine Dön</a>
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<style>
+	.baofeng-hero {
+		background:
+			radial-gradient(circle at 86% 10%, rgba(141, 212, 255, 0.3), transparent 35%),
+			linear-gradient(118deg, rgba(3, 23, 50, 0.95), rgba(9, 52, 102, 0.9));
+	}
+
+	.premium-band {
+		background:
+			radial-gradient(circle at 12% 8%, rgba(160, 214, 255, 0.25), transparent 34%),
+			linear-gradient(180deg, #edf5ff 0%, #f7fbff 100%);
+	}
+
+	.premium-head h2 {
+		margin: 0;
+		font: 800 clamp(28px, 4.6vw, 42px) / 1.06 "Exo 2", sans-serif;
+		color: #0f3f70;
+	}
+
+	.premium-head p {
+		margin: 12px 0 0;
+		color: #526d90;
+		font-size: 17px;
+		line-height: 1.7;
+	}
+
+	.symbol-grid {
+		margin-top: 24px;
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 14px;
+	}
+
+	.symbol-card,
+	.menu-card,
+	.setting-card {
+		background: #fff;
+		border: 1px solid #d7e6f5;
+		border-radius: 14px;
+		box-shadow: 0 18px 30px -26px rgba(4, 31, 63, 0.85);
+	}
+
+	.symbol-card {
+		padding: 16px;
+	}
+
+	.symbol-card h3 {
+		margin: 0 0 8px;
+		font: 700 18px/1.3 "Exo 2", sans-serif;
+		color: #134778;
+	}
+
+	.symbol-card p {
+		margin: 0;
+		color: #4b6486;
+		line-height: 1.65;
+	}
+
+	.menu-stack {
+		margin-top: 24px;
+		display: grid;
+		gap: 14px;
+	}
+
+	.menu-card {
+		padding: 20px;
+	}
+
+	.menu-card h3 {
+		margin: 0;
+		font: 800 24px/1.2 "Exo 2", sans-serif;
+		color: #123f70;
+	}
+
+	.menu-card > p {
+		margin: 10px 0 0;
+		color: #4c6689;
+		line-height: 1.7;
+	}
+
+	.setting-grid {
+		margin-top: 14px;
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 12px;
+	}
+
+	.setting-card {
+		padding: 14px;
+	}
+
+	.setting-card h4 {
+		margin: 0;
+		font: 700 16px/1.3 "Exo 2", sans-serif;
+		color: #0f477e;
+	}
+
+	.setting-card p {
+		margin: 8px 0 0;
+		color: #516b8f;
+		line-height: 1.62;
+	}
+
+	.setting-card ul {
+		margin: 10px 0 0;
+		padding-left: 18px;
+		color: #466285;
+		display: grid;
+		gap: 6px;
+	}
+
+	.chip-row {
+		margin-top: 10px;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	.chip {
+		padding: 5px 10px;
+		border-radius: 999px;
+		border: 1px solid #c3dbf3;
+		background: #eef6ff;
+		color: #0f4f8b;
+		font: 700 12px/1 "Exo 2", sans-serif;
+		letter-spacing: 0.3px;
+	}
+
+	.back-wrap {
+		margin-top: 22px;
+	}
+
+	@media (max-width: 1024px) {
+		.symbol-grid,
+		.setting-grid {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
+
+	@media (max-width: 760px) {
+		.symbol-grid,
+		.setting-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

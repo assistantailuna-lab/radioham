@@ -1,0 +1,126 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import "../styles/site.css";
+---
+
+<Layout
+	lang="tr"
+	title="Lisans Nasıl Alınır? | RadioHam"
+	description="Türkiye'de amatör telsiz lisansı alma süreci: başvuru, sınav, ücret, belge ve çağrı işareti adımları."
+>
+	<SiteNav lang="tr" current="guide" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>Lisans Nasıl Alınır?</h1>
+			<p>
+				Bu sayfa, Türkiye'de amatör telsiz lisansı alma sürecini resmi kurum kaynaklarına dayanarak adım adım
+				özetler. Süreçteki ekran adları ve ücretler dönemsel değişebileceği için başvuru öncesi bağlantıları
+				yeniden kontrol et.
+			</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="outline-section">
+				<h2>1) Yetkili Kurumlar ve Temel Çerçeve</h2>
+				<p>
+					BTK'nın amatör telsizcilik sayfasına göre amatör telsizcilik belgelendirme ve sınav süreçleri KEGM
+					tarafından yürütülür. Belge sınıfları A, B ve C olarak düzenlenir.
+				</p>
+				<p>
+					KEGM resmi duyurularında da başvuruların e-Devlet üzerinden alındığı belirtilir. Bu yüzden ilk
+					adresin e-Devlet'teki KEGM hizmet sayfası olmalıdır.
+				</p>
+
+				<h2>2) Başvuru Öncesi Kontrol</h2>
+				<ul>
+					<li>KEGM SSS'ye göre sınav başvurusu için yaş şartı: 12 yaşından büyük olmak.</li>
+					<li>Başvuru türü: A/B sınıfı veya C sınıfı için sınav tercihi yapılır.</li>
+					<li>
+						12-16 yaş aralığındaki adaylar için KEGM SSS'de ayrıca form ve kuruma iletim yöntemi (posta/e-posta)
+						belirtilmiştir.
+					</li>
+				</ul>
+
+				<h2>3) Adım Adım Lisans Süreci</h2>
+				<ol>
+					<li>
+						e-Devlet'te KEGM hizmetlerinden <strong>Amatör Telsizcilik Sınav Başvuru</strong> ekranına gir.
+						Kimlik doğrulamasını tamamlayıp sınav başvurunu gönder.
+					</li>
+					<li>
+						Başvuru sonrası sınav/belge ücretlerini e-Devlet'teki
+						<strong>Kıyı Emniyeti Amatör Telsizcilik Sınav ve Belge Ücreti Sorgulama</strong> hizmetinden kontrol et
+						ve öde.
+					</li>
+					<li>
+						Sınava gir. KEGM SSS'de sınavın soru dağılımı, süre ve itiraz süreçleri açıklanır; sınav tarihleri
+						KEGM duyurularında ayrıca ilan edilir.
+					</li>
+					<li>
+						Sonuçlar için e-Devlet'te <strong>Kıyı Emniyeti Amatör Telsizcilik Belge Sonuç Sorgulama</strong>
+						hizmetini kullan.
+					</li>
+					<li>
+						Belge düzenlendikten sonra e-Devlet'ten <strong>Amatör Telsizcilik Çağrı İşareti Alma</strong>
+						işlemini tamamla.
+					</li>
+					<li>
+						Ardından çağrı işaretini e-Devlet'teki sorgu ekranından doğrula. KEGM SSS'ye göre belgeye QR kod ile
+						dijital erişim sağlanır, PVC kart ayrıca gönderilir.
+					</li>
+				</ol>
+
+				<h2>4) Pratik Notlar</h2>
+				<ul>
+					<li>Sınav takvimi il ve dönem bazında değişebilir; KEGM duyuru sayfasını düzenli takip et.</li>
+					<li>Ücret bilgileri sabit değildir; her başvuruda e-Devlet sorgu ekranından güncel tutarı teyit et.</li>
+					<li>
+						Çağrı işareti, belge ve sınav durum hizmet adları KEGM'nin e-Devlet hizmet listesinde toplu olarak yer
+						alır.
+					</li>
+				</ul>
+
+				<h2>Resmi Kaynaklar</h2>
+				<ul class="source-list">
+					<li><a href="https://www.btk.gov.tr/amator-telsizcilik" rel="noopener noreferrer" target="_blank">BTK - Amatör Telsizcilik</a></li>
+					<li><a href="https://www.kiyiemniyeti.gov.tr/sss" rel="noopener noreferrer" target="_blank">KEGM - Sıkça Sorulan Sorular</a></li>
+					<li><a href="https://www.kiyiemniyeti.gov.tr/AnnouncementDetail/10657/AMATOR-TELSIZCILIK-HIZMETLERI-DUYURU" rel="noopener noreferrer" target="_blank">KEGM Duyuru (e-Hizmetlerin e-Devlet'e taşınması, 07.11.2025)</a></li>
+					<li><a href="https://www.kiyiemniyeti.gov.tr/AnnouncementDetail/10678/ISTANBUL-ILINDE-YAPILACAK-2026-YILI-AMATOR-TELSIZCILIK-SINAVI-ICIN-BASVURULAR-BASLAMISTIR" rel="noopener noreferrer" target="_blank">KEGM 2026 Sınav Duyurusu Örneği (12 Nisan 2026 sınavı)</a></li>
+					<li><a href="https://www.turkiye.gov.tr/kiyi-emniyeti-genel-mudurlugu" rel="noopener noreferrer" target="_blank">e-Devlet - KEGM Hizmet Listesi</a></li>
+					<li><a href="https://www.turkiye.gov.tr/kegm-amator-telsiz-sinav-basvuru" rel="noopener noreferrer" target="_blank">e-Devlet - Kıyı Emniyeti Amatör Telsizcilik Sınav Başvuru</a></li>
+					<li><a href="https://www.turkiye.gov.tr/kegm-amator-telsiz-borc-sorgula" rel="noopener noreferrer" target="_blank">e-Devlet - Sınav ve Belge Ücreti Sorgulama</a></li>
+					<li><a href="https://www.turkiye.gov.tr/kegm-amator-telsiz-sinav-belge-sonuc" rel="noopener noreferrer" target="_blank">e-Devlet - Belge Sonuç Sorgulama</a></li>
+					<li><a href="https://www.turkiye.gov.tr/kiyi-emniyeti-amator-telsiz-cagri-isareti-alma" rel="noopener noreferrer" target="_blank">e-Devlet - Amatör Telsizcilik Çağrı İşareti Alma</a></li>
+					<li><a href="https://www.turkiye.gov.tr/kiyi-emniyeti-amator-telsiz-cagri-isareti-sorgulama" rel="noopener noreferrer" target="_blank">e-Devlet - Amatör Telsizcilik Çağrı İşareti Sorgulama</a></li>
+				</ul>
+
+				<p class="update-note">
+					Son doğrulama tarihi: 19 Nisan 2026
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<style>
+	.outline-section h2 {
+		margin-top: 18px;
+	}
+
+	.source-list {
+		word-break: break-word;
+	}
+
+	.update-note {
+		margin-top: 12px;
+		color: #48688a;
+		font: 600 13px/1.4 "Barlow", sans-serif;
+	}
+</style>

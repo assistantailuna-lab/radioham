@@ -1,0 +1,87 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import "../../styles/site.css";
+---
+
+<Layout
+	lang="tr"
+	title="Modellere Göre Ayar Rehberi | RadioHam"
+	description="Marka seçerek telsiz modeline göre ayar rehberine geç."
+>
+	<SiteNav lang="tr" current="firstSetup" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>Modellere Göre Ayar Rehberi</h1>
+			<p>Markanı seç, o markaya özel ayar sayfasına geç. Şimdilik Baofeng, Radtel ve Tidradio rehberleri hazır.</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="cards">
+				<a class="card brand-card" href="/ilk-kurulum/modellere-gore-ayar-rehberi/baofeng">
+					<h3>Baofeng</h3>
+					<p>UV-5R, UV-82 ve benzeri modeller için hızlı ayar adımları.</p>
+					<span class="brand-card-cta">Sayfayı Aç</span>
+				</a>
+				<a class="card brand-card" href="/ilk-kurulum/modellere-gore-ayar-rehberi/radtel">
+					<h3>Radtel</h3>
+					<p>RT serisi cihazlarda simplex ve röle menü karşılıkları.</p>
+					<span class="brand-card-cta">Sayfayı Aç</span>
+				</a>
+				<a class="card brand-card" href="/ilk-kurulum/modellere-gore-ayar-rehberi/tidradio">
+					<h3>Tidradio</h3>
+					<p>TD serisi cihazlarda temel kurulum ve kontrol akışı.</p>
+					<span class="brand-card-cta">Sayfayı Aç</span>
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<style>
+	.brand-card {
+		display: block;
+		text-decoration: none;
+		color: inherit;
+		transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+		cursor: pointer;
+	}
+
+	.brand-card-cta {
+		display: inline-block;
+		margin-top: 14px;
+		font-size: 13px;
+		font-weight: 700;
+		letter-spacing: 0.4px;
+		text-transform: uppercase;
+		color: #1464be;
+		transition: color 0.18s ease;
+	}
+
+	.brand-card h3 {
+		transition: color 0.18s ease;
+	}
+
+	.brand-card:hover,
+	.brand-card:focus-visible {
+		transform: translateY(-4px);
+		box-shadow: 0 16px 26px -20px rgba(6, 24, 50, 0.9);
+		border-color: #b8d8f5;
+	}
+
+	.brand-card:hover h3,
+	.brand-card:focus-visible h3 {
+		color: #0f5fb0;
+	}
+
+	.brand-card:hover .brand-card-cta,
+	.brand-card:focus-visible .brand-card-cta {
+		color: #0d4b8a;
+	}
+</style>

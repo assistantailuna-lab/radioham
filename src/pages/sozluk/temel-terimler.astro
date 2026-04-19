@@ -1,0 +1,129 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import "../../styles/site.css";
+
+const basicTerms = [
+	{ title: "VFO mode", text: "Elle frekans yazıp geçici kullanım yaptığın mod." },
+	{ title: "MR / Channel mode", text: "Hafızaya kayıtlı kanalları seçtiğin mod." },
+	{ title: "Bank / Zone", text: "Kanalların klasör gibi gruplanmış hali." },
+	{ title: "Scan", text: "Tarama." },
+	{ title: "Freq Ranger", text: "Belirli iki frekans arasında tarama sınırı." },
+	{ title: "Scan Mode", text: "Taramanın sinyal bulunca nasıl davranacağı." },
+	{ title: "CTCSS", text: "Sürekli gönderilen analog alt ton. Röle veya grup filtresi için kullanılır." },
+	{ title: "DCS", text: "Dijital kodlu sessiz açma sistemi." },
+	{ title: "RX CTCSS / RX DCS", text: "Karşı taraf doğru tonu/kodu gönderirse sesi aç." },
+	{ title: "TX CTCSS / TX DCS", text: "Sen yayın yaparken karşı tarafa veya röleye bu tonu/kodu gönder." },
+	{ title: "Offset", text: "Röle kullanımında alma ve gönderme frekansı arasındaki fark." },
+	{ title: "Offset Direction", text: "Bu farkın artı mı eksi mi olduğu." },
+	{ title: "Reverse", text: "Alma ve gönderme frekansını ters çevir." },
+	{ title: "Talkaround", text: "Röleyi devre dışı bırakıp doğrudan karşı istasyon frekansında konuş." },
+	{ title: "Dual Watch", text: "İki hattı sırayla dinleme." },
+	{ title: "VOX", text: "Konuşunca otomatik yayına geçme." },
+	{ title: "Squelch", text: "Boşta gelen hışırtıyı susturma eşiği." },
+	{ title: "TOT", text: "Bir seferde en uzun yayın süresi sınırı." },
+	{ title: "TOA", text: "Yayın bitince taşıyıcıyı kısa süre daha açık tutma gecikmesi olarak düşünülür." },
+	{ title: "Roger", text: "Yayın bitti tonu." },
+	{ title: "Beep", text: "Tuş basma bip sesi." },
+	{ title: "ANI / PTT-ID", text: "Yayın başında/sonunda kimlik kodu gönderme." },
+	{ title: "DTMF", text: "Telefon tuş sesi benzeri çoklu tonlu sinyal sistemi." },
+	{ title: "Tail Elimination", text: "Squelch kapanırken gelen kuyruk sesini azaltma." },
+	{ title: "Bandwidth Wide/Narrow", text: "Geniş bant 25 kHz, dar bant 12.5 kHz." },
+	{ title: "Busy Lock", text: "Kanal doluyken yayın yapmayı engelleme." },
+	{ title: "CH-MDF", text: "Kanalın ekranda isimle mi frekansla mı kanal numarasıyla mı görüneceği." },
+	{ title: "SP-Mute", text: "Hangi şartta hoparlörün açılacağı." },
+	{ title: "Encryption / Scramble / Confidential", text: "Sesin anlaşılır çıkmaması için karıştırma; karşı tarafta da aynı ayar gerekli." },
+];
+---
+
+<Layout lang="tr" title="Temel Terimler Sözlüğü | RadioHam" description="Telsiz kullanımında sık geçen temel terimlerin kısa sözlüğü.">
+	<SiteNav lang="tr" current="glossary" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>Temel Terimler Sözlüğü</h1>
+			<p>Telsiz menülerinde ve kurulumlarda sık göreceğin terimlerin kısa, net anlamları.</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="outline-section term-section">
+				<div class="back-row">
+					<a href="/sozluk">Sözlüğe Dön</a>
+				</div>
+				<div class="term-grid">
+					{
+						basicTerms.map((term) => (
+							<article class="term-card">
+								<h2>{term.title}</h2>
+								<p>{term.text}</p>
+							</article>
+						))
+					}
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<style>
+	.term-section {
+		margin-top: 22px;
+	}
+
+	.back-row {
+		margin-bottom: 10px;
+	}
+
+	.back-row a {
+		color: #165da8;
+		font: 700 13px/1 "Exo 2", sans-serif;
+		text-decoration: none;
+	}
+
+	.back-row a:hover {
+		text-decoration: underline;
+	}
+
+	.term-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 12px;
+	}
+
+	.term-card {
+		border: 1px solid #d7e2ee;
+		border-radius: 12px;
+		background: linear-gradient(180deg, #f8fbff, #fff);
+		padding: 14px;
+	}
+
+	.term-card h2 {
+		margin: 0;
+		font: 700 18px/1.3 "Exo 2", sans-serif;
+		color: #123b6c;
+	}
+
+	.term-card p {
+		margin: 8px 0 0;
+		color: #355b82;
+		font-size: 14px;
+		line-height: 1.6;
+	}
+
+	@media (max-width: 1100px) {
+		.term-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	@media (max-width: 820px) {
+		.term-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

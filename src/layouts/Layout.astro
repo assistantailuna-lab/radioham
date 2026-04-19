@@ -78,6 +78,7 @@ const jsonLdScripts = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
 		<slot name="head" />
 	</head>
 	<body>
+		<div class="global-bg-logo" aria-hidden="true"></div>
 		<slot />
 		{
 			showGlobalAd && hasGlobalAdSlot && (

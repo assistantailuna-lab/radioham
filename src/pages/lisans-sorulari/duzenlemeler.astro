@@ -1,0 +1,54 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import PdfInlineViewer from "../../components/PdfInlineViewer.astro";
+import "../../styles/site.css";
+
+const pdfPath = "/lisans-sorulari/pdf/duzenlemeler";
+---
+
+<Layout
+	lang="tr"
+	title="Ulusal ve Uluslararası Düzenlemeler Soru Bankası | RadioHam"
+	description="A/B sınıfı ulusal ve uluslararası düzenlemeler soru bankası PDF görüntüleme ve cevap anahtarı erişimi."
+>
+	<SiteNav lang="tr" current="licenseQuestions" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>Ulusal ve Uluslararası Düzenlemeler</h1>
+			<p>Mevzuat sorularını çözerken cevap anahtarını gerektiğinde son sayfadan hızlıca açabilirsin.</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="outline-section">
+				<div class="back-row">
+					<a href="/lisans-sorulari">Lisans Soru Bankasına Dön</a>
+				</div>
+				<PdfInlineViewer title="Düzenlemeler Soru Bankası" pdfPath={pdfPath} />
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>
+
+<style>
+	.back-row {
+		margin-bottom: 10px;
+	}
+
+	.back-row a {
+		color: #165da8;
+		font: 700 13px/1 "Exo 2", sans-serif;
+		text-decoration: none;
+	}
+
+	.back-row a:hover {
+		text-decoration: underline;
+	}
+
+</style>
