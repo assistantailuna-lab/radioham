@@ -133,6 +133,100 @@ const normalizeIlName = (value: string): string => {
 	return main || v;
 };
 
+const TURKIYE_ILLERI = [
+	"ADANA", "ADIYAMAN", "AFYONKARAHİSAR", "AĞRI", "AMASYA", "ANKARA", "ANTALYA", "ARTVİN", "AYDIN", "BALIKESİR",
+	"BİLECİK", "BİNGÖL", "BİTLİS", "BOLU", "BURDUR", "BURSA", "ÇANAKKALE", "ÇANKIRI", "ÇORUM", "DENİZLİ",
+	"DİYARBAKIR", "EDİRNE", "ELAZIĞ", "ERZİNCAN", "ERZURUM", "ESKİŞEHİR", "GAZİANTEP", "GİRESUN", "GÜMÜŞHANE", "HAKKARİ",
+	"HATAY", "ISPARTA", "MERSİN", "İSTANBUL", "İZMİR", "KARS", "KASTAMONU", "KAYSERİ", "KIRKLARELİ", "KIRŞEHİR",
+	"KOCAELİ", "KONYA", "KÜTAHYA", "MALATYA", "MANİSA", "KAHRAMANMARAŞ", "MARDİN", "MUĞLA", "MUŞ", "NEVŞEHİR",
+	"NİĞDE", "ORDU", "RİZE", "SAKARYA", "SAMSUN", "SİİRT", "SİNOP", "SİVAS", "TEKİRDAĞ", "TOKAT",
+	"TRABZON", "TUNCELİ", "ŞANLIURFA", "UŞAK", "VAN", "YOZGAT", "ZONGULDAK", "AKSARAY", "BAYBURT", "KARAMAN",
+	"KIRIKKALE", "BATMAN", "ŞIRNAK", "BARTIN", "ARDAHAN", "IĞDIR", "YALOVA", "KARABÜK", "KİLİS", "OSMANİYE", "DÜZCE",
+];
+
+const foldForLookup = (value: string): string =>
+	normalizeText(value)
+		.toLocaleUpperCase("tr")
+		.replace(/[^\p{L}\p{N}\s]/gu, " ")
+		.replace(/\s+/g, " ")
+		.trim()
+		.replace(/İ/g, "I")
+		.replace(/I/g, "I")
+		.replace(/Ş/g, "S")
+		.replace(/Ğ/g, "G")
+		.replace(/Ü/g, "U")
+		.replace(/Ö/g, "O")
+		.replace(/Ç/g, "C");
+
+const PROVINCE_BY_FOLD = new Map(TURKIYE_ILLERI.map((name) => [foldForLookup(name), name]));
+
+const provinceAlias: Record<string, string> = {
+	AFYON: "AFYONKARAHİSAR",
+	BALIESIR: "BALIKESİR",
+	BALIKESIR: "BALIKESİR",
+	DENIZLI: "DENİZLİ",
+	ELAZIG: "ELAZIĞ",
+	MUGLA: "MUĞLA",
+	USAK: "UŞAK",
+	CANAKKALE: "ÇANAKKALE",
+	CANKIRI: "ÇANKIRI",
+	CORUM: "ÇORUM",
+	ISTANBUL: "İSTANBUL",
+	IZMIR: "İZMİR",
+	SANLIURFA: "ŞANLIURFA",
+	KIRIKKALE: "KIRIKKALE",
+	KAHRAMANMARAS: "KAHRAMANMARAŞ",
+	KILIS: "KİLİS",
+	NIGDE: "NİĞDE",
+	ARTVIN: "ARTVİN",
+	GAZIANTEP: "GAZİANTEP",
+	GIRESUN: "GİRESUN",
+	NEVSEHIR: "NEVŞEHİR",
+	TEKIRDAG: "TEKİRDAĞ",
+	"K MARAS": "KAHRAMANMARAŞ",
+	"SANLI URFA": "ŞANLIURFA",
+	BERGAMA: "İZMİR",
+	SOMA: "MANİSA",
+	KOZAN: "ADANA",
+	ALANYA: "ANTALYA",
+	SARIYER: "İSTANBUL",
+	LULEBURGAZ: "KIRKLARELİ",
+	CAN: "ÇANAKKALE",
+	BOZUYUK: "BİLECİK",
+	EDREMIT: "BALIKESİR",
+	GOLCUK: "KOCAELİ",
+	KADIKOY: "İSTANBUL",
+	KADIRLI: "OSMANİYE",
+	"KDZ EREGLI": "ZONGULDAK",
+	"KOCAELI GOLCUK": "KOCAELİ",
+	"KOCAELI IZMIT": "KOCAELİ",
+	"KOCAELI KARAMURSEL": "KOCAELİ",
+	KONAK: "İZMİR",
+	KONY: "KONYA",
+	KUMLUCA: "ANTALYA",
+	NAZILLI: "AYDIN",
+	"TOKAT ZILE": "TOKAT",
+	ELEZIG: "ELAZIĞ",
+};
+
+const pickCanonicalProvince = (...candidates: string[]): string => {
+	for (const raw of candidates) {
+		const cleaned = normalizeIlName(raw)
+			.replace(/\bTEMS[İI]LC[İI]L[İI]Ğ[İI]\b/gi, "")
+			.replace(/\bMERKEZ\b/gi, "")
+			.replace(/\s+/g, " ")
+			.trim();
+		if (!cleaned) continue;
+		const folded = foldForLookup(cleaned);
+		const direct = PROVINCE_BY_FOLD.get(folded);
+		if (direct) return direct;
+		const firstToken = folded.split(" ")[0] ?? folded;
+		const alias = provinceAlias[folded] ?? provinceAlias[firstToken];
+		if (alias) return alias;
+	}
+	return normalizeText(candidates.find((x) => String(x ?? "").trim()) ?? "");
+};
+
 const isNumericHeight = (value: string): boolean => /^\d+(?:[.,]\d+)?(?:\s*m)?$/i.test(value.trim());
 const isHeightMarker = (value: string): boolean => /^[-?]$/.test(value.trim());
 const cleanHeight = (value: string): string => value.replace(/\s*m$/i, "").trim();
@@ -195,7 +289,7 @@ const preparedRows = trRepeaters.map((item) => {
 	return {
 		...item,
 		il: normalizeIlName(item.il),
-		anaIl: normalizeText(item.anaIl),
+		anaIl: pickCanonicalProvince(item.anaIl, item.il),
 		taBolge: normalizeText(item.taBolge),
 		cografiBolge: normalizeRegion(item.cografiBolge),
 		band: normalizeText(item.band),
