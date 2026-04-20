@@ -1,41 +1,748 @@
----
+﻿---
 import Layout from "../layouts/Layout.astro";
 import SiteNav from "../components/SiteNav.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 import { getGuideData, getSubtopicsBySection } from "../data/guide";
+import { buildSubtopicArticle } from "../data/subtopic-content";
 import "../styles/site.css";
 
 const data = getGuideData("tr");
 const plan = data.sections.find((section) => section.number === 19);
 const planItems = getSubtopicsBySection("tr", "first-7-days");
+
+const quickTasks: Record<number, string> = {
+	1: "Tuşlar, ekran simgeleri ve VFO/Kanal modları arasında rahat geçiş yap.",
+	2: "SQL, TX gücü ve tarama ayarlarını tek tek deneyip kısa not çıkar.",
+	3: "Simplex için frekans, bant genişliği ve ton zincirini doğru sırayla kur.",
+	4: "Röle için shift, offset ve TX tone üçlüsünü adım adım doğrula.",
+	5: "Aynı koşullarda iki anteni test edip farkları loga yaz.",
+	6: "Kısa ve net çağrı cümleleriyle kontrollü konuşma pratiği yap.",
+	7: "Çalışan kanal profilini yedekle, haftalık hata listesini kapat.",
+};
+
+const dayLabels: Record<number, string> = {
+	1: "Temel Tanışma",
+	2: "Menü Hakimiyeti",
+	3: "Simplex Kurulumu",
+	4: "Röle Erişimi",
+	5: "Anten ve Saha Testi",
+	6: "Konuşma Pratiği",
+	7: "Yedekleme ve Kapanış",
+};
+
+const firstParagraph = (text: string) => {
+	const clean = text
+		.replace(/[#>*_`-]/g, " ")
+		.replace(/\s+/g, " ")
+		.trim();
+
+	const firstLine = clean.split("\n")[0]?.trim() ?? clean;
+	const sentenceBreak = firstLine.search(/[.!?](\s|$)/);
+	return sentenceBreak >= 0 ? firstLine.slice(0, sentenceBreak + 1) : firstLine;
+};
+
+const planCards = planItems.map((item) => {
+	const article = buildSubtopicArticle("tr", item);
+	return {
+		...item,
+		summary: firstParagraph(article.plainExplanation),
+		task: quickTasks[item.itemNumber] ?? "Günün tek odak hedefini tamamlayıp kısa not al.",
+		dayLabel: dayLabels[item.itemNumber] ?? `Gün ${item.itemNumber}`,
+	};
+});
+
+const checklist = [
+	"Cihazın VFO ve kanal modu farkını gerçekten anladım.",
+	"Simplex için frekans + genişlik + ton sırasını karıştırmıyorum.",
+	"Röle ayarında shift / offset / TX tone mantığını ayırt edebiliyorum.",
+	"En az bir güvenli test çağrısı yaptım veya hazır hale geldim.",
+	"Çalışan ayarları not ettim ya da kanal olarak kaydettim.",
+	"Hangi ayarın ne işe yaradığını ezber değil mantıkla açıklayabiliyorum.",
+];
+
+const commonMistakes = [
+	"Simplex ve röle mantığını karıştırıp gereksiz tone/offset açık bırakmak.",
+	"Kanaldan değil VFO’dan çalıştığını fark etmeden ayar aramak.",
+	"Genişlik, SQL ve TX gücünü rastgele değiştirip sonucu not almamak.",
+	"Anten farkını sahada kıyaslamadan sadece hissiyata göre karar vermek.",
+	"Çalışan profili kaydetmeden yeniden kurulum yapmak zorunda kalmak.",
+];
+
+const faqItems = [
+	{
+		q: "İlk 7 günün amacı nedir?",
+		a: "Amaç bütün menüleri ezberlemek değil; cihazı güvenli, kontrollü ve mantığını anlayarak kullanabilecek seviyeye gelmektir.",
+	},
+	{
+		q: "Her gün ne kadar zaman ayırmalıyım?",
+		a: "20 ila 40 dakikalık odaklı çalışma bile yeterlidir. Burada önemli olan aynı gün içinde tek bir konuyu netleştirmektir.",
+	},
+	{
+		q: "Bir günü tamamlamadan diğerine geçebilir miyim?",
+		a: "Geçebilirsin; ama en iyi sonuç için her günün hedefini en az bir küçük pratikle kapatman önerilir.",
+	},
+	{
+		q: "Bu plan yeni başlayanlar için mi?",
+		a: "Evet. Sayfa, ilk cihazını alan ve menüler arasında kaybolmadan temel akışı öğrenmek isteyen kullanıcılar için tasarlanmıştır.",
+	},
+];
 ---
 
 <Layout lang="tr" title={data.first7Title} description={data.first7Description}>
 	<SiteNav lang="tr" current="first7" />
 
-	<section class="page-hero">
+	<section class="page-hero hero-upgraded">
+		<div class="container hero-grid">
+			<div>
+				<p class="eyebrow">Başlangıç Planı</p>
+				<h1>{data.first7HeroTitle}</h1>
+				<p class="hero-lead">{data.first7HeroText}</p>
+
+				<div class="hero-points">
+					<span>7 gün odaklı akış</span>
+					<span>Yeni başlayan dostu</span>
+					<span>Pratik görev tabanlı</span>
+				</div>
+			</div>
+
+			<aside class="hero-panel">
+				<h2>Bu sayfada ne var?</h2>
+				<ul>
+					<li>Her gün için kısa özet</li>
+					<li>Tek odak görev mantığı</li>
+					<li>Detaylı konu bağlantıları</li>
+					<li>Hafta sonu kapanış kontrol listesi</li>
+				</ul>
+				<p class="hero-panel-note">
+					Hedef: menü ezberi değil, cihazı mantığını anlayarak güvenli kullanmak.
+				</p>
+			</aside>
+		</div>
+	</section>
+
+	<section class="section section-tight">
 		<div class="container">
-			<h1>{data.first7HeroTitle}</h1>
-			<p>{data.first7HeroText}</p>
+			<ul class="mini-stats" aria-label="İlk 7 gün hızlı özet">
+				<li class="mini-stat">
+					<strong>7</strong>
+					<span>günlük odak</span>
+				</li>
+				<li class="mini-stat">
+					<strong>{planCards.length}</strong>
+					<span>ana konu kartı</span>
+				</li>
+				<li class="mini-stat">
+					<strong>1</strong>
+					<span>günde tek hedef</span>
+				</li>
+				<li class="mini-stat">
+					<strong>Kısa</strong>
+					<span>uygulanabilir pratik</span>
+				</li>
+			</ul>
 		</div>
 	</section>
 
 	<section class="section">
 		<div class="container">
-			<h2>{plan?.number}. {plan?.title}</h2>
-			<div class="cards">
+			<div class="intro-box">
+				<div>
+					<h2>{plan?.number}. {plan?.title}</h2>
+					<p class="plan-intro">
+						Her gün kartında kısa özet, tek odak görev ve detaylı konu bağlantısı birlikte verilir.
+						Böylece cihazı rastgele kurcalamak yerine kontrollü ilerlersin.
+					</p>
+				</div>
+				<div class="intro-tip">
+					<strong>En iyi kullanım şekli:</strong>
+					<p>
+						Günde sadece bir kart seç, görevi tamamla, ardından çalışan ayarı not al.
+						Bu düzen yeni başlayanlarda kafa karışıklığını ciddi biçimde azaltır.
+					</p>
+				</div>
+			</div>
+
+			<ul class="cards plan-cards" role="list">
 				{
-					planItems.map((item) => (
-						<article class="card">
-							<h3>{item.code}</h3>
-							<p>{item.title}</p>
-							<a href={`/konu/${item.slug}`}>Detaylı Anlatım</a>
-						</article>
+					planCards.map((item) => (
+						<li class="card plan-card" role="listitem">
+							<div class="card-top">
+								<div class="day-badge">Gün {item.itemNumber}</div>
+								<div class="day-label">{item.dayLabel}</div>
+							</div>
+
+							<h3>{item.code} - {item.title}</h3>
+
+							<p class="summary">{item.summary}</p>
+
+							<p class="task">
+								<strong>Bugünün hedefi:</strong> {item.task}
+							</p>
+
+							<div class="progress-row" aria-hidden="true">
+								<div class="progress-track">
+									<div class="progress-fill" style={`width: ${(item.itemNumber / Math.max(planCards.length, 1)) * 100}%`}></div>
+								</div>
+								<span class="progress-text">Adım {item.itemNumber}/{planCards.length}</span>
+							</div>
+
+							<a href={`/konu/${item.slug}`} class="card-link" aria-label={`${item.fullTitle} detaylı anlatımını aç`}>
+								Detaylı anlatımı aç
+							</a>
+						</li>
 					))
 				}
+			</ul>
+		</div>
+	</section>
+
+	<section class="section alt-section">
+		<div class="container two-col">
+			<article class="info-card">
+				<h2>Hafta bitmeden kontrol et</h2>
+				<p class="info-intro">
+					Aşağıdaki maddelerin çoğuna “evet” diyebiliyorsan ilk 7 gün hedefini büyük ölçüde tamamlamışsın demektir.
+				</p>
+				<ul class="check-list">
+					{checklist.map((item) => <li class="check-item">{item}</li>)}
+				</ul>
+			</article>
+
+			<article class="info-card">
+				<h2>En sık yapılan hatalar</h2>
+				<p class="info-intro">
+					Yeni başlayanların çoğu cihazdan değil, yanlış kurulum sırasından dolayı zorlanır.
+				</p>
+				<ul class="mistake-list">
+					{commonMistakes.map((item) => <li class="mistake-item">{item}</li>)}
+				</ul>
+			</article>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="focus-box">
+				<h2>Neden bu plan işe yarar?</h2>
+				<div class="focus-grid">
+					<div class="focus-item">
+						<h3>Ezber yerine mantık</h3>
+						<p>
+							Bu akış, kullanıcıyı tek tek menü ezberlemeye değil; hangi ayarın neyi etkilediğini
+							anlamaya yönlendirir.
+						</p>
+					</div>
+					<div class="focus-item">
+						<h3>Her gün tek odak</h3>
+						<p>
+							Bir günde her şeyi öğrenmeye çalışmak yerine tek konuyu kapatmak, öğrenmeyi daha kalıcı hale getirir.
+						</p>
+					</div>
+					<div class="focus-item">
+						<h3>Pratik kapanış</h3>
+						<p>
+							Her günün sonunda çalışan ayarı not etmek, cihazı her seferinde sıfırdan kurma derdini azaltır.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="section alt-section">
+		<div class="container">
+			<h2>Sık Sorulan Sorular</h2>
+			<ul class="faq-grid" role="list">
+				{
+					faqItems.map((item) => (
+						<li class="faq-card" role="listitem">
+							<h3>{item.q}</h3>
+							<p>{item.a}</p>
+						</li>
+					))
+				}
+			</ul>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="cta-box">
+				<div>
+					<h2>İlk haftayı tamamladıktan sonra ne yapmalı?</h2>
+					<p>
+						Bir sonraki aşamada cihazını daha kontrollü kullanmak için sözlük, hesaplamalar,
+						frekans rehberleri ve detaylı konu anlatımlarına geçebilirsin.
+					</p>
+				</div>
+				<div class="cta-actions">
+					<a href="/rehber" class="cta-btn primary">Rehbere dön</a>
+					<a href="/hesaplamalar" class="cta-btn secondary">Hesaplamaları aç</a>
+				</div>
 			</div>
 		</div>
 	</section>
 
 	<SiteFooter lang="tr" />
 </Layout>
+
+<style>
+	.hero-upgraded {
+		padding-bottom: 28px;
+	}
+
+	.hero-grid {
+		display: grid;
+		grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.9fr);
+		gap: 24px;
+		align-items: start;
+	}
+
+	.eyebrow {
+		margin: 0 0 10px;
+		font-size: 13px;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: #0f5fb0;
+	}
+
+	.hero-lead {
+		margin: 0;
+		font-size: 17px;
+		line-height: 1.8;
+		color: #c9ddf2;
+		max-width: 760px;
+	}
+
+	.hero-points {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10px;
+		margin-top: 18px;
+	}
+
+	.hero-points span {
+		padding: 8px 12px;
+		border-radius: 999px;
+		background: #eef7ff;
+		border: 1px solid #d4e7f8;
+		color: #184b81;
+		font-size: 13px;
+		font-weight: 700;
+	}
+
+	.hero-panel {
+		padding: 18px;
+		border-radius: 18px;
+		background: linear-gradient(180deg, #f5fbff 0%, #edf6ff 100%);
+		border: 1px solid #d8ebfb;
+		box-shadow: 0 12px 32px rgba(15, 95, 176, 0.08);
+	}
+
+	.hero-panel h2 {
+		margin: 0 0 10px;
+		font-size: 20px;
+		color: #1c4f83;
+	}
+
+	.hero-panel ul {
+		margin: 0;
+		padding-left: 18px;
+		color: #365c80;
+		line-height: 1.8;
+	}
+
+	.hero-panel-note {
+		margin: 14px 0 0;
+		padding-top: 14px;
+		border-top: 1px solid #d6e7f8;
+		color: #29527c;
+		font-size: 14px;
+		line-height: 1.7;
+	}
+
+	.section-tight {
+		padding-top: 0;
+	}
+
+	.mini-stats {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 14px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.mini-stat {
+		padding: 16px;
+		border-radius: 16px;
+		background: #fff;
+		border: 1px solid #dceafa;
+		box-shadow: 0 10px 24px rgba(28, 78, 132, 0.06);
+		text-align: center;
+	}
+
+	.mini-stat strong {
+		display: block;
+		font-size: 24px;
+		line-height: 1.1;
+		color: #0d4f95;
+		margin-bottom: 6px;
+	}
+
+	.mini-stat span {
+		display: block;
+		font-size: 14px;
+		color: #4a6a89;
+	}
+
+	.intro-box {
+		display: grid;
+		grid-template-columns: minmax(0, 1.3fr) minmax(260px, 0.8fr);
+		gap: 20px;
+		align-items: start;
+		margin-bottom: 18px;
+	}
+
+	.plan-intro {
+		margin-top: 10px;
+		margin-bottom: 0;
+		color: #49698a;
+		line-height: 1.75;
+	}
+
+	.intro-tip {
+		padding: 16px;
+		border-radius: 14px;
+		background: #f8fbff;
+		border: 1px solid #d8e8f8;
+		color: #315675;
+	}
+
+	.intro-tip strong {
+		display: block;
+		margin-bottom: 8px;
+		color: #16497d;
+	}
+
+	.intro-tip p {
+		margin: 0;
+		line-height: 1.7;
+	}
+
+	.plan-cards {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 18px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.plan-card {
+		display: grid;
+		gap: 12px;
+		padding: 20px;
+		border-radius: 18px;
+		border: 1px solid #dceafb;
+		box-shadow: 0 14px 34px rgba(17, 73, 131, 0.07);
+		background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+	}
+
+	.card-top {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 10px;
+		flex-wrap: wrap;
+	}
+
+	.day-badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 6px 10px;
+		border-radius: 999px;
+		background: #0f5fb0;
+		color: #fff;
+		font-size: 12px;
+		font-weight: 800;
+		letter-spacing: 0.03em;
+	}
+
+	.day-label {
+		font-size: 13px;
+		font-weight: 700;
+		color: #537392;
+	}
+
+	.summary {
+		margin: 0;
+		line-height: 1.75;
+		color: #355676;
+	}
+
+	.task {
+		margin: 0;
+		padding: 12px 14px;
+		border: 1px solid #d5e6f8;
+		border-radius: 12px;
+		background: #f5fbff;
+		color: #184b81;
+		font-size: 14px;
+		line-height: 1.6;
+	}
+
+	.progress-row {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.progress-track {
+		flex: 1;
+		height: 8px;
+		border-radius: 999px;
+		background: #e6f0fa;
+		overflow: hidden;
+	}
+
+	.progress-fill {
+		height: 100%;
+		border-radius: 999px;
+		background: linear-gradient(90deg, #0f5fb0 0%, #4fa2f1 100%);
+	}
+
+	.progress-text {
+		font-size: 12px;
+		font-weight: 700;
+		color: #5f7d99;
+		white-space: nowrap;
+	}
+
+	.card-link {
+		display: inline-block;
+		width: fit-content;
+		font-weight: 800;
+		color: #0f5fb0;
+		text-decoration: none;
+		border-bottom: 1px solid #9ec4eb;
+		padding-bottom: 2px;
+	}
+
+	.card-link:hover {
+		color: #0d487f;
+		border-bottom-color: #7caeda;
+	}
+
+	.alt-section {
+		background: linear-gradient(180deg, #fbfdff 0%, #f6fbff 100%);
+	}
+
+	.two-col {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 18px;
+	}
+
+	.info-card {
+		padding: 20px;
+		border-radius: 18px;
+		background: #fff;
+		border: 1px solid #dbe9f9;
+		box-shadow: 0 12px 30px rgba(22, 73, 125, 0.06);
+	}
+
+	.info-card h2 {
+		margin-top: 0;
+		margin-bottom: 10px;
+	}
+
+	.info-intro {
+		margin: 0 0 14px;
+		color: #486987;
+		line-height: 1.7;
+	}
+
+	.check-list,
+	.mistake-list {
+		margin: 0;
+		padding-left: 18px;
+		color: #355676;
+		line-height: 1.8;
+	}
+
+	.check-item,
+	.mistake-item {
+		margin: 0;
+	}
+
+	.focus-box {
+		padding: 24px;
+		border-radius: 20px;
+		background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+		border: 1px solid #dceafb;
+		box-shadow: 0 14px 34px rgba(17, 73, 131, 0.06);
+	}
+
+	.focus-box h2 {
+		margin-top: 0;
+		margin-bottom: 18px;
+	}
+
+	.focus-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 16px;
+	}
+
+	.focus-item {
+		padding: 18px;
+		border-radius: 16px;
+		background: #f7fbff;
+		border: 1px solid #dceafb;
+	}
+
+	.focus-item h3 {
+		margin-top: 0;
+		margin-bottom: 8px;
+		font-size: 18px;
+	}
+
+	.focus-item p {
+		margin: 0;
+		color: #446683;
+		line-height: 1.7;
+	}
+
+	.faq-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 16px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.faq-card {
+		padding: 18px;
+		border-radius: 16px;
+		background: #fff;
+		border: 1px solid #dceafb;
+		box-shadow: 0 10px 24px rgba(17, 73, 131, 0.05);
+	}
+
+	.faq-card h3 {
+		margin-top: 0;
+		margin-bottom: 10px;
+		font-size: 18px;
+	}
+
+	.faq-card p {
+		margin: 0;
+		color: #446683;
+		line-height: 1.75;
+	}
+
+	.cta-box {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 20px;
+		padding: 24px;
+		border-radius: 22px;
+		background: linear-gradient(135deg, #0f5fb0 0%, #1b75cc 55%, #4099ea 100%);
+		color: #fff;
+		box-shadow: 0 18px 40px rgba(15, 95, 176, 0.2);
+	}
+
+	.cta-box h2 {
+		margin: 0 0 10px;
+		color: #fff;
+	}
+
+	.cta-box p {
+		margin: 0;
+		max-width: 720px;
+		line-height: 1.75;
+		color: rgba(255, 255, 255, 0.95);
+	}
+
+	.cta-actions {
+		display: flex;
+		gap: 12px;
+		flex-wrap: wrap;
+	}
+
+	.cta-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 12px 16px;
+		border-radius: 12px;
+		text-decoration: none;
+		font-weight: 800;
+		transition: 0.2s ease;
+	}
+
+	.cta-btn.primary {
+		background: #fff;
+		color: #0d4f95;
+	}
+
+	.cta-btn.primary:hover {
+		background: #eef6ff;
+	}
+
+	.cta-btn.secondary {
+		background: rgba(255, 255, 255, 0.12);
+		color: #fff;
+		border: 1px solid rgba(255, 255, 255, 0.28);
+	}
+
+	.cta-btn.secondary:hover {
+		background: rgba(255, 255, 255, 0.18);
+	}
+
+	@media (max-width: 980px) {
+		.hero-grid,
+		.intro-box,
+		.two-col,
+		.focus-grid,
+		.faq-grid,
+		.plan-cards {
+			grid-template-columns: 1fr;
+		}
+
+		.mini-stats {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.cta-box {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.mini-stats {
+			grid-template-columns: 1fr 1fr;
+		}
+
+		.plan-card,
+		.info-card,
+		.faq-card,
+		.focus-item,
+		.focus-box,
+		.cta-box,
+		.hero-panel {
+			padding: 16px;
+		}
+
+		.hero-lead {
+			font-size: 16px;
+		}
+	}
+</style>
