@@ -4,6 +4,7 @@ interface Props {
 	current:
 		| "home"
 		| "guide"
+		| "sdr"
 		| "categories"
 		| "aprs"
 		| "worldMap"
@@ -19,10 +20,12 @@ interface Props {
 }
 
 const { current } = Astro.props;
+const sdrEnabled = String(import.meta.env.PUBLIC_ENABLE_SDR ?? "false").toLowerCase() === "true";
 
 const routes = {
 	home: "/",
 	guide: "/rehber",
+	sdr: "/sdr",
 	categories: "/frekanslar",
 	aprs: "/aprs",
 	worldMap: "/dunya-haritasi",
@@ -40,6 +43,7 @@ const routes = {
 const labels = {
 	home: "Anasayfa",
 	amateur: "Amatör Telsizcilik",
+	sdrHub: "SDR / Dinleme",
 	guide: "Rehber",
 	categories: "Frekanslar",
 	aprs: "APRS",
@@ -72,6 +76,19 @@ const amateurItems = [
 ] as const;
 
 const amateurActive = amateurItems.some((item) => item.key === current);
+
+const sdrItems = [
+	{ href: routes.sdr, label: "SDR Ana Sayfa" },
+	{ href: "/sdr/nedir", label: "SDR Nedir?" },
+	{ href: "/sdr/yeni-baslayan-icin", label: "Yeni Başlayan İçin" },
+	{ href: "/sdr/hangi-sdr-cihazi-alinmali", label: "Hangi Cihaz?" },
+	{ href: "/sdr/yazilimlar/sdrsharp", label: "SDR# Rehberi" },
+	{ href: "/sdr/ne-dinlenir/ads-b", label: "ADS-B" },
+	{ href: "/sdr/sorun-giderme", label: "Sorun Giderme" },
+	{ href: "/sdr/amatore-gecis-koprusu/sdrden-amatore-gecis", label: "Amatöre Geçiş" },
+] as const;
+
+const sdrActive = current === "sdr";
 ---
 
 <header class="page-header">
@@ -100,6 +117,20 @@ const amateurActive = amateurItems.some((item) => item.key === current);
 					}
 				</div>
 			</details>
+			{
+				sdrEnabled && (
+					<details class={`nav-dropdown ${sdrActive ? "active" : ""}`}>
+						<summary>{labels.sdrHub}</summary>
+						<div class="dropdown-menu">
+							{
+								sdrItems.map((item) => (
+									<a href={item.href}>{item.label}</a>
+								))
+							}
+						</div>
+					</details>
+				)
+			}
 			<a href={routes.contact} class={current === "contact" ? "active" : ""}>
 				{labels.contact}
 			</a>

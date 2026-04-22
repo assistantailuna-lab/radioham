@@ -9,6 +9,7 @@ const t = {
 	col1: "Rehber",
 	col2: "Kaynaklar",
 	allSections: "Tüm Bölümler",
+	sdr: "SDR / Dinleme",
 	categoryMap: "Frekanslar",
 	firstSetup: "İlk Kurulum",
 	faq: "Sık Sorulan Sorular",
@@ -19,6 +20,7 @@ const t = {
 	bottom: ["Kullanım Koşulları", "Gizlilik Politikası", "İletişim"],
 	links: {
 		guide: "/rehber",
+		sdr: "/sdr",
 		categories: "/frekanslar",
 		firstSetup: "/ilk-kurulum",
 		faq: "/sss",
@@ -30,6 +32,7 @@ const t = {
 		privacy: "/gizlilik-politikasi",
 	},
 };
+const sdrEnabled = String(import.meta.env.PUBLIC_ENABLE_SDR ?? "false").toLowerCase() === "true";
 ---
 
 <footer class="site-footer">
@@ -43,6 +46,7 @@ const t = {
 			<h3>{t.col1}</h3>
 			<ul>
 				<li><a href={t.links.guide}>{t.allSections}</a></li>
+				{ sdrEnabled && <li><a href={t.links.sdr}>{t.sdr}</a></li> }
 				<li><a href={t.links.categories}>{t.categoryMap}</a></li>
 				<li><a href={t.links.firstSetup}>{t.firstSetup}</a></li>
 				<li><a href={t.links.faq}>{t.faq}</a></li>

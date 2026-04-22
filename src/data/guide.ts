@@ -10,6 +10,7 @@ export type GuideSection = {
 export type GuideSubtopic = {
 	lang: Lang;
 	slug: string;
+	legacySlugs: string[];
 	code: string;
 	sectionId: string;
 	sectionNumber: number;
@@ -259,10 +260,52 @@ export const getGuideData = (lang: Lang) => guideData[lang];
 export const getSectionsByNumbers = (lang: Lang, numbers: number[]) =>
 	guideData[lang].sections.filter((section) => numbers.includes(section.number));
 
-const slugify = (value: string) =>
+const legacySlugify = (value: string) =>
 	value
 		.toLocaleLowerCase()
 		.normalize("NFD")
+		.replace(/[\u0300-\u036f]/g, "")
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/^-+|-+$/g, "")
+		.slice(0, 80);
+
+const fixMojibake = (text: string) => {
+	const replacements: Array<[string, string]> = [
+		["Ã¼", "ü"],
+		["Ãœ", "Ü"],
+		["Ã¶", "ö"],
+		["Ã–", "Ö"],
+		["Ã§", "ç"],
+		["Ã‡", "Ç"],
+		["Ä±", "ı"],
+		["Ä°", "İ"],
+		["ÅŸ", "ş"],
+		["Åž", "Ş"],
+		["ÄŸ", "ğ"],
+		["Äž", "Ğ"],
+		["â€™", "'"],
+		["â€˜", "'"],
+		["â€œ", "\""],
+		["â€", "\""],
+		["â€“", "-"],
+		["â€”", "-"],
+	];
+	return replacements.reduce((current, [bad, good]) => current.split(bad).join(good), text);
+};
+
+const canonicalSlugify = (value: string) =>
+	fixMojibake(value)
+		.toLocaleLowerCase("tr-TR")
+		.replace(/[ç]/g, "c")
+		.replace(/[ğ]/g, "g")
+		.replace(/[ı]/g, "i")
+		.replace(/[ö]/g, "o")
+		.replace(/[ş]/g, "s")
+		.replace(/[ü]/g, "u")
+		.replace(/[â]/g, "a")
+		.replace(/[î]/g, "i")
+		.replace(/[û]/g, "u")
+		.normalize("NFKD")
 		.replace(/[\u0300-\u036f]/g, "")
 		.replace(/[^a-z0-9]+/g, "-")
 		.replace(/^-+|-+$/g, "")
@@ -281,11 +324,13 @@ export const listSubtopics = (lang: Lang): GuideSubtopic[] => {
 			const itemNumber = match ? Number(match[2]) : index + 1;
 			const title = match ? match[3] : trimmed;
 			const code = `${section.number}.${itemNumber}`;
-			const slug = `${section.number}-${itemNumber}-${slugify(title)}`;
+			const slug = `${section.number}-${itemNumber}-${canonicalSlugify(title)}`;
+			const legacySlug = `${section.number}-${itemNumber}-${legacySlugify(title)}`;
 
 			subtopics.push({
 				lang,
 				slug,
+				legacySlugs: legacySlug !== slug ? [legacySlug] : [],
 				code,
 				sectionId: section.id,
 				sectionNumber: section.number,

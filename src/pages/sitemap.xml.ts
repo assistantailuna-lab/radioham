@@ -1,35 +1,31 @@
 import type { APIRoute } from "astro";
 import { calculators } from "../data/calculators";
+import { listSubtopics } from "../data/guide";
+import { sdrRoutes } from "../data/sdr-routes";
 
-const routes = [
-	"/",
-	"/rehber",
-	"/kategoriler",
-	"/frekanslar",
-	"/frekanslar/turkiye-role-frekanslari",
-	"/frekanslar/genel-frekans-bilgileri",
-	"/dunya-haritasi",
-	"/solar-aktivite",
-	"/hesaplamalar",
-	"/telsiz-kiyaslama",
-	"/lisans-sorulari",
-	"/lisans-sorulari/isletme",
-	"/lisans-sorulari/teknik",
-	"/lisans-sorulari/duzenlemeler",
-	"/ilk-kurulum",
-	"/ilk-7-gun",
-	"/sss",
-	"/sozluk",
-	"/sozluk/fonetik-alfabe",
-	"/sozluk/q-kodlar",
-	"/sozluk/cagri-isareti-ornekleri",
-	"/sozluk/temel-terimler",
-	"/contact-us",
-	"/kaynakca",
-	"/kullanim-kosullari",
-	"/gizlilik-politikasi",
+const sdrEnabled = String(import.meta.env.PUBLIC_ENABLE_SDR ?? "false").toLowerCase() === "true";
+const staticPageModules = import.meta.glob("/src/pages/**/*.astro");
+
+const staticRoutes = Object.keys(staticPageModules)
+	.map((modulePath) =>
+		modulePath
+			.replace("/src/pages", "")
+			.replace(/\/index\.astro$/, "/")
+			.replace(/\.astro$/, "")
+	)
+	.filter((route) => route !== "")
+	.filter((route) => !route.includes("["))
+	.map((route) => (route.endsWith("/") && route !== "/" ? route.slice(0, -1) : route))
+	.filter((route) => route !== "/kategoriler")
+	.filter((route) => (sdrEnabled ? true : !(route === "/sdr" || route.startsWith("/sdr/"))));
+
+const dynamicRoutes = [
 	...calculators.map((item) => `/hesaplamalar/${item.slug}`),
+	...listSubtopics("tr").map((item) => `/konu/${item.slug}`),
+	...(sdrEnabled ? sdrRoutes : []),
 ];
+
+const routes = Array.from(new Set([...staticRoutes, ...dynamicRoutes])).sort((a, b) => a.localeCompare(b));
 
 export const GET: APIRoute = ({ site }) => {
 	const base = site?.toString().replace(/\/$/, "") ?? "";

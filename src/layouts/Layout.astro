@@ -30,9 +30,33 @@ const globalSlot =
 const hasGlobalAdSlot = Boolean(adsenseClient && globalSlot);
 const siteBase = Astro.site?.toString().replace(/\/$/, "") ?? "";
 const pagePath = Astro.url?.pathname ?? "/";
+const sdrEnabled = String(import.meta.env.PUBLIC_ENABLE_SDR ?? "false").toLowerCase() === "true";
+const isSdrPath = pagePath === "/sdr" || pagePath.startsWith("/sdr/");
+const blockSdr = isSdrPath && !sdrEnabled;
+if (blockSdr) Astro.response.status = 404;
 const canonicalUrl = canonical ?? (siteBase ? `${siteBase}${pagePath}` : undefined);
 const ogImageUrl = ogImage.startsWith("http") ? ogImage : siteBase ? `${siteBase}${ogImage}` : ogImage;
-const jsonLdScripts = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
+const pageSchema = canonicalUrl
+	? {
+			"@context": "https://schema.org",
+			"@type": "WebPage",
+			name: title,
+			description,
+			url: canonicalUrl,
+			inLanguage: lang === "tr" ? "tr-TR" : "en-US",
+			...(siteBase
+				? {
+						isPartOf: {
+							"@type": "WebSite",
+							name: "RadioHam",
+							url: siteBase,
+						},
+					}
+				: {}),
+		}
+	: null;
+const extraJsonLd = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
+const jsonLdScripts = [pageSchema, ...extraJsonLd].filter(Boolean) as Record<string, unknown>[];
 ---
 
 <!doctype html>
@@ -51,10 +75,11 @@ const jsonLdScripts = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 		<meta name="description" content={description} />
-		<meta name="robots" content={noindex ? "noindex,nofollow" : "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"} />
+		<meta name="robots" content={noindex || blockSdr ? "noindex,nofollow" : "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"} />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="RadioHam" />
 		<meta property="og:image" content={ogImageUrl} />
 		{canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
 		<meta property="og:locale" content={lang === "tr" ? "tr_TR" : "en_US"} />
@@ -63,6 +88,8 @@ const jsonLdScripts = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
 		<meta name="twitter:description" content={description} />
 		<meta name="twitter:image" content={ogImageUrl} />
 		{canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+		{canonicalUrl && <link rel="alternate" hrefLang={lang === "tr" ? "tr-TR" : "en-US"} href={canonicalUrl} />}
+		{canonicalUrl && <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />}
 		{
 			jsonLdScripts.map((item) => (
 				<script type="application/ld+json" set:html={JSON.stringify(item)} />
@@ -79,9 +106,20 @@ const jsonLdScripts = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
 	</head>
 	<body>
 		<div class="global-bg-logo" aria-hidden="true"></div>
-		<slot />
 		{
-			showGlobalAd && hasGlobalAdSlot && (
+			blockSdr ? (
+				<main class="section">
+					<div class="container">
+						<h1>Sayfa Bulunamadı</h1>
+						<p>Bu içerik şu anda yayında değil.</p>
+					</div>
+				</main>
+			) : (
+				<slot />
+			)
+		}
+		{
+			!blockSdr && showGlobalAd && hasGlobalAdSlot && (
 				<section class="layout-global-ad section">
 					<div class="container">
 						<AdBlock slotId={globalSlot} minHeight="150px" />
@@ -90,7 +128,7 @@ const jsonLdScripts = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
 			)
 		}
 		{
-			showGlobalAd && hasGlobalAdSlot && (
+			!blockSdr && showGlobalAd && hasGlobalAdSlot && (
 				<script is:inline>
 					document.addEventListener("DOMContentLoaded", () => {
 						const ad = document.querySelector(".layout-global-ad");

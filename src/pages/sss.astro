@@ -42,9 +42,22 @@ const faqItems = rawFaqItems
 		question: fixMojibake(item.question),
 		answer: fixMojibake(item.answer),
 	}));
+
+const faqSchema = {
+	"@context": "https://schema.org",
+	"@type": "FAQPage",
+	mainEntity: faqItems.map((item) => ({
+		"@type": "Question",
+		name: item.question,
+		acceptedAnswer: {
+			"@type": "Answer",
+			text: item.answer,
+		},
+	})),
+};
 ---
 
-<Layout lang="tr" title={data.faqTitle} description={data.faqDescription}>
+<Layout lang="tr" title={data.faqTitle} description={data.faqDescription} jsonLd={faqSchema}>
 	<SiteNav lang="tr" current="faq" />
 
 	<section class="page-hero">
