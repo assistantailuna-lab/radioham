@@ -1,0 +1,59 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import "../styles/site.css";
+---
+
+<Layout
+	lang="tr"
+	title="Editoryal Politika | RadioHam"
+	description="RadioHam içerik üretim, doğrulama ve güncelleme editoryal politikası."
+>
+	<SiteNav lang="tr" current="home" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>Editoryal Politika</h1>
+			<p>Son güncelleme: 29 Nisan 2026</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="outline-section legal">
+				<h2>1. İçerik Üretim Standardı</h2>
+				<p>
+					RadioHam’de yayınlanan içerikler kopya/otomatik doldurma metni yerine problem-çözüm temelli, sahada
+					uygulanabilir bilgi üretimini hedefler.
+				</p>
+
+				<h2>2. Kaynak ve Doğrulama</h2>
+				<p>
+					Mevzuat, bant planı ve teknik standart gerektiren başlıklarda birincil kaynaklara referans verilir.
+					Belirsiz ifadeler yerine doğrulanabilir veriler kullanılır.
+				</p>
+
+				<h2>3. Güncellik</h2>
+				<p>
+					Regülasyon ve teknik koşullar değişebildiği için içerikler periyodik olarak gözden geçirilir. Gerekli
+					olduğunda metin, örnek ve bağlantılar güncellenir.
+				</p>
+
+				<h2>4. Kullanıcıya Değer İlkesi</h2>
+				<p>
+					Her sayfa; açık başlık, net cevap, uygulanabilir adımlar, sık hata listesi ve kaynak bölümü içermeyi
+					hedefler. Sadece anahtar kelime odaklı veya içerik değeri düşük sayfalar yayınlanmaz.
+				</p>
+
+				<h2>5. Düzeltme Süreci</h2>
+				<p>
+					Kullanıcı geri bildirimiyle gelen teknik hata veya anlatım problemi doğrulandıktan sonra içerik
+					güncellenir. Kritik düzeltmeler öncelikli işlenir.
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>

@@ -104,6 +104,52 @@ const jsonLd = [
 					<h3>{answerHeading}</h3>
 					<p>{article.plainExplanation}</p>
 				</article>
+				<article class="outline-section">
+					<h3>Detaylı Açıklama</h3>
+					{article.deepDive.map((paragraph) => <p>{paragraph}</p>)}
+				</article>
+				<article class="outline-section">
+					<h3>Neden Önemli?</h3>
+					<ul>
+						{article.whyItMatters.map((item) => <li>{item}</li>)}
+					</ul>
+				</article>
+				<article class="outline-section">
+					<h3>Adım Adım Uygulama</h3>
+					<ol>
+						{article.stepByStep.map((item) => <li>{item}</li>)}
+					</ol>
+				</article>
+				<article class="outline-section">
+					<h3>Sahadan Kısa Örnek</h3>
+					<p>{article.realLifeExample}</p>
+				</article>
+				<article class="outline-section">
+					<h3>Sık Yapılan Hatalar</h3>
+					<ul>
+						{article.commonMistakes.map((item) => <li>{item}</li>)}
+					</ul>
+				</article>
+				<article class="outline-section">
+					<h3>Hızlı Kontrol Listesi</h3>
+					<ul>
+						{article.quickCheck.map((item) => <li>{item}</li>)}
+					</ul>
+				</article>
+				<article class="outline-section">
+					<h3>Kaynaklar</h3>
+					<ul>
+						{
+							article.sources.map((source) => (
+								<li>
+									<a href={source.url} target="_blank" rel="noopener noreferrer">
+										{source.label}
+									</a>
+								</li>
+							))
+						}
+					</ul>
+				</article>
 			</div>
 		</div>
 	</section>

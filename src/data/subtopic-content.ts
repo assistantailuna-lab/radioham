@@ -380,16 +380,67 @@ export const buildSubtopicArticle = (lang: Lang, subtopic: GuideSubtopic): Subto
 		: enAnswer
 			? ensureSentence(base)
 			: `${ensureSentence(base)} ${enSectionFallback[subtopic.sectionId] ?? ""}`.trim();
+	const sectionSummary = isTr
+		? `${subtopic.sectionTitle} bölümünde bu başlık, sahada doğru ayar ve doğru işletim sırasını kurmak için temel taşı görevi görür.`
+		: `Inside ${subtopic.sectionTitle}, this topic is a practical building block for stable setup and operation.`;
+	const whyItMatters = isTr
+		? [
+				"Hatalı ayar zinciri nedeniyle oluşan sessizlik, parazit veya erişim sorunlarını azaltır.",
+				"Sahada deneme-yanılma süresini kısaltır ve tekrarlanabilir sonuç üretir.",
+				"Yerel mevzuat ve bant planına uygun, disiplinli kullanım alışkanlığı oluşturur.",
+			]
+		: [
+				"Reduces silent failures caused by mismatched settings.",
+				"Improves repeatability instead of trial-and-error operation.",
+				"Supports compliant and disciplined use in shared spectrum.",
+			];
+	const stepByStep = isTr
+		? [
+				`Önce ${subtopic.fullTitle} için hedef kullanımını belirle (dinleme, simplex, röle veya dijital).`,
+				"Tek bir parametreyi değiştir ve kısa bir test kaydı al.",
+				"Çalışan ayarları kanal profiline kaydet, tarih ve kaynak notu ekle.",
+				"Bir sorun oluşursa son çalışan profile geri dönerek farkı izole et.",
+			]
+		: [
+				`Define your goal for ${subtopic.fullTitle} (monitoring, simplex, repeater, or digital).`,
+				"Change one parameter at a time and run a short validation test.",
+				"Save the working profile with date and source notes.",
+				"Rollback to last known-good profile to isolate failures.",
+			];
+	const commonMistakes = isTr
+		? [
+				"Aynı anda birden fazla menü değerini değiştirip sonucu yorumlamaya çalışmak.",
+				"Frekans doğru olsa da tone/offset/duplex uyumunu atlamak.",
+				"Çalışan ayarları yedeklemeden yeni denemelere geçmek.",
+			]
+		: [
+				"Changing multiple parameters at once and losing causality.",
+				"Ignoring tone/offset/duplex alignment after setting frequency.",
+				"Skipping backups before experiments.",
+			];
+	const quickCheck = isTr
+		? ["Frekans", "Mod (FM/AM/Dijital)", "TX gücü", "Tone / DCS", "Shift / Offset", "Kanal kayıt adı"]
+		: ["Frequency", "Mode", "TX power", "Tone / DCS", "Shift / Offset", "Saved channel label"];
+	const deepDive = isTr
+		? [
+				detailed,
+				sectionSummary,
+				`${subtopic.fullTitle} özelinde iyi sonuç için ayar, test ve kayıt adımlarının aynı sırayla uygulanması gerekir.`,
+			]
+		: [detailed, sectionSummary, `For ${subtopic.fullTitle}, use a stable setup-test-log loop for reliable results.`];
+	const realLifeExample = isTr
+		? `Örnek: ${subtopic.title} ayarı sonrası iletişim kurulamadığında önce tone ve offset değerlerini doğrulayıp, ardından bir önceki çalışan kanalı geri yüklemek çoğu sorunu dakikalar içinde çözer.`
+		: `Example: after changing ${subtopic.title}, validate tone/offset first, then compare against your previous known-good channel profile.`;
 
 	return {
 		title: subtopic.fullTitle,
 		plainExplanation: detailed,
-		deepDive: [],
-		whyItMatters: [],
-		stepByStep: [],
-		realLifeExample: "",
-		commonMistakes: [],
-		quickCheck: [],
+		deepDive,
+		whyItMatters,
+		stepByStep,
+		realLifeExample,
+		commonMistakes,
+		quickCheck,
 		sources: sectionSources[subtopic.sectionId] ?? [defaultSource],
 	};
 };

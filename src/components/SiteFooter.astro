@@ -15,6 +15,8 @@ const t = {
 	faq: "Sık Sorulan Sorular",
 	glossary: "Mini Sözlük",
 	references: "Kaynakça",
+	about: "Hakkımızda",
+	editorial: "Editoryal Politika",
 	contact: "İletişim",
 	legal: "Lisans ve mevzuat notları",
 	bottom: ["Kullanım Koşulları", "Gizlilik Politikası", "İletişim"],
@@ -26,6 +28,8 @@ const t = {
 		faq: "/sss",
 		glossary: "/sozluk",
 		references: "/kaynakca",
+		about: "/hakkimizda",
+		editorial: "/editorial-politika",
 		legalNotes: "/kaynakca#lisans-ve-mevzuat-notlari",
 		contact: "/contact-us",
 		terms: "/kullanim-kosullari",
@@ -57,6 +61,8 @@ const sdrEnabled = String(import.meta.env.PUBLIC_ENABLE_SDR ?? "false").toLowerC
 			<ul>
 				<li><a href={t.links.glossary}>{t.glossary}</a></li>
 				<li><a href={t.links.references}>{t.references}</a></li>
+				<li><a href={t.links.about}>{t.about}</a></li>
+				<li><a href={t.links.editorial}>{t.editorial}</a></li>
 				<li><a href={t.links.contact}>{t.contact}</a></li>
 				<li><a href={t.links.legalNotes}>{t.legal}</a></li>
 			</ul>

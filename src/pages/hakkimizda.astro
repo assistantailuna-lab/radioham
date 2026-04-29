@@ -1,0 +1,54 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import "../styles/site.css";
+---
+
+<Layout
+	lang="tr"
+	title="Hakkımızda | RadioHam"
+	description="RadioHam yayın yaklaşımı, içerik kapsamı ve kalite ilkeleri."
+>
+	<SiteNav lang="tr" current="home" />
+
+	<section class="page-hero">
+		<div class="container">
+			<h1>Hakkımızda</h1>
+			<p>RadioHam, amatör telsiz ve SDR alanında Türkçe, uygulanabilir ve kaynak odaklı bir bilgi merkezidir.</p>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="outline-section legal">
+				<h2>Misyon</h2>
+				<p>
+					Yeni başlayanların yanlış kurulum ve hatalı kullanım nedeniyle zaman kaybetmesini önlemek; orta ve
+					ileri seviye kullanıcılar için de sahada karşılığı olan teknik referanslar sunmak.
+				</p>
+
+				<h2>Kapsam</h2>
+				<p>
+					Sitede frekans rehberleri, kurulum akışları, hesaplama araçları, cihaz karşılaştırmaları, lisans
+					çalışma içerikleri ve SDR pratikleri yayınlanır. İçerikler teknik doğruluk, anlaşılabilirlik ve
+					güncellenebilirlik ilkelerine göre hazırlanır.
+				</p>
+
+				<h2>Yayın İlkesi</h2>
+				<p>
+					Her içerikte önce kullanıcı problemi tanımlanır, ardından adım adım çözüm verilir. Mevzuat, bant
+					planı ve standart referans gerektiren konularda kaynak bağlantıları açık şekilde belirtilir.
+				</p>
+
+				<h2>Güncelleme Yaklaşımı</h2>
+				<p>
+					İçerikler düzenli aralıklarla gözden geçirilir; hatalı, eksik veya eski kalan alanlar kullanıcı geri
+					bildirimleri ve teknik doğrulama notlarıyla revize edilir.
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<SiteFooter lang="tr" />
+</Layout>

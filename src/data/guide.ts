@@ -325,12 +325,14 @@ export const listSubtopics = (lang: Lang): GuideSubtopic[] => {
 			const title = match ? match[3] : trimmed;
 			const code = `${section.number}.${itemNumber}`;
 			const slug = `${section.number}-${itemNumber}-${canonicalSlugify(title)}`;
-			const legacySlug = `${section.number}-${itemNumber}-${legacySlugify(title)}`;
+			const fixedTitle = fixMojibake(title);
+			const legacySlug = `${section.number}-${itemNumber}-${legacySlugify(fixedTitle)}`;
+			const shouldExposeLegacy = fixedTitle !== title;
 
 			subtopics.push({
 				lang,
 				slug,
-				legacySlugs: legacySlug !== slug ? [legacySlug] : [],
+				legacySlugs: shouldExposeLegacy && legacySlug !== slug ? [legacySlug] : [],
 				code,
 				sectionId: section.id,
 				sectionNumber: section.number,
