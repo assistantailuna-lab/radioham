@@ -130,6 +130,31 @@ const jsonLdScripts = [pageSchema, ...extraJsonLd].filter(Boolean) as Record<str
 		{
 			!blockSdr && showGlobalAd && hasGlobalAdSlot && (
 				<script is:inline>
+					(() => {
+						const normalizeInternalHref = (rawHref) => {
+							if (!rawHref || !rawHref.startsWith("/")) return rawHref;
+							if (rawHref.startsWith("//")) return rawHref;
+							if (rawHref === "/") return rawHref;
+							if (rawHref.startsWith("/#")) return rawHref;
+							if (/\.[a-z0-9]+($|[?#])/i.test(rawHref)) return rawHref;
+
+							const [pathAndQuery, hash = ""] = rawHref.split("#");
+							const [path, query = ""] = pathAndQuery.split("?");
+							const normalizedPath = path.endsWith("/") ? path : `${path}/`;
+							const queryPart = query ? `?${query}` : "";
+							const hashPart = hash ? `#${hash}` : "";
+							return `${normalizedPath}${queryPart}${hashPart}`;
+						};
+
+						document.querySelectorAll("a[href]").forEach((link) => {
+							const href = link.getAttribute("href");
+							const normalized = normalizeInternalHref(href);
+							if (normalized && normalized !== href) {
+								link.setAttribute("href", normalized);
+							}
+						});
+					})();
+
 					document.addEventListener("DOMContentLoaded", () => {
 						const ad = document.querySelector(".layout-global-ad");
 						const footer = document.querySelector("footer");
